@@ -1,0 +1,22 @@
+# *** modules2 currently has 'experimental' status.  Testing is encouraged but.
+# for greatest stability use the modules file. ***
+#
+# This file describes the layout of virtual directory structures
+# within the repository.
+#
+# The layout is similar to a Windows .ini file.  For example:
+#
+# [foo]
+# dir1/dir2/dir3 = realdir1/realdir2
+# dir1/dir3 = !realdir1/realdir3 (^*js$|^*cpp$)
+#
+# [bar]
+# / = realdir4
+# dir_to_delete =
+# foo = foo
+#
+# The special character '!' stops recursion to directories below the one specified (-l option).
+# The special character '+' stops parsing of that line, so that you can avoid infinte loops.
+#
+# Items in (...) are an extended regular expression applied to the filenames.  All files which do not.
+# match are ignored.

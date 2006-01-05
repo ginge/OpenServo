@@ -1,0 +1,18 @@
+# This file affects handling of files based on their names.
+#
+# The -m option specifies whether CVS attempts to merge files.
+#
+# The -k option specifies keyword expansion (e.g. -kb for binary).
+#
+# The -t option overrides the default mime type.
+#
+# Format of wrapper file ($CVSROOT/CVSROOT/cvswrappers or .cvswrappers)
+#
+#  wildcard	[option value][option value]...
+#
+#  where option is one of
+#  -k		expansion mode		value: b, o, kkv, etc.
+#
+#  and value is a single-quote delimited value.
+# For example:
+#*.gif -kb

@@ -1,0 +1,8 @@
+# The "triggers" file lists libraries which handle the events for each
+# module.
+#
+# A line enclosed in {....} will be treaded as a COM object.  You can use either
+# the ClassId or the ProgId
+#
+# In addition to the lines here, the default_trigger library is loaded, if available.
+#

@@ -1,0 +1,30 @@
+# The "keywords" file is used to modify the standard set of RCS keywords
+# or define entirely new ones.
+#
+# The first entry on a line is a regular expression which is tested
+# against the directory that the change is being made to, relative to the
+# $CVSROOT.  Subsequent lines contain keyword definitions, indented by a space
+# to separate them from module definitions
+.#
+# If the repository name does not match any of the definitions in this
+# file, the "ALL" section is used, if it is specified.
+#
+# Any keyword with an empty definition is ignored.  This can be used to selectively
+# disable individual RCS keywords.
+#
+# The default defintions are:
+#
+#ALL
+#  Author    %a
+#  Date      %d
+#  Header    %r/%p/%f %v %d %a %s %l
+#  CVSHeader %p/%f %v %d %a %s %l
+#  Id        %f %v %d %a %s %l
+#  Locker    %l
+#  Log		  %f
+#  Name      %N
+#  RCSfile   %f
+#  Revision  %v
+#  Source    %r/%p/%f
+#  State     %s
+#  CommitId  %C
