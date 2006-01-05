@@ -1,0 +1,26 @@
+# Set this to 'no' if pserver shouldn't check system users/passwords
+#SystemAuth=yes
+
+# Set the Acl parsing type (none,compat,normal).
+#AclMode=compat
+
+# Alternate location of CVS LockServer.  Set to 'none' to disable..
+#LockServer=localhost:2402
+
+# Set 'TopLevelAdmin' to 'yes' to create a CVS directory at the top
+# level of the new working directory when using the 'cvs checkout'
+# command.
+#TopLevelAdmin=no
+
+# Set 'LogHistory' to 'all' or 'TOFEWGCMAR' to log all transactions to the
+# history file, or a subset as needed (ie 'TMAR' logs all write operations)
+#LogHistory=TOFEWGCMAR
+
+# Set 'RereadLogAfterVerify' to control rereading of the log file after a verifymsg
+#   'always' or 'yes' to always reread the log regardless
+#   'never' or 'no' (default) to never reread the log
+#RereadLogAfterVerify=no
+
+# Set 'Watcher' to set a user who gets all notify events within the repository whether
+# or not the ifle is watched.
+#Watcher=watch_user
