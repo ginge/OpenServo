@@ -12,3 +12,4 @@ A new version of WinAVR should be available in January or February of 2006
 which should natively support the AVR ATtinyX5 MCUs.
 
 -Mike
+
