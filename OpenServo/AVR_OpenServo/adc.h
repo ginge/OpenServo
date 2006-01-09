@@ -47,24 +47,24 @@ extern volatile uint16_t adc_position_value;
 inline static uint16_t adc_get_power_value(void)
 // Return the signed 16-bit ADC power value.
 {
-	// Clear the ready ADC value ready flag.
-	adc_power_ready = 0;
+    // Clear the ready ADC value ready flag.
+    adc_power_ready = 0;
 
-	// Return the value.
-	return adc_power_value;
+    // Return the value.
+    return adc_power_value;
 }
 
 inline static uint8_t adc_power_value_is_ready(void)
 // Return the ADC power value ready flag.
 {
-	// Return the value ready flag.
-	return adc_power_ready;
+    // Return the value ready flag.
+    return adc_power_ready;
 }
 
 inline static void adc_power_value_clear_ready(void)
 // Clear the ready ADC power value ready flag.
 {
-	adc_power_ready = 0;
+    adc_power_ready = 0;
 }
 
 // In-lines for fast access to position flags and values.
@@ -72,24 +72,24 @@ inline static void adc_power_value_clear_ready(void)
 inline static uint16_t adc_get_position_value(void)
 // Return the 16-bit ADC position value.
 {
-	// Clear the ready ADC value ready flag.
-	adc_position_ready = 0;
+    // Clear the ready ADC value ready flag.
+    adc_position_ready = 0;
 
-	// Return the value.
-	return adc_position_value;
+    // Return the value.
+    return adc_position_value;
 }
 
 inline static uint8_t adc_position_value_is_ready(void)
 // Return the ADC position value ready flag.
 {
-	// Return the value ready flag.
-	return adc_position_ready;
+    // Return the value ready flag.
+    return adc_position_ready;
 }
 
 inline static void adc_position_value_clear_ready(void)
 // Clear the ready ADC power value ready flag.
 {
-	adc_position_ready = 0;
+    adc_position_ready = 0;
 }
 
 #endif // _OS_ADC_H_

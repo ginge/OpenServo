@@ -49,73 +49,73 @@ uint8_t bootloader_active;
 
 BOOTLOADER_SECTION void bootloader(void)
 // This is the main bootloader function.  When this function returns
-// the application code loaded into lower memory will be executed.  
-// The application code must reside immediately after the vector 
+// the application code loaded into lower memory will be executed.
+// The application code must reside immediately after the vector
 // table at address 0x001E.
 {
-	uint8_t timer_count = 0;
+    uint8_t timer_count = 0;
 
 #if 0
     // XXX Enable PB1/PB3 as outputs and clear the LED.
-	DDRB |= (1<<DDB1) | (1<<DDB3);
-	PORTB |= (1<<PB1) | (1<<PB3);
+    DDRB |= (1<<DDB1) | (1<<DDB3);
+    PORTB |= (1<<PB1) | (1<<PB3);
 #endif
 
-	// Initialize the bootloader exit and active flags.
-	bootloader_exit = 0;
-	bootloader_active = 0;
+    // Initialize the bootloader exit and active flags.
+    bootloader_exit = 0;
+    bootloader_active = 0;
 
-	// Initialize programming module.
-	prog_init();
+    // Initialize programming module.
+    prog_init();
 
-	// Initialize TWI module.
-	twi_init();
+    // Initialize TWI module.
+    twi_init();
 
-	// Initialize timer.
-	timer_init();
+    // Initialize timer.
+    timer_init();
 
-	// Loop until the bootloader exit flag is active.
-	while (!bootloader_exit)
-	{
-		// Check for TWI conditions that require handling.
-		twi_check_conditions();
+    // Loop until the bootloader exit flag is active.
+    while (!bootloader_exit)
+    {
+        // Check for TWI conditions that require handling.
+        twi_check_conditions();
 
-		// Check for timer elapsed.
-		if (timer_check_elapsed())
-		{
-			// Increment the time count.
-			++timer_count ;			
+        // Check for timer elapsed.
+        if (timer_check_elapsed())
+        {
+            // Increment the time count.
+            ++timer_count ;
 
-			// Have we exceeded the bootloader timeout (about three seconds)?
-			if (timer_count > 128)
-			{
-				// Set the bootloader exit flag if the bootloader is not active.
-				if (!bootloader_active) bootloader_exit = 1;
-			}
+            // Have we exceeded the bootloader timeout (about three seconds)?
+            if (timer_count > 128)
+            {
+                // Set the bootloader exit flag if the bootloader is not active.
+                if (!bootloader_active) bootloader_exit = 1;
+            }
 
 #if 0
-			// XXX Turn off or on the LED.
-			if (timer_count & 0x40)
-			{
-				// XXX Turn on the PB1 LED.
-				PORTB &= ~(1<<PB1);
-			}
-			else
-			{
-				// XXX Turn off the PB1 LED.
-				PORTB |= (1<<PB1);
-			}
+            // XXX Turn off or on the LED.
+            if (timer_count & 0x40)
+            {
+                // XXX Turn on the PB1 LED.
+                PORTB &= ~(1<<PB1);
+            }
+            else
+            {
+                // XXX Turn off the PB1 LED.
+                PORTB |= (1<<PB1);
+            }
 #endif
-		}
-	}
+        }
+    }
 
-	// Restore timer to powerup defaults.
-	timer_deinit();
+    // Restore timer to powerup defaults.
+    timer_deinit();
 
-	// Restore TWI interface to powerup defaults.
-	twi_deinit();
+    // Restore TWI interface to powerup defaults.
+    twi_deinit();
 
-	return;
+    return;
 }
 
 #endif // !BOOTSTRAPPER

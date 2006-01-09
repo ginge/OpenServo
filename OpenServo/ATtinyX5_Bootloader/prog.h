@@ -34,7 +34,7 @@
 #define _PROG_H_ 1
 
 // These constants define the page configuration based on the Attiny25/45/85 MPU.
-// The the Flash and EEPROM pages that can be written are represented as a 
+// The the Flash and EEPROM pages that can be written are represented as a
 // contiguous address space with the Flash spanning the lower pages and the
 // EEPROM spanning the upper pages.  It is up to the end user to keep track of
 // which type and size of the page being programmed.  Page and address maps
@@ -50,7 +50,7 @@
 //   20     0400-041F   Flash (R/O - Bootloader)
 //   ..
 //   3F     07E0-07FF   Flash (R/O - Bootloader)
-//   40     0800-081F   EEPROM 
+//   40     0800-081F   EEPROM
 //   ..
 //   43     0860-087F   EEPROM
 //
@@ -58,16 +58,16 @@
 #ifdef __AVR_ATtiny25__
 
 // Flash/EEPROM Page Information
-#define FLASH_PAGE_COUNT		(64)
-#define EEPROM_PAGE_COUNT		(4)
-#define PROG_PAGE_SIZE			(32)
+#define FLASH_PAGE_COUNT        (64)
+#define EEPROM_PAGE_COUNT       (4)
+#define PROG_PAGE_SIZE          (32)
 
 // Flash/EEPROM Address Information
-#define PROG_FLASH_START		(0x0000)
-#define PROG_FLASH_BOOTLOADER	(0x0400)
-#define PROG_FLASH_END			(0x0800)
-#define PROG_EEPROM_START		(0x0800)
-#define PROG_EEPROM_END			(0x0880)
+#define PROG_FLASH_START        (0x0000)
+#define PROG_FLASH_BOOTLOADER   (0x0400)
+#define PROG_FLASH_END          (0x0800)
+#define PROG_EEPROM_START       (0x0800)
+#define PROG_EEPROM_END         (0x0880)
 
 #endif
 
@@ -81,23 +81,23 @@
 //   30     0C00-0C3F   Flash (R/O - Bootloader)
 //   ..
 //   3F     0FC0-0FFF   Flash (R/O - Bootloader)
-//   40     1000-103F   EEPROM 
+//   40     1000-103F   EEPROM
 //   ..
 //   43     10C0-10FF   EEPROM
 
 #ifdef __AVR_ATtiny45__
 
 // Flash/EEPROM Page Information
-#define FLASH_PAGE_COUNT		(64)
-#define EEPROM_PAGE_COUNT		(4)
-#define PROG_PAGE_SIZE			(64)
+#define FLASH_PAGE_COUNT        (64)
+#define EEPROM_PAGE_COUNT       (4)
+#define PROG_PAGE_SIZE          (64)
 
 // Flash/EEPROM Address Information
-#define PROG_FLASH_START		(0x0000)
-#define PROG_FLASH_BOOTLOADER	(0x0C00)
-#define PROG_FLASH_END			(0x1000)
-#define PROG_EEPROM_START		(0x1000)
-#define PROG_EEPROM_END			(0x1100)
+#define PROG_FLASH_START        (0x0000)
+#define PROG_FLASH_BOOTLOADER   (0x0C00)
+#define PROG_FLASH_END          (0x1000)
+#define PROG_EEPROM_START       (0x1000)
+#define PROG_EEPROM_END         (0x1100)
 
 #endif
 
@@ -111,23 +111,23 @@
 //   70     1C00-1C3F   Flash (R/O - Bootloader)
 //   ..
 //   7F     1FC0-1FFF   Flash (R/O - Bootloader)
-//   80     2000-203F   EEPROM 
+//   80     2000-203F   EEPROM
 //   ..
 //   87     21C0-21FF   EEPROM
 
 #ifdef __AVR_ATtiny85__
 
 // Flash/EEPROM Page Information
-#define FLASH_PAGE_COUNT		(128)
-#define EEPROM_PAGE_COUNT		(8)
-#define PROG_PAGE_SIZE			(64)
+#define FLASH_PAGE_COUNT        (128)
+#define EEPROM_PAGE_COUNT       (8)
+#define PROG_PAGE_SIZE          (64)
 
 // Flash/EEPROM Address Information
-#define PROG_FLASH_START		(0x0000)
-#define PROG_FLASH_BOOTLOADER	(0x1C00)
-#define PROG_FLASH_END			(0x2000)
-#define PROG_EEPROM_START		(0x2000)
-#define PROG_EEPROM_END			(0x2200)
+#define PROG_FLASH_START        (0x0000)
+#define PROG_FLASH_BOOTLOADER   (0x1C00)
+#define PROG_FLASH_END          (0x2000)
+#define PROG_EEPROM_START       (0x2000)
+#define PROG_EEPROM_END         (0x2200)
 
 #endif
 

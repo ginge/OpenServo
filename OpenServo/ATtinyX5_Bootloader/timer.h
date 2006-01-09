@@ -36,40 +36,40 @@
 
 static inline void timer_init(void)
 {
-	// Configure the Timer Control Register A.
-	TCCR0A = (0<<COM0A1) | (0<<COM0A0) |		// OC0A disconnected.
-			 (0<<COM0B1) | (0<<COM0B0) |		// OC0B disconnected.
-			 (0<<WGM01) | (0<<WGM00);			// Normal operation.
+    // Configure the Timer Control Register A.
+    TCCR0A = (0<<COM0A1) | (0<<COM0A0) |        // OC0A disconnected.
+             (0<<COM0B1) | (0<<COM0B0) |        // OC0B disconnected.
+             (0<<WGM01) | (0<<WGM00);           // Normal operation.
 
-	// Configure the Timer Control Register B.
-	TCCR0B = (0<<WGM02) |						// Normal operation.
-			 (1<<CS02) | (0<<CS01) | (1<<CS00);	// Use pre/scaled (1024) clock source.
+    // Configure the Timer Control Register B.
+    TCCR0B = (0<<WGM02) |                       // Normal operation.
+             (1<<CS02) | (0<<CS01) | (1<<CS00); // Use pre/scaled (1024) clock source.
 }
 
 
 static inline void timer_deinit(void)
 {
-	// Clear timer related registers.
-	TCCR0A = 0;
-	TCCR0B = 0;
-	TCNT0 = 0;
-	TIFR = (1<<OCF0A) | (1<<OCF0B) | (1<<TOV0);
+    // Clear timer related registers.
+    TCCR0A = 0;
+    TCCR0B = 0;
+    TCNT0 = 0;
+    TIFR = (1<<OCF0A) | (1<<OCF0B) | (1<<TOV0);
 }
 
 
 static inline uint8_t timer_check_elapsed(void)
 {
-	// Has the timer overflowed?
-	if (TIFR & (1<<TOV0))
-	{
-		// Reset the overflow flag.
-		TIFR |= (1<<TOV0);
+    // Has the timer overflowed?
+    if (TIFR & (1<<TOV0))
+    {
+        // Reset the overflow flag.
+        TIFR |= (1<<TOV0);
 
-		// Return that one time period has elapsed.
-		return 1;
-	}
+        // Return that one time period has elapsed.
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 #endif // _TIMER_H_

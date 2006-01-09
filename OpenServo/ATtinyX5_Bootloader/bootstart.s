@@ -6,16 +6,16 @@
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
 
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
 
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -42,23 +42,23 @@
 	.text
 
 	/* Define this code section as the bootloader. */
-	.section	.bootloader,"ax",@progbits
+	.section    .bootloader,"ax",@progbits
 
-	.global	bootstart
+	.global bootstart
 bootstart:
 
-	.global	__init
+	.global __init
 __init:
 
-	.weak	__stack
-	.set	__stack, RAMEND
+	.weak   __stack
+	.set    __stack, RAMEND
 
 	/* Make sure global interrupts are disabled. */
 	cli
 
 	/* Clear the status register. */
-	clr	r1
-	out	_SFR_IO_ADDR(SREG), r1
+	clr r1
+	out _SFR_IO_ADDR(SREG), r1
 
 	/* Clear out MCUSR. */
 	out _SFR_IO_ADDR(MCUSR), r1 
@@ -71,17 +71,17 @@ __init:
 	out _SFR_IO_ADDR(WDTCR), r16
 
 	/* Configure stack. */
-	ldi	r28,lo8(__stack)
-	ldi	r29,hi8(__stack)
-	out	_SFR_IO_ADDR(SPH),r29
-	out	_SFR_IO_ADDR(SPL),r28
+	ldi r28,lo8(__stack)
+	ldi r29,hi8(__stack)
+	out _SFR_IO_ADDR(SPH),r29
+	out _SFR_IO_ADDR(SPL),r28
 
 	/* Call the boot loader function. */
 	rcall bootloader
 
 	/* Jump to boot vector address. */
-	rjmp	__boot_vector
+	rjmp    __boot_vector
 
-	.size	bootstart,.-bootstart
+	.size   bootstart,.-bootstart
 
 #endif /* !BOOTSTRAPPER */

@@ -50,16 +50,16 @@ static uint16_t power_array[8];
 void power_init(void)
 // Initialize the power module.
 {
-	uint8_t i;
+    uint8_t i;
 
-	// Initialize the power index.
-	power_index = 0;
+    // Initialize the power index.
+    power_index = 0;
 
-	// Initialize the power array.
-	for (i = 0; i < 8; ++i) power_array[i] = 0; 
+    // Initialize the power array.
+    for (i = 0; i < 8; ++i) power_array[i] = 0;
 
-	// Initialize the power values within the system registers.
-	registers_write_word(POWER_HI, POWER_LO, 0);
+    // Initialize the power values within the system registers.
+    registers_write_word(POWER_HI, POWER_LO, 0);
 }
 
 
@@ -67,24 +67,24 @@ void power_update(uint16_t power)
 // Update the servo motor power value.  The actual value reported
 // is averaged with the seven previous power values.
 {
-	uint8_t i;
+    uint8_t i;
 
-	// Insert the power value into the power array.
-	power_array[power_index] = power;
+    // Insert the power value into the power array.
+    power_array[power_index] = power;
 
-	// Keep the index within the array bounds.
-	power_index = (power_index + 1) & 7;
+    // Keep the index within the array bounds.
+    power_index = (power_index + 1) & 7;
 
-	// Reset the power value.
-	power = 0;
+    // Reset the power value.
+    power = 0;
 
-	// Determine the power values across the power array.
-	for (i = 0; i < 8; ++i) power += power_array[i]; 
-	
-	// Shift the sum of power values to find the average.
-	power >>= 3;
+    // Determine the power values across the power array.
+    for (i = 0; i < 8; ++i) power += power_array[i];
 
-	// Update the power values within the system registers.
-	registers_write_word(POWER_HI, POWER_LO, power);
+    // Shift the sum of power values to find the average.
+    power >>= 3;
+
+    // Update the power values within the system registers.
+    registers_write_word(POWER_HI, POWER_LO, power);
 }
 

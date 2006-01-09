@@ -45,63 +45,62 @@ uint8_t registers[MAX_REGISTER + 1];
 void registers_init(void)
 // Function to initialize all registers.
 {
-	uint8_t i;
+    uint8_t i;
 
-	// Initialize all registers to zero.
-	for (i = 0; i < (MAX_REGISTER + 1); ++i)
-	{
-		// Initialize the word.
-		registers_write_byte(i, 0x00);
-	}
+    // Initialize all registers to zero.
+    for (i = 0; i < (MAX_REGISTER + 1); ++i)
+    {
+        // Initialize the word.
+        registers_write_byte(i, 0x00);
+    }
 
-	// Initialize select read/only registers to disable 
-	// PWM and disable register write on power up.
-	registers_write_byte(PWM_ENABLE, 0x00);
-	registers_write_byte(WRITE_ENABLE, 0x00);
+    // Initialize select read/only registers to disable
+    // PWM and disable register write on power up.
+    registers_write_byte(PWM_ENABLE, 0x00);
+    registers_write_byte(WRITE_ENABLE, 0x00);
 
-	// Reset other read/only registers.  These values will
-	// be populated under normal operation.
-	registers_write_byte(POWER_HI, 0x00);
-	registers_write_byte(POWER_LO, 0x00);
-	registers_write_byte(POSITION_HI, 0x00);
-	registers_write_byte(POSITION_LO, 0x00);
-	registers_write_byte(PWM_CW, 0x00);
-	registers_write_byte(PWM_CCW, 0x00);
+    // Reset other read/only registers.  These values will
+    // be populated under normal operation.
+    registers_write_byte(POWER_HI, 0x00);
+    registers_write_byte(POWER_LO, 0x00);
+    registers_write_byte(POSITION_HI, 0x00);
+    registers_write_byte(POSITION_LO, 0x00);
+    registers_write_byte(PWM_CW, 0x00);
+    registers_write_byte(PWM_CCW, 0x00);
 
-	// Initialize safe read/write registers to defaults.
-	registers_defaults();
+    // Initialize safe read/write registers to defaults.
+    registers_defaults();
 
-	// Does the EEPROM appear to be erased?
-	if (!eeprom_is_erased())
-	{
-		// No. Restore the register values.
-		eeprom_restore_registers();
-	}
+    // Does the EEPROM appear to be erased?
+    if (!eeprom_is_erased())
+    {
+        // No. Restore the register values.
+        eeprom_restore_registers();
+    }
 
-	// Initialize read/write registers.  
-	registers_write_byte(SEEK_HI, registers_read_byte(DEFAULT_SEEK_HI));
-	registers_write_byte(SEEK_LO, registers_read_byte(DEFAULT_SEEK_LO));
+    // Initialize read/write registers.
+    registers_write_byte(SEEK_HI, registers_read_byte(DEFAULT_SEEK_HI));
+    registers_write_byte(SEEK_LO, registers_read_byte(DEFAULT_SEEK_LO));
 }
 
 
 void registers_defaults(void)
 // Reset safe read/write registers to defaults.
 {
-	// Initialize safe read/write registers to defaults.
-	registers_write_byte(TWI_ADDRESS, 0x10);
-	registers_write_byte(PID_OFFSET, 0x00);
-	registers_write_byte(PID_PGAIN_HI, 0x08);
-	registers_write_byte(PID_PGAIN_LO, 0x00);
-	registers_write_byte(PID_DGAIN_HI, 0x28);
-	registers_write_byte(PID_DGAIN_LO, 0x00);
-	registers_write_byte(PID_IGAIN_HI, 0x0E);
-	registers_write_byte(PID_IGAIN_LO, 0x00);
-	registers_write_byte(MIN_SEEK_HI, 0x00);
-	registers_write_byte(MIN_SEEK_LO, 0x60);
-	registers_write_byte(MAX_SEEK_HI, 0x03);
-	registers_write_byte(MAX_SEEK_LO, 0xa0);
-	registers_write_byte(DEFAULT_SEEK_HI, 0x02);
-	registers_write_byte(DEFAULT_SEEK_LO, 0x00);
-	registers_write_byte(REVERSE_SEEK, 0x00);
+    // Initialize safe read/write registers to defaults.
+    registers_write_byte(TWI_ADDRESS, 0x10);
+    registers_write_byte(PID_PGAIN_HI, 0x08);
+    registers_write_byte(PID_PGAIN_LO, 0x00);
+    registers_write_byte(PID_DGAIN_HI, 0x28);
+    registers_write_byte(PID_DGAIN_LO, 0x00);
+    registers_write_byte(PID_IGAIN_HI, 0x0B);
+    registers_write_byte(PID_IGAIN_LO, 0x80);
+    registers_write_byte(MIN_SEEK_HI, 0x00);
+    registers_write_byte(MIN_SEEK_LO, 0x60);
+    registers_write_byte(MAX_SEEK_HI, 0x03);
+    registers_write_byte(MAX_SEEK_LO, 0xa0);
+    registers_write_byte(DEFAULT_SEEK_HI, 0x02);
+    registers_write_byte(DEFAULT_SEEK_LO, 0x00);
+    registers_write_byte(REVERSE_SEEK, 0x00);
 }
 

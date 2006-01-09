@@ -46,35 +46,35 @@
 
 int
 main (void)
-// This is just a place holder application that will be replaced by 
+// This is just a place holder application that will be replaced by
 // bootloader programming.  When built with BOOTSTRAPPER defined the
 // application will allow the bootloader itself to be programmed.
 {
 
 #ifdef BOOTSTRAPPER
-	// Initialize the bootloader exit and active flags.
-	bootloader_exit = 0;
-	bootloader_active = 0;
+    // Initialize the bootloader exit and active flags.
+    bootloader_exit = 0;
+    bootloader_active = 0;
 
-	// Initialize programming module.
-	prog_init();
+    // Initialize programming module.
+    prog_init();
 
-	// Initialize TWI module.
-	twi_init();
+    // Initialize TWI module.
+    twi_init();
 #endif
 
-	// Loop forever.
-	for (;;)
-	{
+    // Loop forever.
+    for (;;)
+    {
 #ifdef BOOTSTRAPPER
-		// Check for TWI conditions that require handling.
-		twi_check_conditions();
+        // Check for TWI conditions that require handling.
+        twi_check_conditions();
 #endif
-	}
+    }
 
 #ifdef BOOTSTRAPPER
-	// Restore TWI interface to powerup defaults.
-	twi_deinit();
+    // Restore TWI interface to powerup defaults.
+    twi_deinit();
 #endif
 
     return 0;

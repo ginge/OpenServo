@@ -48,173 +48,173 @@
 #include "watchdog.h"
 
 #if defined(__AVR_ATtiny45__)
-	// Do nothing.
+    // Do nothing.
 #else
 #  error "Don't know what kind of MCU you are compiling for"
 #endif
 
 void handle_twi_command(void)
 {
-	uint8_t command;
+    uint8_t command;
 
-	// Get the command from the receive buffer.
-	command = twi_receive_byte();
+    // Get the command from the receive buffer.
+    command = twi_receive_byte();
 
-	switch (command)
-	{
-		case TWI_CMD_RESET:
+    switch (command)
+    {
+        case TWI_CMD_RESET:
 
-			// Reset the servo.
-			watchdog_hard_reset();
+            // Reset the servo.
+            watchdog_hard_reset();
 
-			break;
+            break;
 
-		case TWI_CMD_PWM_ENABLE:
+        case TWI_CMD_PWM_ENABLE:
 
-			// Enable PWM to the servo motor.
-			pwm_enable();
+            // Enable PWM to the servo motor.
+            pwm_enable();
 
-			break;
+            break;
 
-		case TWI_CMD_PWM_DISABLE:
+        case TWI_CMD_PWM_DISABLE:
 
-			// Disable PWM to the servo motor.
-			pwm_disable();
+            // Disable PWM to the servo motor.
+            pwm_disable();
 
-			break;
+            break;
 
-		case TWI_CMD_WRITE_ENABLE:
+        case TWI_CMD_WRITE_ENABLE:
 
-			// Enable write to safe read/write registers.
-			registers_write_byte(WRITE_ENABLE, 0x01);
+            // Enable write to safe read/write registers.
+            registers_write_byte(WRITE_ENABLE, 0x01);
 
-			break;
+            break;
 
-		case TWI_CMD_WRITE_DISABLE:
+        case TWI_CMD_WRITE_DISABLE:
 
-			// Disable write to safe read/write registers.
-			registers_write_byte(WRITE_ENABLE, 0x00);
+            // Disable write to safe read/write registers.
+            registers_write_byte(WRITE_ENABLE, 0x00);
 
-			break;
+            break;
 
-		case TWI_CMD_REGISTERS_SAVE:
+        case TWI_CMD_REGISTERS_SAVE:
 
-			// Save register values into EEPROM.
-			eeprom_save_registers();
+            // Save register values into EEPROM.
+            eeprom_save_registers();
 
-			break;
+            break;
 
-		case TWI_CMD_REGISTERS_RESTORE:
+        case TWI_CMD_REGISTERS_RESTORE:
 
-			// Restore register values into EEPROM.
-			eeprom_restore_registers();
+            // Restore register values into EEPROM.
+            eeprom_restore_registers();
 
-			break;
+            break;
 
-		case TWI_CMD_REGISTERS_DEFAULT:
+        case TWI_CMD_REGISTERS_DEFAULT:
 
-			// Restore register values to factory defaults.
-			registers_defaults();
-			break;
+            // Restore register values to factory defaults.
+            registers_defaults();
+            break;
 
-		default: 
+        default:
 
-			// Ignore unknown command.
-			break;
-	}
+            // Ignore unknown command.
+            break;
+    }
 }
 
 
 int main (void)
 {
-	asm volatile(".set __stack,0x15F" : : );
+    asm volatile(".set __stack,0x15F" : : );
 
-	int16_t pwm;
-	int16_t position;
-	uint16_t power;
-	uint16_t timer;
+    int16_t pwm;
+    int16_t position;
+    uint16_t power;
+    uint16_t timer;
 
-	// Initialize the watchdog module.
-	watchdog_init();
+    // Initialize the watchdog module.
+    watchdog_init();
 
-	// First, initialize registers that control servo operation.
-	registers_init();
+    // First, initialize registers that control servo operation.
+    registers_init();
 
-	// Initialize the PWM module.
+    // Initialize the PWM module.
     pwm_init();
 
-	// Initialize the ADC module.
-	adc_init();
+    // Initialize the ADC module.
+    adc_init();
 
-	// Initialize the motion module.
-	motion_init();
+    // Initialize the motion module.
+    motion_init();
 
-	// Initialize the power module.
-	power_init();
+    // Initialize the power module.
+    power_init();
 
-	// Initialize the TWI slave module.
-	twi_slave_init(registers_read_byte(TWI_ADDRESS));
+    // Initialize the TWI slave module.
+    twi_slave_init(registers_read_byte(TWI_ADDRESS));
 
-   	// Enable interrupts.
+    // Enable interrupts.
     sei();
 
-	// XXX Enable PWM and writing.
-	registers_write_byte(PWM_ENABLE, 0x01);
-	registers_write_byte(WRITE_ENABLE, 0x01);
+    // XXX Enable PWM and writing.
+    registers_write_byte(PWM_ENABLE, 0x01);
+    registers_write_byte(WRITE_ENABLE, 0x01);
 
     // Loop forever.
     for (;;)
-	{
-		// Is position value ready?
-		if (adc_position_value_is_ready())
-		{
-  			// A new position value should be ready every 1.024 mS.
-			// Increment a timer/counter to keep track of ADC reads.
-			timer = registers_read_word(TIMER_HI, TIMER_LO) + 1;
-#if 0
-			if (timer > 16000) timer = 0;
+    {
+        // Is position value ready?
+        if (adc_position_value_is_ready())
+        {
+            // A new position value should be ready every 1.024 mS.
+            // Increment a timer/counter to keep track of ADC reads.
+            timer = registers_read_word(TIMER_HI, TIMER_LO) + 1;
+#if 1
+            if (timer > 16000) timer = 0;
 #endif
-			registers_write_word(TIMER_HI, TIMER_LO, timer);
+            registers_write_word(TIMER_HI, TIMER_LO, timer);
 
-#if 0
-			if (timer == 0)
-			{
-				registers_write_word(SEEK_HI, SEEK_LO, 0x0100);
-			}
-			else if (timer == 8000)
-			{
-				registers_write_word(SEEK_HI, SEEK_LO, 0x0300);
-			}
+#if 1
+            if (timer == 0)
+            {
+                registers_write_word(SEEK_HI, SEEK_LO, 0x0100);
+            }
+            else if (timer == 8000)
+            {
+                registers_write_word(SEEK_HI, SEEK_LO, 0x0300);
+            }
 #endif
 
-			// Get the new position value.
-			position = (int16_t) adc_get_position_value();
+            // Get the new position value.
+            position = (int16_t) adc_get_position_value();
 
-			// Call the motion module to get a new PWM value.
-			pwm = motion_position_to_pwm(position);
+            // Call the motion module to get a new PWM value.
+            pwm = motion_position_to_pwm(position);
 
-			// Update the servo movement as indicated by the PWM value.
-			// Sanity checks are performed against the position value.
-			pwm_update(position, pwm);
-		}
+            // Update the servo movement as indicated by the PWM value.
+            // Sanity checks are performed against the position value.
+            pwm_update(position, pwm);
+        }
 
-		// Is a power value ready?
-		if (adc_power_value_is_ready())
-		{
-			// Get the new power value.
-			power = adc_get_power_value();
+        // Is a power value ready?
+        if (adc_power_value_is_ready())
+        {
+            // Get the new power value.
+            power = adc_get_power_value();
 
-			// Update the power value for reporting.
-			power_update(power);
-		}
+            // Update the power value for reporting.
+            power_update(power);
+        }
 
-		// Was a data byte recieved?
-		if (twi_data_in_receive_buffer())
-		{
-			// Handle any TWI command.
-			handle_twi_command();
-		}
-	}
+        // Was a data byte recieved?
+        if (twi_data_in_receive_buffer())
+        {
+            // Handle any TWI command.
+            handle_twi_command();
+        }
+    }
 
     return 0;
 }

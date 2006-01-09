@@ -43,39 +43,39 @@ void pwm_ccw(uint8_t pwm_width);
 
 inline static void pwm_enable(void)
 {
-	// Enable PWM to the servo motor.
-	registers_write_byte(PWM_ENABLE, 1);
+    // Enable PWM to the servo motor.
+    registers_write_byte(PWM_ENABLE, 1);
 }
 
 
 inline static void pwm_disable(void)
 {
-	// Disable PWM to the servo motor.
-	registers_write_byte(PWM_ENABLE, 0);
+    // Disable PWM to the servo motor.
+    registers_write_byte(PWM_ENABLE, 0);
 
-	// Stop now!
-	pwm_stop();
+    // Stop now!
+    pwm_stop();
 }
 
 
 inline static void pwm_output(int16_t pwm)
 {
-	// Determine direction or stop.
-	if (pwm < 0)
-	{
-		// Turn clockwise.
-		pwm_cw(-pwm);
-	}
-	else if (pwm > 0)
-	{
-		// Turn counter-clockwise.
-		pwm_ccw(pwm);
-	}
-	else
-	{
-		// Stop the motor.
-		pwm_stop();
-	}
+    // Determine direction or stop.
+    if (pwm < 0)
+    {
+        // Turn clockwise.
+        pwm_cw(-pwm);
+    }
+    else if (pwm > 0)
+    {
+        // Turn counter-clockwise.
+        pwm_ccw(pwm);
+    }
+    else
+    {
+        // Stop the motor.
+        pwm_stop();
+    }
 }
 
 #endif // _OS_PWM_H_
