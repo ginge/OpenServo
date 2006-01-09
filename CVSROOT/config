@@ -2,7 +2,7 @@
 #SystemAuth=yes
 
 # Set the Acl parsing type (none,compat,normal).
-AclMode=normal
+#AclMode=normal
 
 # Alternate location of CVS LockServer.  Set to 'none' to disable..
 #LockServer=localhost:2402
