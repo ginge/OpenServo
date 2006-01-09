@@ -11,4 +11,4 @@ instruction set of the ATtiny2313 MCU is compatible with the ATtinyX5 MCUs.
 A new version of WinAVR should be available in January or February of 2006
 which should natively support the AVR ATtinyX5 MCUs.
 
---Mike
+-Mike
