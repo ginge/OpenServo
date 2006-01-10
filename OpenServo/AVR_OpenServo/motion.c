@@ -54,7 +54,7 @@ static int16_t previous_position;
 
 // The accumulator is a structure arranged so that both the most significant
 // and least significant words can be indepently accessed.  The accumulator
-// maintains 32-bit resolution, but only 16-bit is needed for output.
+// maintains 32-bit resolution, but only 16-bits are needed for output.
 static union
 {
     struct
@@ -64,7 +64,6 @@ static union
     } small;
     int32_t big;
 } integral_accumulator;
-
 
 
 static int16_t fixed_multiply(int16_t component, uint16_t fixed_gain)
@@ -83,26 +82,6 @@ static int16_t fixed_multiply(int16_t component, uint16_t fixed_gain)
     return (int16_t) output;
 }
 
-#if 0
-static inline int16_t shift_right(int16_t val, uint8_t cnt)
-// Arithmetic shift right of the signed 16-bit value.
-{
-    asm volatile (
-        "L_asr1%=:" "\n\t"
-        "cp %1,__zero_reg__" "\n\t"
-        "breq L_asr2%=" "\n\t"
-        "dec %1" "\n\t"
-        "asr %B0" "\n\t"
-        "ror %A0" "\n\t"
-        "rjmp L_asr1%=" "\n\t"
-        "L_asr2%=:" "\n\t"
-        : "=&r" (val)
-        : "r" (cnt), "0" (val)
-        );
-
-    return val;
-}
-#endif
 
 static inline int16_t integral_accumulator_get(void)
 // This function returns the most significant word of the integral gain.
@@ -111,14 +90,15 @@ static inline int16_t integral_accumulator_get(void)
 }
 
 
-static inline void integral_accumulator_update(int16_t command_error, uint16_t fixed_gain)
+static inline void integral_accumulator_update(int16_t command_error, uint16_t integral_gain)
 // This function updates the integral accumulator with the command error.
-// The fixed gain scales the integral accumulator
+// Note: The command error is maintained with 32 bit precision, although 
+// only the upper 16 bits are used for output calculations.
 {
     int32_t temp;
 
-    // Multiply the command error by the fixed gain value.
-    temp = (int32_t) command_error * (int32_t) fixed_gain;
+    // Multiply the command error by the fixed integral gain value.
+    temp = (int32_t) command_error * (int32_t) integral_gain;
 
     // Add to the accumulator adjusting for multiplication.
     integral_accumulator.big += temp;
@@ -160,7 +140,7 @@ int16_t motion_position_to_pwm(int16_t current_position)
 // Automatic Control Systems, Cornell University Press, 1977 (ISBN 0-8014-1033-9)
 //
 // The theory of operation of this function will be filled in later, but the
-// diagram below should give a picture of how it is intended to work.
+// diagram below should gives a general picture of how it is intended to work.
 //
 //
 //                           +<------- bounds checking -------+
@@ -176,13 +156,12 @@ int16_t motion_position_to_pwm(int16_t current_position)
 //                +<-------------Ki * position ---------------+
 //
 //
-//
-//  Apply no gain to the integral output
-//
 {
     uint8_t i;
-    int16_t current_velocity;
     int16_t command_position;
+    int16_t maximum_position;
+    int16_t minimum_position;
+    int16_t current_velocity;
     int16_t command_error;
     int16_t output;
     int16_t position_output;
@@ -209,17 +188,9 @@ int16_t motion_position_to_pwm(int16_t current_position)
     previous_position = current_position;
 
     // Get the command position to where the servo is moving to from the registers.
-    command_position = registers_read_word(SEEK_HI, SEEK_LO);
-
-    // Get the positional, velocity and integral gains from the registers.
-    position_gain = registers_read_word(PID_PGAIN_HI, PID_PGAIN_LO);
-    velocity_gain = registers_read_word(PID_DGAIN_HI, PID_DGAIN_LO);
-    integral_gain = registers_read_word(PID_IGAIN_HI, PID_IGAIN_LO);
-
-    // Sanity check the command position. We do this because this value is
-    // passed from the outside to the servo and it could be an invalid value.
-    if (command_position < MIN_POSITION) command_position = MIN_POSITION;
-    if (command_position > MAX_POSITION) command_position = MAX_POSITION;
+    command_position = (int16_t) registers_read_word(SEEK_HI, SEEK_LO);
+    minimum_position = (int16_t) registers_read_word(MIN_SEEK_HI, MIN_SEEK_LO);
+    maximum_position = (int16_t) registers_read_word(MAX_SEEK_HI, MAX_SEEK_LO);
 
     // Are we reversing the seek sense?
     if (registers_read_byte(REVERSE_SEEK) != 0)
@@ -231,6 +202,8 @@ int16_t motion_position_to_pwm(int16_t current_position)
 
         // Adjust command position for the reverse sense.
         command_position = MAX_POSITION - command_position;
+        minimum_position = MAX_POSITION - minimum_position;
+        maximum_position = MAX_POSITION - maximum_position;
     }
     else
     {
@@ -240,9 +213,26 @@ int16_t motion_position_to_pwm(int16_t current_position)
         registers_write_word(POSITION_HI, POSITION_LO, (uint16_t) current_position);
     }
 
-    // The command error is the difference between the
-    // command position and current position.
+    // Sanity check the command position. We do this because this value is
+    // passed from the outside to the servo and it could be an invalid value.
+    if (command_position < minimum_position) command_position = minimum_position;
+    if (command_position > maximum_position) command_position = maximum_position;
+
+    // The command error is the difference between the command position and current position.
     command_error = command_position - current_position;
+
+    // Add a bit of deadband into the command error to minimize twitching.  The 
+    // potentiometer readings are a bit noisy and there is typically one or two
+    // units of difference from reading to reading when the servo is holding 
+    // position.  Adding deadband decreases some of the twitchiness in the servo
+    // caused by this noise.
+    if (command_error == 1) command_error = 0;
+    if (command_error == -1) command_error = 0;
+
+    // Get the positional, velocity and integral gains from the registers.
+    position_gain = registers_read_word(PID_PGAIN_HI, PID_PGAIN_LO);
+    velocity_gain = registers_read_word(PID_DGAIN_HI, PID_DGAIN_LO);
+    integral_gain = registers_read_word(PID_IGAIN_HI, PID_IGAIN_LO);
 
     // Add the command error scaled by the position gain to the integral accumulator.
     // The integral accumulator maintains a sum of total error over each iteration.
