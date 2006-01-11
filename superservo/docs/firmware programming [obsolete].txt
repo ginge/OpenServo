@@ -1,0 +1,84 @@
+SuperServo I2C Protocol Implimentation
+Aug 28th, 2003
+
+[OBSOLETE]	This preliminary design file is no longer valid but remains
+for review purposes.
+
+
+This document describes the protocol implimentation for the servo firmware
+programming module that comes with each servo.
+
+
+
+Processes:
+
+  Servo Firmware update:
+	1. "Enter device programming mode" command is sent.
+		* the device redirects the reset vector, halts all normal 
+		operations by reseting the device. The device enters 
+		programming mode upon reset.
+
+	2. Software sends program region command. Something like:
+		Send { [DA] write-op region r0 r1 r2 r3 ... rn }
+		* if all is ok, the device acks each write.
+
+	3. Software verifies program region.
+		Send { [DA] read-op region }
+		Receive { [DA] r0 r1 r3 ... rn }
+		* Software continues if all is ok, otherwise reports error
+		and tries again.
+
+	5. Software set new reset and interrupt vector.
+		Send { [DA] vector-op reset-vector int-vector }
+		* The vectors are saved but not modified until programming
+		mode is exited.
+
+	4. New firmware is tested by jumping into the saved reset vector.
+		Send { [DA] execute-op jump-location }
+		* The int-vector must be overwritten with the saved 
+		int-vector. The int-vector for programming mode would have
+		to be restored when programming mode is reentered.
+		* To reenter programming mode the device is reset via power
+		cycle or software reset.
+
+	5. Upon software verification, programming mode is exited.
+		Send { [DA] exit-op }
+		* the saved reset and int vectors are restored.
+
+
+Programming firmware can be updated by uploading a new programming firmware
+module to the device and then jumping into its boot vector. Upon a reset the
+old programming firmware would become active and the software could again
+jump into the new programming firmware. The factory installed firmware should
+not be overwritten.
+
+
+
+memory map:
+
+0000	reset vector
+0001	firmware programming vector
+0002	normal operations vector
+0003	installed modules table vector
+0004	interrupt vector
+
+
+0e00?	programming firmware
+
+
+Modules table layout:
+[address] [module-type:module-id] 
+
+
+
+Module Types (6bit): 0..15 are reserved types
+0	servo firmware
+1	programming firmware
+2	reset trigger module
+3	device address query module
+4	user ADC sample complete trigger
+5	timer overflow trigger
+...
+15
+--------
+16	user module

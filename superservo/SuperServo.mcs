@@ -1,0 +1,49 @@
+[Header]
+MagicCookie={0b13fe8c-dfe0-40eb-8900-6712719559a7}
+Version=1.0
+[File000]
+Location=servo.err
+Folder=Intermediary
+DeviceName=PIC16F873A
+LanguageToolSuiteID={6B3DAA78-59C1-46DD-B6AA-DBDAE4E06484}
+LanguageToolID={49D3CA3F-D9A3-4518-9943-226A347E8CC7}
+LanguageToolLocation=C:\Program Files\Microchip\MPASM Suite\MPAsmWin.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)||$(LIBDIR)||$(LKRDIR)||
+SOLK=<src>|servo.asm||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=
+[File001]
+Location=C:\projects\superservo\servo.cod
+Folder=Output
+DeviceName=PIC16F873A
+LanguageToolSuiteID={6B3DAA78-59C1-46DD-B6AA-DBDAE4E06484}
+LanguageToolID={49D3CA3F-D9A3-4518-9943-226A347E8CC7}
+LanguageToolLocation=C:\Program Files\Microchip\MPASM Suite\MPAsmWin.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)||$(LIBDIR)||$(LKRDIR)||
+SOLK=<src>|servo.asm||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=
+[File002]
+Location=C:\projects\superservo\servo.hex
+Folder=Output
+DeviceName=PIC16F873A
+LanguageToolSuiteID={6B3DAA78-59C1-46DD-B6AA-DBDAE4E06484}
+LanguageToolID={49D3CA3F-D9A3-4518-9943-226A347E8CC7}
+LanguageToolLocation=C:\Program Files\Microchip\MPASM Suite\MPAsmWin.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)||$(LIBDIR)||$(LKRDIR)||
+SOLK=<src>|servo.asm||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=
+[File003]
+Location=servo.lst
+Folder=Output
+DeviceName=PIC16F873A
+LanguageToolSuiteID={6B3DAA78-59C1-46DD-B6AA-DBDAE4E06484}
+LanguageToolID={49D3CA3F-D9A3-4518-9943-226A347E8CC7}
+LanguageToolLocation=C:\Program Files\Microchip\MPASM Suite\MPAsmWin.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)||$(LIBDIR)||$(LKRDIR)||
+SOLK=<src>|servo.asm||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=
+[TOOL_LOC_STAMPS]
+tool_loc{49D3CA3F-D9A3-4518-9943-226A347E8CC7}=C:\Program Files\Microchip\MPASM Suite\MPAsmWin.exe

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+<devices>
+	<about>This file will be updated to contain PID tuning coefficients for known servos. If you have
+		tested PID values for a servo listed or not please submit to openservo.com</about>
+	<device>
+		<model>Standard</model>
+		<servo>Hitec HS-300</servo>
+
+		<arch name='v3'>
+			<osc speed='9.80'>
+				<pid>
+					<kp>0x01<kp>
+					<ki>0xfe</ki>
+					<kd>0x05</kd>
+					<kpid>0x00</kpid>
+				</pid>
+			</osc>
+		</arch>
+
+	</device>
+
+
+</devices>
