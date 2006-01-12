@@ -133,7 +133,6 @@ int main (void)
     int16_t pwm;
     int16_t position;
     uint16_t power;
-    uint16_t timer;
 
     // Initialize the watchdog module.
     watchdog_init();

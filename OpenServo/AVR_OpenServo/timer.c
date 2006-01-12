@@ -38,6 +38,4 @@
 
 #include "timer.h"
 
-// Gloval timer.
-uint16_t global_timer;
-
+// Implementation contained within in-line functions in header file.
