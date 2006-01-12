@@ -85,7 +85,7 @@
 // may only be written to when write enabled.
 
 #define TWI_ADDRESS             0x20
-#define PID_OFFSET              0x21
+#define RESERVED_21             0x21
 #define PID_PGAIN_HI            0x22
 #define PID_PGAIN_LO            0x23
 #define PID_DGAIN_HI            0x24

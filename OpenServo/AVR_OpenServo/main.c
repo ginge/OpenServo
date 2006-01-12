@@ -43,9 +43,10 @@
 #include "motion.h"
 #include "power.h"
 #include "pwm.h"
+#include "timer.h"
 #include "twi.h"
-#include "registers.h"
 #include "watchdog.h"
+#include "registers.h"
 
 #if defined(__AVR_ATtiny45__)
     // Do nothing.
@@ -155,6 +156,9 @@ int main (void)
     // Initialize the TWI slave module.
     twi_slave_init(registers_read_byte(TWI_ADDRESS));
 
+    // Finally initialize the timer.
+    timer_set(0);
+
     // Enable interrupts.
     sei();
 
@@ -168,20 +172,16 @@ int main (void)
         // Is position value ready?
         if (adc_position_value_is_ready())
         {
-            // A new position value should be ready every 1.024 mS.
-            // Increment a timer/counter to keep track of ADC reads.
-            timer = registers_read_word(TIMER_HI, TIMER_LO) + 1;
 #if 1
-            if (timer > 16000) timer = 0;
-#endif
-            registers_write_word(TIMER_HI, TIMER_LO, timer);
+            // Reset the timer if greater than 16000.
+            if (timer_get() > 16000) timer_set(0);
 
-#if 1
-            if (timer == 0)
+
+            if (timer_get() == 0)
             {
                 registers_write_word(SEEK_HI, SEEK_LO, 0x0100);
             }
-            else if (timer == 8000)
+            else if (timer_get() == 8000)
             {
                 registers_write_word(SEEK_HI, SEEK_LO, 0x0300);
             }

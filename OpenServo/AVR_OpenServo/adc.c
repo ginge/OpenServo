@@ -40,6 +40,7 @@
 #include <avr/signal.h>
 
 #include "adc.h"
+#include "timer.h"
 
 // The 10-bit Analog to Digital Converter (ADC) on the ATtinyX5 chip is used
 // to provide power and position feedback from the servo circuitry.  Power
@@ -132,7 +133,8 @@ void adc_init(void)
 SIGNAL(SIG_OUTPUT_COMPARE0A)
 // Handles timer/counter 0 compare match A.
 {
-    // Do nothing, but discard the interrupt.
+    // Increment the timer.
+    timer_increment();
 }
 
 

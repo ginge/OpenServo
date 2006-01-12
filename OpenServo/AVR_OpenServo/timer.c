@@ -35,54 +35,9 @@
 #define __AVR_ATtiny45__
 
 #include <inttypes.h>
-#include <avr/eeprom.h>
 
-#include "eeprom.h"
-#include "registers.h"
+#include "timer.h"
 
-uint8_t eeprom_is_erased(void)
-// Perform simple test to determine if the EEPROM may have been erased
-// and register values should not be restored from the EEPROM.
-{
-    // Validate certain register values that should not be 0xFF.
-    if (eeprom_read_byte ((void *) (TWI_ADDRESS - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (PID_PGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (PID_DGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (PID_IGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (MIN_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (MAX_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (DEFAULT_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-
-    // Doesn't appear to be erased.
-    return 0;
-}
-
-
-void eeprom_restore_registers(void)
-// Restore registers from EEPROM.
-{
-    // XXX Disable PWM to servo motor while reading registers.
-
-    // Read the safe read/write registers from EEPROM.
-    eeprom_read_block(&registers[MAX_RW_REGISTER + 1], (void *) 0, 16);
-
-    // XXX Restore PWM to servo motor.
-
-    return;
-}
-
-
-void eeprom_save_registers(void)
-// Save registers to EEPROM.
-{
-    // XXX Disable PWM to servo motor while reading registers.
-
-    // Write the safe read/write registers from EEPROM.
-    eeprom_write_block(&registers[MAX_RW_REGISTER + 1], (void *) 0, 16);
-
-    // XXX Restore PWM to servo motor.
-
-    return;
-}
-
+// Gloval timer.
+uint16_t global_timer;
 
