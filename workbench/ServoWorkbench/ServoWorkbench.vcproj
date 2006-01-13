@@ -286,6 +286,19 @@
 				RelativePath=".\res\toolbar1.bmp">
 			</File>
 		</Filter>
+		<Filter
+			Name="Sample Scripts"
+			Filter="">
+			<File
+				RelativePath=".\samples\basic.js">
+			</File>
+			<File
+				RelativePath=".\samples\follow.js">
+			</File>
+			<File
+				RelativePath=".\samples\test.js">
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt">
 		</File>
