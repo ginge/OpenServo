@@ -36,6 +36,9 @@
 // Initialize the motion module.
 void motion_init(void);
 
+// Initialize the motion related register values.
+void motion_registers_defaults(void);
+
 // Take the 10-bit position as input and output a signed PWM to be
 // applied to the servo motors.
 int16_t motion_position_to_pwm(int16_t position);

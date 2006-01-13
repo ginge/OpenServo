@@ -161,31 +161,26 @@ int main (void)
     // Enable interrupts.
     sei();
 
-    // XXX Enable PWM and writing.
+    // XXX Enable PWM and writing.  I do this for now to make development and
+    // XXX tuning a bit easier.  Constantly manually setting these values to 
+    // XXX turn the servo on and write the gain values get's to be a pain.
     registers_write_byte(PWM_ENABLE, 0x01);
     registers_write_byte(WRITE_ENABLE, 0x01);
 
-    // Loop forever.
+    // Wait until initial position value is ready.
+    while (!adc_position_value_is_ready());
+
+    // Store the initial position as the initial command position.  If PWM is 
+    // enabled this will have the servo hold the position it is currently at.
+    registers_write_word(SEEK_HI, SEEK_LO, adc_get_position_value());
+
+    // This is the main processing loop for the servo.  It basically looks
+    // for new position, power or TWI commands to be processed.
     for (;;)
     {
         // Is position value ready?
         if (adc_position_value_is_ready())
         {
-#if 1
-            // Reset the timer if greater than 16000.
-            if (timer_get() > 16000) timer_set(0);
-
-
-            if (timer_get() == 0)
-            {
-                registers_write_word(SEEK_HI, SEEK_LO, 0x0100);
-            }
-            else if (timer_get() == 8000)
-            {
-                registers_write_word(SEEK_HI, SEEK_LO, 0x0300);
-            }
-#endif
-
             // Get the new position value.
             position = (int16_t) adc_get_position_value();
 
@@ -207,12 +202,36 @@ int main (void)
             power_update(power);
         }
 
-        // Was a data byte recieved?
+        // Was a command recieved?
         if (twi_data_in_receive_buffer())
         {
             // Handle any TWI command.
             handle_twi_command();
         }
+
+#if 0
+        // XXX This code is in place for having the servo drive itself between 
+        // XXX two positions to aid in the servo tuning process.  This code 
+        // XXX should normally be commented out.
+        {
+            // Get the timer.  This timer is defined by the position/power sample
+            // frequency and has a cycle time of approximately 512 microseconds.
+            uint16_t timer = timer_get();
+
+            // Reset the timer if greater than 16000.
+            if (timer > 16000) timer_set(0);
+
+            // Look for specific events.
+            if (timer == 0)
+            {
+                registers_write_word(SEEK_HI, SEEK_LO, 0x0100);
+            }
+            else if (timer == 8000)
+            {
+                registers_write_word(SEEK_HI, SEEK_LO, 0x0300);
+            }
+        }
+#endif
     }
 
     return 0;

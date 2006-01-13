@@ -129,6 +129,24 @@ void motion_init(void)
 }
 
 
+void motion_registers_defaults(void)
+// Initialize the motion related register values.  This is done here to
+// keep the motion related code in a single file.  
+{
+    // Default gain values.
+    registers_write_word(PID_PGAIN_HI, PID_PGAIN_LO, 0x0800);
+    registers_write_word(PID_DGAIN_HI, PID_DGAIN_LO, 0x2800);
+    registers_write_word(PID_IGAIN_HI, PID_IGAIN_LO, 0x0B80);
+
+    // Default position limits.
+    registers_write_word(MIN_SEEK_HI, MIN_SEEK_LO, 0x0060);
+    registers_write_word(MAX_SEEK_HI, MAX_SEEK_LO, 0x03A0);
+
+    // Default reverse seek setting.
+    registers_write_byte(REVERSE_SEEK, 0x00);
+}
+
+
 int16_t motion_position_to_pwm(int16_t current_position)
 // This function takes the current servo position as input and outputs a pwm
 // value for the servo motors.  The current position value must be within the

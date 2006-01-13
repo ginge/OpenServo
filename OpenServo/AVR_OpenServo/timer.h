@@ -35,8 +35,6 @@
 
 #include "registers.h"
 
-extern uint16_t global_timer;
-
 static inline void timer_set(uint16_t value)
 {
     // Set the timer to the specified value.

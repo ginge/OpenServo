@@ -51,7 +51,6 @@ uint8_t eeprom_is_erased(void)
     if (eeprom_read_byte ((void *) (PID_IGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
     if (eeprom_read_byte ((void *) (MIN_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
     if (eeprom_read_byte ((void *) (MAX_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (DEFAULT_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
 
     // Doesn't appear to be erased.
     return 0;

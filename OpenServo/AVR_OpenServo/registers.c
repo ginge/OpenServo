@@ -37,6 +37,7 @@
 #include <inttypes.h>
 
 #include "eeprom.h"
+#include "motion.h"
 #include "registers.h"
 
 // Register values.
@@ -54,21 +55,9 @@ void registers_init(void)
         registers_write_byte(i, 0x00);
     }
 
-    // Initialize select read/only registers to disable
-    // PWM and disable register write on power up.
-    registers_write_byte(PWM_ENABLE, 0x00);
-    registers_write_byte(WRITE_ENABLE, 0x00);
+    // Add non-zero initialization of registers here.
 
-    // Reset other read/only registers.  These values will
-    // be populated under normal operation.
-    registers_write_byte(POWER_HI, 0x00);
-    registers_write_byte(POWER_LO, 0x00);
-    registers_write_byte(POSITION_HI, 0x00);
-    registers_write_byte(POSITION_LO, 0x00);
-    registers_write_byte(PWM_CW, 0x00);
-    registers_write_byte(PWM_CCW, 0x00);
-
-    // Initialize safe read/write registers to defaults.
+    // Initialize read/write protected registers to defaults.
     registers_defaults();
 
     // Does the EEPROM appear to be erased?
@@ -77,30 +66,19 @@ void registers_init(void)
         // No. Restore the register values.
         eeprom_restore_registers();
     }
-
-    // Initialize read/write registers.
-    registers_write_byte(SEEK_HI, registers_read_byte(DEFAULT_SEEK_HI));
-    registers_write_byte(SEEK_LO, registers_read_byte(DEFAULT_SEEK_LO));
 }
 
 
 void registers_defaults(void)
 // Reset safe read/write registers to defaults.
 {
-    // Initialize safe read/write registers to defaults.
+    // Initialize read/write protected registers to defaults.
+
+    // Default TWI address.
     registers_write_byte(TWI_ADDRESS, 0x10);
-    registers_write_byte(PID_PGAIN_HI, 0x08);
-    registers_write_byte(PID_PGAIN_LO, 0x00);
-    registers_write_byte(PID_DGAIN_HI, 0x28);
-    registers_write_byte(PID_DGAIN_LO, 0x00);
-    registers_write_byte(PID_IGAIN_HI, 0x0B);
-    registers_write_byte(PID_IGAIN_LO, 0x80);
-    registers_write_byte(MIN_SEEK_HI, 0x00);
-    registers_write_byte(MIN_SEEK_LO, 0x60);
-    registers_write_byte(MAX_SEEK_HI, 0x03);
-    registers_write_byte(MAX_SEEK_LO, 0xa0);
-    registers_write_byte(DEFAULT_SEEK_HI, 0x02);
-    registers_write_byte(DEFAULT_SEEK_LO, 0x00);
-    registers_write_byte(REVERSE_SEEK, 0x00);
+
+    // Call the motion module to initialize the motion related default values.
+    // This is done so the motion related parameters can be kept in a single file.
+    motion_registers_defaults();
 }
 

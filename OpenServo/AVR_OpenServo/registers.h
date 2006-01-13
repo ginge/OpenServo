@@ -97,10 +97,10 @@
 #define MIN_SEEK_LO             0x29
 #define MAX_SEEK_HI             0x2a
 #define MAX_SEEK_LO             0x2b
-#define DEFAULT_SEEK_HI         0x2c
-#define DEFAULT_SEEK_LO         0x2d
+#define REVERSE_SEEK            0x2c
+#define RESERVED_2D             0x2d
 #define RESERVED_2E             0x2e
-#define REVERSE_SEEK            0x2f
+#define RESERVED_2F             0x2f
 
 #define RESERVED_30             0x30
 #define RESERVED_31             0x31
