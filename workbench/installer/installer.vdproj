@@ -121,7 +121,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:..\\..\\ServoWorkbench-Installer\\installer.msi"
+        "OutputFilename" = "8:..\\..\\ServoWorkbench-Installer\\swb.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -200,7 +200,7 @@
             "SourcePath" = "8:XTP9601Lib.dll"
             "TargetName" = "8:XTP9601Lib.dll"
             "Tag" = "8:"
-            "Folder" = "8:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
+            "Folder" = "8:_EA64657066D345FFA5FDDFC3F3BD589A"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -281,6 +281,17 @@
             "Property" = "8:ProgramMenuFolder"
                 "Folders"
                 {
+                    "{F27BD5C5-A65D-4608-96D4-7C5DA1F76302}:_52819F4E1F0B4598A648CE14D4B23FF3"
+                    {
+                    "Name" = "8:Open Servo"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_BA21377DD30B4BE3BE457511A3B3E0CD"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{58C0ADA3-3CEA-43BD-A3B3-2EA121BC8217}:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
@@ -291,6 +302,17 @@
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:TARGETDIR"
+                "Folders"
+                {
+                }
+            }
+            "{78BAF5CE-F2E5-45BE-83BC-DB6AF387E941}:_EA64657066D345FFA5FDDFC3F3BD589A"
+            {
+            "Name" = "8:#1914"
+            "AlwaysCreate" = "11:FALSE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Property" = "8:SystemFolder"
                 "Folders"
                 {
                 }
@@ -311,11 +333,11 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Servo Workbench"
         "ProductCode" = "8:{EAD022F2-4508-4DC3-B2EC-DDAE468EAA1D}"
-        "PackageCode" = "8:{BA3D44E0-A450-40AD-A5A6-B08C40A21E26}"
+        "PackageCode" = "8:{9611A11E-A3A0-4288-A089-423DDD119589}"
         "UpgradeCode" = "8:{0FB8F17F-03B5-4928-B929-1F037C6B1BEC}"
         "RestartWWWService" = "11:FALSE"
-        "RemovePreviousVersions" = "11:FALSE"
-        "DetectNewerInstalledVersion" = "11:TRUE"
+        "RemovePreviousVersions" = "11:TRUE"
+        "DetectNewerInstalledVersion" = "11:FALSE"
         "ProductVersion" = "8:1.0.0"
         "Manufacturer" = "8:OpenServo.com"
         "ARPHELPTELEPHONE" = "8:"
@@ -425,6 +447,20 @@
         }
         "Shortcut"
         {
+            "{478F747B-8505-45D1-9AAE-8C3B645C26E3}:_0D393141CA4144AAA23400A04C746EB2"
+            {
+            "Name" = "8:Servo Workbench"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_67903E5645D3460DB710076087F749AF"
+            "Folder" = "8:_52819F4E1F0B4598A648CE14D4B23FF3"
+            "WorkingFolder" = "8:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
         }
         "UserInterface"
         {
@@ -917,7 +953,7 @@
             "Folder" = "8:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
+            "Vital" = "11:FALSE"
             "ReadOnly" = "11:FALSE"
             "Hidden" = "11:FALSE"
             "System" = "11:FALSE"
@@ -956,7 +992,7 @@
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
+            "ProjectOutputGroupRegister" = "3:2"
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{4CAB6D32-1352-4EE3-848A-52DC27C92CC4}"

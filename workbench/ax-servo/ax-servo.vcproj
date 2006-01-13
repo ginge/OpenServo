@@ -156,6 +156,9 @@
 				RelativePath=".\Device.cpp">
 			</File>
 			<File
+				RelativePath=".\OpenServo.cpp">
+			</File>
+			<File
 				RelativePath=".\Register.cpp">
 			</File>
 			<File
@@ -182,6 +185,9 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\SuperServo.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -189,6 +195,9 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\Device.h">
+			</File>
+			<File
+				RelativePath=".\OpenServo.h">
 			</File>
 			<File
 				RelativePath=".\Register.h">
@@ -210,6 +219,9 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h">
+			</File>
+			<File
+				RelativePath=".\SuperServo.h">
 			</File>
 		</Filter>
 		<Filter

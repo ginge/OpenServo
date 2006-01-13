@@ -163,13 +163,16 @@ LRESULT CRegistersToolWnd::OnControllerDisconnecting( WPARAM wp, LPARAM lp ) {
 void CRegistersToolWnd::OnLoadServos()
 {
 	m_cb_servo.ResetContent();
-
-	IServoControllerPtr pcontroller = GetController();
-	for(int i = 0, c = pcontroller->count; i<c; i++) {
-		IServoPtr pservo = pcontroller->item[i];
-		CString s;
-		s.Format("0x%02x - %s", pservo->address, (LPCTSTR)pservo->typeName );
-		m_cb_servo.InsertString( -1, s);
+	try {
+		IServoControllerPtr pcontroller = GetController();
+		for(int i = 0, c = pcontroller->count; i<c; i++) {
+			IServoPtr pservo = pcontroller->item[i];
+			CString s;
+			s.Format("0x%02x - %s", pservo->address, (LPCTSTR)pservo->typeName );
+			m_cb_servo.InsertString( -1, s);
+		}
+	} catch(HRESULT) {
+		// ax-servo error
 	}
 }
 
@@ -180,7 +183,6 @@ void CRegistersToolWnd::OnServoChange()
 		ASSERT(i != CB_ERR);
 
 		m_servo = GetController()->item[i];
-		
 		Refresh();
 
 	} catch(HRESULT) {

@@ -263,10 +263,19 @@
 				RelativePath=".\res\bmp00001.bmp">
 			</File>
 			<File
+				RelativePath=".\res\MainToolbar.bmp">
+			</File>
+			<File
 				RelativePath=".\mg_cur.cur">
 			</File>
 			<File
 				RelativePath=".\mg_icons.bmp">
+			</File>
+			<File
+				RelativePath=".\res\ScriptToolbar.bmp">
+			</File>
+			<File
+				RelativePath=".\res\ServoToolbar.bmp">
 			</File>
 			<File
 				RelativePath=".\res\ServoWorkbench.ico">
@@ -291,13 +300,16 @@
 			Name="Sample Scripts"
 			Filter="">
 			<File
-				RelativePath=".\samples\basic.js">
+				RelativePath=".\samples\basic.js"
+				DeploymentContent="TRUE">
 			</File>
 			<File
-				RelativePath=".\samples\follow.js">
+				RelativePath=".\samples\follow.js"
+				DeploymentContent="TRUE">
 			</File>
 			<File
-				RelativePath=".\samples\test.js">
+				RelativePath=".\samples\test.js"
+				DeploymentContent="TRUE">
 			</File>
 		</Filter>
 		<File

@@ -26,6 +26,7 @@ BEGIN_MESSAGE_MAP(CServoWorkbenchApp, CWinApp)
 	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
 	// Standard print setup command
 	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
+	ON_COMMAND(ID_SCRIPT_SAMPLES, OnScriptSamples)
 END_MESSAGE_MAP()
 
 
@@ -63,6 +64,10 @@ BOOL CServoWorkbenchApp::InitInstance()
 	InitCommonControls();
 
 	CWinApp::InitInstance();
+
+	/* save current working directory */
+	GetCurrentDirectory(sizeof(m_lpszWorkingDir), m_lpszWorkingDir);
+
 
 #if 1
 	CoInitializeEx(0, COINIT_MULTITHREADED );
@@ -197,4 +202,18 @@ int CServoWorkbenchApp::ExitInstance()
 {
 	CoUninitialize();
 	return CWinApp::ExitInstance();
+}
+
+void CServoWorkbenchApp::OnScriptSamples()
+{
+	static char BASED_CODE szFilter[] = "JavaScript Files (*.js)|*.js|VBScript Files (*.vbs)|*.vbs||";
+	CFileDialog dlg(TRUE, "js", NULL, OFN_FILEMUSTEXIST, szFilter, AfxGetMainWnd());
+
+	CString s(m_lpszWorkingDir);
+	s += "\\samples";
+	dlg.m_pOFN->lpstrInitialDir = s ;
+
+	if(dlg.DoModal() == IDOK) {
+		OpenDocumentFile( dlg.GetPathName() );
+	}
 }

@@ -13,8 +13,8 @@
 #pragma comment(lib, "..\\u2c\\U2CCommon.lib")
 
 
-#include "Servo.h"
-#include ".\servocontroller.h"
+#include "SuperServo.h"
+
 
 // CServoController
 
@@ -46,7 +46,8 @@ STDMETHODIMP CServoController::Scan()
 	if( U2C_ScanDevices( m_hDevice, &list) ==U2C_SUCCESS) {
 		for(int i=0, c=list.nDeviceNumber; i<c; i++) {
 			IDevice* pdevice;
-			if(FAILED( CoCreateInstance(__uuidof(CServo), NULL, CLSCTX_ALL, __uuidof(IDevice), (void**)&pdevice) ))
+			// TODO: We must detect all classes of installed servos and call Detect() on each one for this device
+			if(FAILED( CoCreateInstance(__uuidof(CSuperServo), NULL, CLSCTX_ALL, __uuidof(IDevice), (void**)&pdevice) ))
 				return false;
 			pdevice->Attach(  this, list.List[i] );
 			m_devices[ list.List[i] ] = pdevice;
@@ -64,10 +65,7 @@ STDMETHODIMP CServoController::GetDevice(USHORT i2cAddress, IDevice** pVal)
 		pdevice->AddRef();
 		return S_OK;
 	} else {
-		if(FAILED( CoCreateInstance(__uuidof(CServo), NULL, CLSCTX_ALL, __uuidof(IServo), (void**)&pdevice) ))
-			return false;
-		pdevice->Attach(  this, i2cAddress );
-		return S_OK;
+		return E_FAIL;
 	}
 }
 

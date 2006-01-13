@@ -55,6 +55,7 @@ BOOL CServoListCtrl::Refresh()
 			pservoinfo->current = pservoinfo->ptr->current;
 			pservoinfo->valid = TRUE;
 		} catch(HRESULT) {
+			// ax-servo error
 			pservoinfo->valid = FALSE;
 		}
 	}
@@ -76,14 +77,16 @@ int CServoListCtrl::InsertServo(int index, IServoPtr pservo)
 		pservoinfo->targetPosition = pservo->targetPosition;
 		pservoinfo->current = pservo->current;
 		pservoinfo->valid = TRUE;
-	} catch(HRESULT) {
-		pservoinfo->valid = FALSE;
-	}
 
-	int id = InsertString(index, NULL);
-	if(id!=CB_ERR)
-		SetItemDataPtr(id, pservoinfo);
-	return id;
+		int id = InsertString(index, NULL);
+		if(id!=CB_ERR)
+			SetItemDataPtr(id, pservoinfo);
+		return id;
+	} catch(HRESULT) {
+		// ax-servo error
+		pservoinfo->valid = FALSE;
+		return CB_ERR;
+	}
 }
 
 

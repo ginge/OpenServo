@@ -125,6 +125,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
+        MENUITEM "Open Samples",                32783
+        MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "&Close",                      ID_FILE_CLOSE
@@ -155,6 +157,8 @@ BEGIN
         MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
         MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
         MENUITEM SEPARATOR
+        MENUITEM "Open Samples",                ID_SCRIPT_SAMPLES
+        MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
@@ -171,6 +175,16 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "Controller"
+    BEGIN
+        MENUITEM "Connect",                     ID_SERVO_CONNECT
+        MENUITEM "Scan for devices",            ID_SERVO_SCAN
+    END
+    POPUP "Script"
+    BEGIN
+        MENUITEM "Run",                         ID_SCRIPT_EXECUTE
+        MENUITEM "Stop",                        ID_SCRIPT_STOP
     END
     POPUP "&Window"
     BEGIN

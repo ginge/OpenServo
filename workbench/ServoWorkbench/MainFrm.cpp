@@ -169,6 +169,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_pcontroller.CreateInstance( __uuidof(CServoController) );
 
+	DisplayPopup("Welcome to Servo Workbench", "Click on the Connect toolbar button to connect to the servo controller. Samples are available from the File menu.", MB_ICONINFORMATION);
 
 	return 0;
 }
@@ -501,10 +502,12 @@ void CMainFrame::OnUpdateIfControllerConnected(CCmdUI* pcmdui)
 
 void CMainFrame::OnServoConnect()
 {
-	if( (m_pcontroller!=NULL) && m_pcontroller->isConnected )
-		Disconnect();
-	else
-		Connect();
+	if(m_pcontroller!=NULL) {
+		if( m_pcontroller->isConnected )
+			Disconnect();
+		else
+			Connect();
+	}
 }
 
 void CMainFrame::OnServoScan()

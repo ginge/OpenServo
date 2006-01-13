@@ -33,6 +33,8 @@
 #define ID_SERVO_CONNECT                32775
 #define ID_BUTTON32776                  32776
 #define ID_SERVO_SCAN                   32777
+#define ID_Menu                         32782
+#define ID_SCRIPT_SAMPLES               32783
 #define ID_EDIT_DELETE                  37000
 #define ID_EDIT_DELETE_BACK             37001
 #define ID_EDIT_DELETE_WORD_BACK        37002
@@ -92,7 +94,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
-#define _APS_NEXT_COMMAND_VALUE         32778
+#define _APS_NEXT_COMMAND_VALUE         32784
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
