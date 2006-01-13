@@ -1,0 +1,13 @@
+REGEDIT
+; This .REG file may be used by your SETUP program.
+;   If a SETUP program is not available, the entries below will be
+;   registered in your InitInstance automatically with a call to
+;   CWinApp::RegisterShellFileTypes and COleObjectFactory::UpdateRegistryAll.
+
+HKEY_CLASSES_ROOT\ServoWorkbench.Document = ServoWorkbench.Document
+HKEY_CLASSES_ROOT\ServoWorkbench.Document\CLSID = {E7018364-FBE8-4B60-A6FC-7A2ACAD74B54}
+
+HKEY_CLASSES_ROOT\CLSID\{E7018364-FBE8-4B60-A6FC-7A2ACAD74B54} = ServoWorkbench.Document
+HKEY_CLASSES_ROOT\CLSID\{E7018364-FBE8-4B60-A6FC-7A2ACAD74B54}\ProgId = ServoWorkbench.Document
+
+HKEY_CLASSES_ROOT\CLSID\{E7018364-FBE8-4B60-A6FC-7A2ACAD74B54}\LocalServer32 = ServoWorkbench.EXE

@@ -1,0 +1,56 @@
+// ServoWorkbench.idl : type library source for ServoWorkbench.exe
+
+// This file will be processed by the MIDL compiler to produce the
+// type library (ServoWorkbench.tlb).
+
+[ uuid(166153B0-914D-4C46-A091-0119DB4F4948), version(1.0) ]
+library ServoWorkbench
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	//  Primary dispatch interface for CServoWorkbenchSystem
+	
+	[ uuid(7C314D49-8E58-4DC4-83D5-802FEB298444) ]
+	dispinterface IServoWorkbenchSystem
+	{
+		properties:
+			
+		methods:
+		[id(1), helpstring("method Sleep")] HRESULT sleep(LONG msecs);
+		[id(2), helpstring("method Alert")] HRESULT alert(BSTR msg);
+		[id(3), helpstring("method print")] HRESULT print(BSTR text);
+		[id(4), helpstring("method trace")] HRESULT trace(BSTR text);
+		[id(5), helpstring("method Connect")] HRESULT Connect(void);
+	};
+
+	//  Class information for CServoWorkbenchDoc
+	
+	[ uuid(E7018364-FBE8-4B60-A6FC-7A2ACAD74B55) ]
+	coclass CMainFrame
+	{
+		[default] dispinterface IServoWorkbenchSystem;
+	};
+
+
+
+
+
+	//  Primary dispatch interface for CServoWorkbenchDoc
+	
+	[ uuid(7C314D49-8E58-4DC4-83D5-802FEB298443) ]
+	dispinterface IServoWorkbench
+	{
+		properties:
+			
+		methods:
+	};
+
+	//  Class information for CServoWorkbenchDoc
+	
+	[ uuid(E7018364-FBE8-4B60-A6FC-7A2ACAD74B54) ]
+	coclass CServoWorkbenchDoc
+	{
+		[default] dispinterface IServoWorkbench;
+	};
+};
