@@ -15,26 +15,38 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_01DFDAE10CED4B8B8CD59CA85564B96C"
+        "OwnerKey" = "8:_67903E5645D3460DB710076087F749AF"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_01DFDAE10CED4B8B8CD59CA85564B96C"
+        "OwnerKey" = "8:_B52AA32F08BB49429053A8DE665F3A10"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_01DFDAE10CED4B8B8CD59CA85564B96C"
+        "OwnerKey" = "8:_9578B0BFD14A4A0289BC48934B853CA0"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_0E32646D609DCB2BBAB706E3671FD5B9"
         "OwnerKey" = "8:_9578B0BFD14A4A0289BC48934B853CA0"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_1970692C95322C86FD4B0A5399103E79"
+        "MsmKey" = "8:_28E6ACC1DF2B433AB98CD83CAC21BDED"
         "OwnerKey" = "8:_67903E5645D3460DB710076087F749AF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_1970692C95322C86FD4B0A5399103E79"
+        "MsmKey" = "8:_28E6ACC1DF2B433AB98CD83CAC21BDED"
         "OwnerKey" = "8:_9578B0BFD14A4A0289BC48934B853CA0"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_43A8650DFA30EE36BF9C406A09A6EE20"
-        "OwnerKey" = "8:_67903E5645D3460DB710076087F749AF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -45,7 +57,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_649C1DE7B809DE727E776A5792DEA6DC"
+        "MsmKey" = "8:_5AA7BEA2DA86BB8B2512201CC8A46B21"
         "OwnerKey" = "8:_67903E5645D3460DB710076087F749AF"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -53,6 +65,12 @@
         {
         "MsmKey" = "8:_67903E5645D3460DB710076087F749AF"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_8CCE654BA78DDE104A4F59B2BB4D389F"
+        "OwnerKey" = "8:_67903E5645D3460DB710076087F749AF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -69,26 +87,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_C883F44824E5C50354FED34CAAD144D2"
+        "MsmKey" = "8:_C3A0B32B6DA74E24B8D187CEA927C0B6"
         "OwnerKey" = "8:_67903E5645D3460DB710076087F749AF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_D29B85D655076255ECDFB5C9460D108F"
-        "OwnerKey" = "8:_67903E5645D3460DB710076087F749AF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_D29B85D655076255ECDFB5C9460D108F"
-        "OwnerKey" = "8:_B52AA32F08BB49429053A8DE665F3A10"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_D29B85D655076255ECDFB5C9460D108F"
-        "OwnerKey" = "8:_9578B0BFD14A4A0289BC48934B853CA0"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -121,7 +121,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\installer.msi"
+        "OutputFilename" = "8:..\\..\\ServoWorkbench-Installer\\installer.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -175,26 +175,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_1970692C95322C86FD4B0A5399103E79"
-            {
-            "SourcePath" = "8:MSVCP71D.dll"
-            "TargetName" = "8:MSVCP71D.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{A582A373-4685-4296-BEFE-614B80A702C3}:_43A8650DFA30EE36BF9C406A09A6EE20"
             {
             "SourcePath" = "8:RPCRT4.dll"
@@ -211,14 +191,14 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_649C1DE7B809DE727E776A5792DEA6DC"
+            "{A582A373-4685-4296-BEFE-614B80A702C3}:_5AA7BEA2DA86BB8B2512201CC8A46B21"
             {
-            "SourcePath" = "8:MFC71D.DLL"
-            "TargetName" = "8:MFC71D.DLL"
+            "SourcePath" = "8:XTP9601Lib.dll"
+            "TargetName" = "8:XTP9601Lib.dll"
             "Tag" = "8:"
             "Folder" = "8:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
             "Condition" = "8:"
@@ -235,10 +215,10 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_C883F44824E5C50354FED34CAAD144D2"
+            "{A582A373-4685-4296-BEFE-614B80A702C3}:_8CCE654BA78DDE104A4F59B2BB4D389F"
             {
-            "SourcePath" = "8:XTP9601Libd.dll"
-            "TargetName" = "8:XTP9601Libd.dll"
+            "SourcePath" = "8:_ax-servo.tlb"
+            "TargetName" = "8:_ax-servo.tlb"
             "Tag" = "8:"
             "Folder" = "8:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
             "Condition" = "8:"
@@ -250,27 +230,7 @@
             "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{A582A373-4685-4296-BEFE-614B80A702C3}:_D29B85D655076255ECDFB5C9460D108F"
-            {
-            "SourcePath" = "8:MSVCR71D.dll"
-            "TargetName" = "8:MSVCR71D.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_DF6F9EC9A61942A497A2DA07F6D4D3C7"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
+            "Register" = "3:2"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
@@ -351,7 +311,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Servo Workbench"
         "ProductCode" = "8:{EAD022F2-4508-4DC3-B2EC-DDAE468EAA1D}"
-        "PackageCode" = "8:{ED630456-DB5B-4027-A30F-6AFAAC7EF73B}"
+        "PackageCode" = "8:{BA3D44E0-A450-40AD-A5A6-B08C40A21E26}"
         "UpgradeCode" = "8:{0FB8F17F-03B5-4928-B929-1F037C6B1BEC}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
@@ -848,6 +808,48 @@
         }
         "MergeModule"
         {
+            "{35A69C6E-5BA4-440D-803D-762B59A45393}:_01DFDAE10CED4B8B8CD59CA85564B96C"
+            {
+            "UseDynamicProperties" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "SourcePath" = "8:vc_user_crt71_rtl_x86_---.msm"
+                "Properties"
+                {
+                }
+            "LanguageId" = "3:0"
+            "Exclude" = "11:FALSE"
+            "Folder" = "8:"
+            "Feature" = "8:"
+            "IsolateTo" = "8:"
+            }
+            "{35A69C6E-5BA4-440D-803D-762B59A45393}:_28E6ACC1DF2B433AB98CD83CAC21BDED"
+            {
+            "UseDynamicProperties" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "SourcePath" = "8:vc_user_stl71_rtl_x86_---.msm"
+                "Properties"
+                {
+                }
+            "LanguageId" = "3:0"
+            "Exclude" = "11:FALSE"
+            "Folder" = "8:"
+            "Feature" = "8:"
+            "IsolateTo" = "8:"
+            }
+            "{35A69C6E-5BA4-440D-803D-762B59A45393}:_C3A0B32B6DA74E24B8D187CEA927C0B6"
+            {
+            "UseDynamicProperties" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "SourcePath" = "8:vc_user_mfc71_rtl_x86_---.msm"
+                "Properties"
+                {
+                }
+            "LanguageId" = "3:0"
+            "Exclude" = "11:FALSE"
+            "Folder" = "8:"
+            "Feature" = "8:"
+            "IsolateTo" = "8:"
+            }
         }
         "ProjectOutput"
         {
