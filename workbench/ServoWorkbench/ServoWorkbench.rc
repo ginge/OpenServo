@@ -74,10 +74,10 @@ IDR_ServoWorkbenchTYPE  ICON                    "res\\ServoWorkbenchDoc.ico"
 // Bitmap
 //
 
-IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_MAINFRAME           BITMAP                  "res\\MainToolbar.bmp"
 IDR_MARGIN_ICONS        BITMAP                  "mg_icons.bmp"
-IDR_TOOLBAR_SCRIPT      BITMAP                  "res\\toolbar1.bmp"
-IDR_TOOLBAR_SERVO       BITMAP                  "res\\bmp00001.bmp"
+IDR_TOOLBAR_SCRIPT      BITMAP                  "res\\Scripttoolbar.bmp"
+IDR_TOOLBAR_SERVO       BITMAP                  "res\\ServoToolbar.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
