@@ -52,7 +52,7 @@ HRESULT CMainFrame::Disconnect()
 			DisplayPopup("Disconnected!", "You are now disconnected from the servo controller.", MB_ICONINFORMATION);
 		}
 		return hr;
-	} catch(HRESULT hr) {
+	} catch(HRESULT) {
 		m_pcontroller->Release();
 		return S_OK;
 	}

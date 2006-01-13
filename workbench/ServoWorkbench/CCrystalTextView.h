@@ -103,7 +103,7 @@ private:
 	BOOL m_bPreparingToDrag;
 	BOOL m_bDraggingText;
 	BOOL m_bDragSelection, m_bWordSelection, m_bLineSelection;
-	UINT m_nDragSelTimer;
+	UINT_PTR m_nDragSelTimer;
 	CPoint WordToRight(CPoint pt);
 	CPoint WordToLeft(CPoint pt);
 
