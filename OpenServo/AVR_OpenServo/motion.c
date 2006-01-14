@@ -36,8 +36,8 @@
 
 // I'm currently working with different algorithms -- PID and IPD.  The
 // defines below control which set of algorithms are included in the build.
-// #define USE_IPD
-#define USE_PID
+#define USE_IPD
+// #define USE_PID
 
 #ifdef USE_IPD
 
