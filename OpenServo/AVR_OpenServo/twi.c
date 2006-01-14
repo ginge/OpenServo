@@ -141,9 +141,12 @@ twi_slave_init(uint8_t slave_address)
     DDRTWI |= (1<<DDSCL);
     DDRTWI &= ~(1<<DDSDA);
 
-    // Set the interrupt enable, wire mode and clock settings.
+    // Set the interrupt enable, wire mode and clock settings.  Note: At this
+    // time the wire mode must not be set to hold the SCL line low when the 
+    // counter overflows. Otherwise, this TWI slave will interfere with other
+    // TWI slaves.
     USICR = (1<<USISIE) | (0<<USIOIE) |                 // Enable Start Condition interrupt. Disable overflow.
-            (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+            (1<<USIWM1) | (0<<USIWM0) |                 // Set USI to two-wire mode without clock stretching.
             (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
             (0<<USITC);                                 // No toggle of clock pin.
 
@@ -195,7 +198,7 @@ SIGNAL(SIG_USI_START)
 
         // Update the interrupt enable, wire mode and clock settings.
         USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Overflow and Start Condition Interrupt.
-                (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
                 (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                 (0<<USITC);                                 // No toggle of clock pin.
     }
@@ -243,7 +246,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 
                 // Update the interrupt enable, wire mode and clock settings.
                 USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                        (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                        (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
                         (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                         (0<<USITC);                                 // No toggle of clock pin.
 
@@ -253,10 +256,12 @@ SIGNAL(SIG_USI_OVERFLOW)
             }
             else
             {
-                // Reset USI to detect start condition.
-                // Update the interrupt enable, wire mode and clock settings.
+                // Reset USI to detect start condition.  Update the interrupt enable, 
+                // wire mode and clock settings.  Note: At this time the wire mode must
+                // not be set to hold the SCL line low when the counter overflows.  
+                // Otherwise, this TWI slave will interfere with other TWI slaves.
                 USICR = (1<<USISIE) | (0<<USIOIE) |                 // Enable Start Condition Interrupt. Disable overflow.
-                        (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                        (1<<USIWM1) | (0<<USIWM0) |                 // Maintain USI in two-wire mode without clock stretching.
                         (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                         (0<<USITC);                                 // No toggle of clock pin.
 
@@ -275,10 +280,12 @@ SIGNAL(SIG_USI_OVERFLOW)
             // Check the lowest bit for NACK?  If set, the master does not want more data.
             if (USIDR & 0x01)
             {
-                // Reset USI to detect start condition.
-                // Update the interrupt enable, wire mode and clock settings.
+                // Reset USI to detect start condition. Update the interrupt enable,
+                // wire mode and clock settings. Note: At this time the wire mode must
+                // not be set to hold the SCL line low when the counter overflows.  
+                // Otherwise, this TWI slave will interfere with other TWI slaves.
                 USICR = (1<<USISIE) | (0<<USIOIE) |                 // Enable Start Condition Interrupt. Disable overflow.
-                        (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                        (1<<USIWM1) | (0<<USIWM0) |                 // Maintain USI in two-wire mode without clock stretching.
                         (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                         (0<<USITC);                                 // No toggle of clock pin.
 
@@ -308,7 +315,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 
             // Update the interrupt enable, wire mode and clock settings.
             USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
                     (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                     (0<<USITC);                                 // No toggle of clock pin.
 
@@ -330,7 +337,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 
             // Update the interrupt enable, wire mode and clock settings.
             USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
                     (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                     (0<<USITC);                                 // No toggle of clock pin.
 
@@ -351,7 +358,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 
             // Update the interrupt enable, wire mode and clock settings.
             USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
                     (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                     (0<<USITC);                                 // No toggle of clock pin.
 
@@ -403,7 +410,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 
             // Update the interrupt enable, wire mode and clock settings.
             USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in Two-wire mode.
+                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
                     (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                     (0<<USITC);                                 // No toggle of clock pin.
 
