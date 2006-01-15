@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -41,17 +41,22 @@ void pwm_stop(void);
 void pwm_cw(uint8_t pwm_width);
 void pwm_ccw(uint8_t pwm_width);
 
+
 inline static void pwm_enable(void)
 {
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
     // Enable PWM to the servo motor.
-    registers_write_byte(PWM_ENABLE, 1);
+    registers_write_byte(REG_FLAGS_LO, flags_lo | (1<<FLAGS_LO_PWM_ENABLED));
 }
 
 
 inline static void pwm_disable(void)
 {
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
     // Disable PWM to the servo motor.
-    registers_write_byte(PWM_ENABLE, 0);
+    registers_write_byte(REG_FLAGS_LO, flags_lo & ~(1<<FLAGS_LO_PWM_ENABLED));
 
     // Stop now!
     pwm_stop();

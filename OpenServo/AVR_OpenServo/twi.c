@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ inline static void twi_registers_write(uint8_t address, uint8_t data)
     if (address <= MAX_RO_REGISTER) return;
 
     // Don't write to safe read/write registers unless enabled.
-    if (!registers_read_byte(WRITE_ENABLE) && (address > MAX_RW_REGISTER)) return;
+    if ((address > MAX_RW_REGISTER) && registers_is_write_disabled()) return;
 
     // Write the data to the address address.
     registers_write_byte(address, data);

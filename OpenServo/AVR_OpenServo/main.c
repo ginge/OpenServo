@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -86,15 +86,15 @@ void handle_twi_command(void)
 
         case TWI_CMD_WRITE_ENABLE:
 
-            // Enable write to safe read/write registers.
-            registers_write_byte(WRITE_ENABLE, 0x01);
+            // Enable write to read/write protected registers.
+            registers_write_enable();
 
             break;
 
         case TWI_CMD_WRITE_DISABLE:
 
-            // Disable write to safe read/write registers.
-            registers_write_byte(WRITE_ENABLE, 0x00);
+            // Disable write to read/write protected registers.
+            registers_write_disable();
 
             break;
 
@@ -153,7 +153,7 @@ int main (void)
     power_init();
 
     // Initialize the TWI slave module.
-    twi_slave_init(registers_read_byte(TWI_ADDRESS));
+    twi_slave_init(registers_read_byte(REG_TWI_ADDRESS));
 
     // Finally initialize the timer.
     timer_set(0);
@@ -164,15 +164,15 @@ int main (void)
     // XXX Enable PWM and writing.  I do this for now to make development and
     // XXX tuning a bit easier.  Constantly manually setting these values to 
     // XXX turn the servo on and write the gain values get's to be a pain.
-    registers_write_byte(PWM_ENABLE, 0x01);
-    registers_write_byte(WRITE_ENABLE, 0x01);
+    pwm_enable();
+    registers_write_enable();
 
     // Wait until initial position value is ready.
     while (!adc_position_value_is_ready());
 
     // Store the initial position as the initial command position.  If PWM is 
     // enabled this will have the servo hold the position it is currently at.
-    registers_write_word(SEEK_HI, SEEK_LO, adc_get_position_value());
+    registers_write_word(REG_SEEK_HI, REG_SEEK_LO, adc_get_position_value());
 
     // This is the main processing loop for the servo.  It basically looks
     // for new position, power or TWI commands to be processed.
@@ -209,7 +209,7 @@ int main (void)
             handle_twi_command();
         }
 
-#if 0
+#if 1
         // XXX This code is in place for having the servo drive itself between 
         // XXX two positions to aid in the servo tuning process.  This code 
         // XXX should normally be commented out.
@@ -224,11 +224,11 @@ int main (void)
             // Look for specific events.
             if (timer == 0)
             {
-                registers_write_word(SEEK_HI, SEEK_LO, 0x0100);
+                registers_write_word(REG_SEEK_HI, REG_SEEK_LO, 0x0100);
             }
             else if (timer == 8000)
             {
-                registers_write_word(SEEK_HI, SEEK_LO, 0x0300);
+                registers_write_word(REG_SEEK_HI, REG_SEEK_LO, 0x0300);
             }
         }
 #endif

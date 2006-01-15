@@ -30,22 +30,18 @@
    POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _OS_TWI_H_
-#define _OS_TWI_H_ 1
+#ifndef _OS_OPENSERVO_H_
+#define _OS_OPENSERVO_H_ 1
 
-#define TWI_CMD_RESET               0x80        // Reset command
-#define TWI_CMD_PWM_ENABLE          0x82        // Enable PWM to motors
-#define TWI_CMD_PWM_DISABLE         0x83        // Disable PWM to servo motors
-#define TWI_CMD_WRITE_ENABLE        0x84        // Enable write of safe read/write registers
-#define TWI_CMD_WRITE_DISABLE       0x85        // Disable write of safe read/write registers
-#define TWI_CMD_REGISTERS_SAVE      0x86        // Save safe read/write registers fo EEPROM
-#define TWI_CMD_REGISTERS_RESTORE   0x87        // Restore safe read/write registers from EEPROM
-#define TWI_CMD_REGISTERS_DEFAULT   0x88        // Restore safe read/write registers to defaults
+// Define the device type and subtype.  These values are used so that
+// external TWI clients can query the type of device the servo is.
+#define OPENSERVO_DEVICE_TYPE           1
+#define OPENSERVO_DEVICE_SUBTYPE        1
 
-void twi_slave_init(uint8_t);
-void twi_transmit_byte(uint8_t);
-uint8_t twi_receive_byte(void);
-uint8_t twi_data_in_receive_buffer(void);
+// Define the software major and minor version.  These values are used 
+// so that external TWI clients can query the version of the software
+// running on the servo.
+#define SOFTWARE_VERSION_MAJOR          0
+#define SOFTWARE_VERSION_MINOR          1
 
-
-#endif // _OS_TWI_H_
+#endif // _OS_OPENSERVO_H_

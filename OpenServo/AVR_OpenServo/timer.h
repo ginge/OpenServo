@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,13 @@
 static inline void timer_set(uint16_t value)
 {
     // Set the timer to the specified value.
-    registers_write_word(TIMER_HI, TIMER_LO, value);
+    registers_write_word(REG_TIMER_HI, REG_TIMER_LO, value);
 }
 
 static inline uint16_t timer_get(void)
 {
     // Get the timer value.
-    return registers_read_word(TIMER_HI, TIMER_LO);
+    return registers_read_word(REG_TIMER_HI, REG_TIMER_LO);
 }
 
 static void inline timer_increment(void)
@@ -52,13 +52,13 @@ static void inline timer_increment(void)
     uint16_t value;
 
     // Read the timer value.
-    value = registers_read_word(TIMER_HI, TIMER_LO);
+    value = registers_read_word(REG_TIMER_HI, REG_TIMER_LO);
 
     // Increment the timer value.
     ++value;
 
     // Write the increment timer value.
-    registers_write_word(TIMER_HI, TIMER_LO, value);
+    registers_write_word(REG_TIMER_HI, REG_TIMER_LO, value);
 }
 
 

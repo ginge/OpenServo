@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -140,16 +140,16 @@ void motion_registers_defaults(void)
 // keep the motion related code in a single file.  
 {
     // Default gain values.
-    registers_write_word(PID_PGAIN_HI, PID_PGAIN_LO, 0x0800);
-    registers_write_word(PID_DGAIN_HI, PID_DGAIN_LO, 0x2800);
-    registers_write_word(PID_IGAIN_HI, PID_IGAIN_LO, 0x0B80);
+    registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0800);
+    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x2800);
+    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, 0x0B80);
 
     // Default position limits.
-    registers_write_word(MIN_SEEK_HI, MIN_SEEK_LO, 0x0060);
-    registers_write_word(MAX_SEEK_HI, MAX_SEEK_LO, 0x03A0);
+    registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, 0x0060);
+    registers_write_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO, 0x03A0);
 
     // Default reverse seek setting.
-    registers_write_byte(REVERSE_SEEK, 0x00);
+    registers_write_byte(REG_REVERSE_SEEK, 0x00);
 }
 
 
@@ -212,17 +212,17 @@ int16_t motion_position_to_pwm(int16_t current_position)
     previous_position = current_position;
 
     // Get the command position to where the servo is moving to from the registers.
-    command_position = (int16_t) registers_read_word(SEEK_HI, SEEK_LO);
-    minimum_position = (int16_t) registers_read_word(MIN_SEEK_HI, MIN_SEEK_LO);
-    maximum_position = (int16_t) registers_read_word(MAX_SEEK_HI, MAX_SEEK_LO);
+    command_position = (int16_t) registers_read_word(REG_SEEK_HI, REG_SEEK_LO);
+    minimum_position = (int16_t) registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
+    maximum_position = (int16_t) registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
     // Are we reversing the seek sense?
-    if (registers_read_byte(REVERSE_SEEK) != 0)
+    if (registers_read_byte(REG_REVERSE_SEEK) != 0)
     {
         // Yes. Update the system registers with an adjusted reverse sense
         // position. With reverse sense, the position value to grows from
         // a low value to high value in the clockwise direction.
-        registers_write_word(POSITION_HI, POSITION_LO, (uint16_t) (MAX_POSITION - current_position));
+        registers_write_word(REG_POSITION_HI, REG_POSITION_LO, (uint16_t) (MAX_POSITION - current_position));
 
         // Adjust command position for the reverse sense.
         command_position = MAX_POSITION - command_position;
@@ -234,7 +234,7 @@ int16_t motion_position_to_pwm(int16_t current_position)
         // No. Update the system registers with a non-reverse sense position.
         // Normal position value grows from a low value to high value in the
         // counter-clockwise direction.
-        registers_write_word(POSITION_HI, POSITION_LO, (uint16_t) current_position);
+        registers_write_word(REG_POSITION_HI, REG_POSITION_LO, (uint16_t) current_position);
     }
 
     // Sanity check the command position. We do this because this value is
@@ -254,9 +254,9 @@ int16_t motion_position_to_pwm(int16_t current_position)
     if (command_error == -1) command_error = 0;
 
     // Get the positional, velocity and integral gains from the registers.
-    position_gain = registers_read_word(PID_PGAIN_HI, PID_PGAIN_LO);
-    velocity_gain = registers_read_word(PID_DGAIN_HI, PID_DGAIN_LO);
-    integral_gain = registers_read_word(PID_IGAIN_HI, PID_IGAIN_LO);
+    position_gain = registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
+    velocity_gain = registers_read_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
+    integral_gain = registers_read_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO);
 
     // Add the command error scaled by the position gain to the integral accumulator.
     // The integral accumulator maintains a sum of total error over each iteration.
@@ -273,9 +273,9 @@ int16_t motion_position_to_pwm(int16_t current_position)
     // by the current velocity of the servo to create the velocity output.
     velocity_output = fixed_multiply(current_velocity, velocity_gain);
 
-    registers_write_word(RESERVED_0A, RESERVED_0B, (uint16_t) position_output);
-    registers_write_word(RESERVED_0C, RESERVED_0D, (uint16_t) velocity_output);
-    registers_write_word(RESERVED_0E, RESERVED_0F, (uint16_t) integral_output);
+    registers_write_word(REG_RESERVED_38, REG_RESERVED_39, (uint16_t) position_output);
+    registers_write_word(REG_RESERVED_3A, REG_RESERVED_3B, (uint16_t) velocity_output);
+    registers_write_word(REG_RESERVED_3C, REG_RESERVED_3D, (uint16_t) integral_output);
 
     // The integral output drives the output and the position and velocity outputs
     // function as a frictional component to counter the integral output.
@@ -330,7 +330,7 @@ int16_t motion_position_to_pwm(int16_t current_position)
 #define MIN_OUTPUT              (-MAX_OUTPUT)
 
 // Borrow a reserved register.
-#define PID_OFFSET              RESERVED_21
+#define REG_PID_OFFSET          REG_RESERVED_21
 
 // Values preserved across multiple PID iterations.
 static int16_t integral_error = 0;
@@ -374,19 +374,19 @@ void motion_registers_defaults(void)
 // keep the motion related code in a single file.  
 {
     // Default gain values.
-    registers_write_word(PID_PGAIN_HI, PID_PGAIN_LO, 0x0600);
-    registers_write_word(PID_DGAIN_HI, PID_DGAIN_LO, 0x7000);
-    registers_write_word(PID_IGAIN_HI, PID_IGAIN_LO, 0x0001);
+    registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0600);
+    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x7000);
+    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, 0x0001);
 
     // Default offset value.
-    registers_write_byte(PID_OFFSET, 0x80);
+    registers_write_byte(REG_PID_OFFSET, 0x80);
 
     // Default position limits.
-    registers_write_word(MIN_SEEK_HI, MIN_SEEK_LO, 0x0060);
-    registers_write_word(MAX_SEEK_HI, MAX_SEEK_LO, 0x03A0);
+    registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, 0x0060);
+    registers_write_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO, 0x03A0);
 
     // Default reverse seek setting.
-    registers_write_byte(REVERSE_SEEK, 0x00);
+    registers_write_byte(REG_REVERSE_SEEK, 0x00);
 }
 
 
@@ -413,17 +413,17 @@ int16_t motion_position_to_pwm(int16_t current_position)
     output = 0;
 
     // Get the command position to where the servo is moving to from the registers.
-    command_position = (int16_t) registers_read_word(SEEK_HI, SEEK_LO);
-    minimum_position = (int16_t) registers_read_word(MIN_SEEK_HI, MIN_SEEK_LO);
-    maximum_position = (int16_t) registers_read_word(MAX_SEEK_HI, MAX_SEEK_LO);
+    command_position = (int16_t) registers_read_word(REG_SEEK_HI, REG_SEEK_LO);
+    minimum_position = (int16_t) registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
+    maximum_position = (int16_t) registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
     // Are we reversing the seek sense?
-    if (registers_read_byte(REVERSE_SEEK) != 0)
+    if (registers_read_byte(REG_REVERSE_SEEK) != 0)
     {
         // Yes. Update the system registers with an adjusted reverse sense
         // position. With reverse sense, the position value to grows from
         // a low value to high value in the clockwise direction.
-        registers_write_word(POSITION_HI, POSITION_LO, (uint16_t) (MAX_POSITION - current_position));
+        registers_write_word(REG_POSITION_HI, REG_POSITION_LO, (uint16_t) (MAX_POSITION - current_position));
 
         // Adjust command position for the reverse sense.
         command_position = MAX_POSITION - command_position;
@@ -435,7 +435,7 @@ int16_t motion_position_to_pwm(int16_t current_position)
         // No. Update the system registers with a non-reverse sense position.
         // Normal position value grows from a low value to high value in the
         // counter-clockwise direction.
-        registers_write_word(POSITION_HI, POSITION_LO, (uint16_t) current_position);
+        registers_write_word(REG_POSITION_HI, REG_POSITION_LO, (uint16_t) current_position);
     }
 
     // Sanity check the command position. We do this because this value is
@@ -474,9 +474,9 @@ int16_t motion_position_to_pwm(int16_t current_position)
     }
 
     // Get the proportional, derivative and integral gains.
-    proportional_gain = registers_read_word(PID_PGAIN_HI, PID_PGAIN_LO);
-    derivative_gain = registers_read_word(PID_DGAIN_HI, PID_DGAIN_LO);
-    integral_gain = registers_read_word(PID_IGAIN_HI, PID_IGAIN_LO);
+    proportional_gain = registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
+    derivative_gain = registers_read_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
+    integral_gain = registers_read_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO);
 
     // Add the proportional and derivative components of the output.
     // The derivative component is subtracted as it is meant to serve 
@@ -488,7 +488,7 @@ int16_t motion_position_to_pwm(int16_t current_position)
     // static friction and other drag within the servo.  If the offset is
     // not great enough to move the servo the output may not be of sufficient
     // strength to move the motor -- inducing motor vibrations and wasting power.
-    output_offset = (int16_t) registers_read_byte(PID_OFFSET);
+    output_offset = (int16_t) registers_read_byte(REG_PID_OFFSET);
 
     // This value determines the true range of the PID values to be the
     // maximum PID value minus the PID offset.

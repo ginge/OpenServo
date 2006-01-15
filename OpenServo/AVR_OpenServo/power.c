@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ void power_init(void)
     for (i = 0; i < 8; ++i) power_array[i] = 0;
 
     // Initialize the power values within the system registers.
-    registers_write_word(POWER_HI, POWER_LO, 0);
+    registers_write_word(REG_POWER_HI, REG_POWER_LO, 0);
 }
 
 
@@ -85,6 +85,6 @@ void power_update(uint16_t power)
     power >>= 3;
 
     // Update the power values within the system registers.
-    registers_write_word(POWER_HI, POWER_LO, power);
+    registers_write_word(REG_POWER_HI, REG_POWER_LO, power);
 }
 

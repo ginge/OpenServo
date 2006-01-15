@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
 
 #include "eeprom.h"
 #include "motion.h"
+#include "openservo.h"
 #include "registers.h"
 
 // Register values.
@@ -55,7 +56,11 @@ void registers_init(void)
         registers_write_byte(i, 0x00);
     }
 
-    // Add non-zero initialization of registers here.
+    // Set device and software identification information.
+    registers_write_byte(REG_DEVICE_TYPE, OPENSERVO_DEVICE_TYPE);
+    registers_write_byte(REG_DEVICE_SUBTYPE, OPENSERVO_DEVICE_SUBTYPE);
+    registers_write_byte(REG_VERSION_MAJOR, SOFTWARE_VERSION_MAJOR);
+    registers_write_byte(REG_VERSION_MINOR, SOFTWARE_VERSION_MINOR);
 
     // Initialize read/write protected registers to defaults.
     registers_defaults();
@@ -75,7 +80,7 @@ void registers_defaults(void)
     // Initialize read/write protected registers to defaults.
 
     // Default TWI address.
-    registers_write_byte(TWI_ADDRESS, 0x10);
+    registers_write_byte(REG_TWI_ADDRESS, 0x10);
 
     // Call the motion module to initialize the motion related default values.
     // This is done so the motion related parameters can be kept in a single file.

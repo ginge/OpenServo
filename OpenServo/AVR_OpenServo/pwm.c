@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -69,13 +69,13 @@ void pwm_update(uint16_t position, int16_t pwm)
     uint16_t max_position;
 
     // Are we reversing the seek sense?
-    if (registers_read_byte(REVERSE_SEEK) != 0)
+    if (registers_read_byte(REG_REVERSE_SEEK) != 0)
     {
         // Yes. Swap the minimum and maximum position.
 
         // Get the minimum and maximum seek position.
-        min_position = registers_read_word(MAX_SEEK_HI, MAX_SEEK_LO);
-        max_position = registers_read_word(MIN_SEEK_HI, MIN_SEEK_LO);
+        min_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
+        max_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
 
         // Make sure these values are sane 10-bit values.
         if (min_position > 0x3ff) min_position = 0x3ff;
@@ -90,8 +90,8 @@ void pwm_update(uint16_t position, int16_t pwm)
         // No. Use the minimum and maximum position as is.
 
         // Get the minimum and maximum seek position.
-        min_position = registers_read_word(MIN_SEEK_HI, MIN_SEEK_LO);
-        max_position = registers_read_word(MAX_SEEK_HI, MAX_SEEK_LO);
+        min_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
+        max_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
         // Make sure these values are sane 10-bit values.
         if (min_position > 0x3ff) min_position = 0x3ff;
@@ -142,8 +142,8 @@ void pwm_stop(void)
     pwm_ccw_save = 0;
 
     // Update the pwm values.
-    registers_write_byte(PWM_CCW, pwm_cw_save);
-    registers_write_byte(PWM_CW, pwm_ccw_save);
+    registers_write_byte(REG_PWM_CCW, pwm_cw_save);
+    registers_write_byte(REG_PWM_CW, pwm_ccw_save);
 
     // Set PB4/OC1B and PB1/OC1A to low.
     PORTB &= ~((1<<PB4) | (1<<PB1));
@@ -168,7 +168,7 @@ void pwm_cw(uint8_t pwm_width)
 // Send PWM signal for clockwise rotation with the indicated pwm ratio (0 - 255).
 {
     // Are we setting a non-zero pwm and is PWM enabled?
-    if (pwm_width && registers_read_byte(PWM_ENABLE))
+    if (pwm_width && (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_PWM_ENABLED)))
     {
         // Are we changing the pwm?
         if (pwm_width != pwm_cw_save)
@@ -203,8 +203,8 @@ void pwm_cw(uint8_t pwm_width)
         }
 
         // Update the pwm values.
-        registers_write_byte(PWM_CW, pwm_cw_save);
-        registers_write_byte(PWM_CCW, pwm_ccw_save);
+        registers_write_byte(REG_PWM_CW, pwm_cw_save);
+        registers_write_byte(REG_PWM_CCW, pwm_ccw_save);
     }
     else
     {
@@ -218,7 +218,7 @@ void pwm_ccw(uint8_t pwm_width)
 // Send PWM signal for counter-clockwise rotation with the indicated pwm ratio (0 - 255).
 {
     // Are we setting a non-zero pwm and is PWM enabled?
-    if (pwm_width && registers_read_byte(PWM_ENABLE))
+    if (pwm_width && (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_PWM_ENABLED)))
     {
         // Are we changing the pwm?
         if (pwm_width != pwm_ccw_save)
@@ -253,8 +253,8 @@ void pwm_ccw(uint8_t pwm_width)
         }
 
         // Update the pwm values.
-        registers_write_byte(PWM_CW, pwm_cw_save);
-        registers_write_byte(PWM_CCW, pwm_ccw_save);
+        registers_write_byte(REG_PWM_CW, pwm_cw_save);
+        registers_write_byte(REG_PWM_CCW, pwm_ccw_save);
     }
     else
     {

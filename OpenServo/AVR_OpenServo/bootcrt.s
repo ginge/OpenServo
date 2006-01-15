@@ -38,7 +38,7 @@
 
    Copyright for original code not derived from gcrt1.S:
 
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
+   Copyright (c) 2006, Mike Thompson <mpthompson@gmail.com>
    All rights reserved.
 */
 
