@@ -56,24 +56,24 @@
 
 //////////////////////////////////////////////////////////////////
 
-#define TWI_SLAVE_CHECK_ADDRESS                (0x00)
-#define TWI_SLAVE_SEND_DATA                    (0x01)
-#define TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA (0x02)
-#define TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA   (0x03)
-#define TWI_SLAVE_REQUEST_DATA                 (0x04)
-#define TWI_SLAVE_GET_DATA_AND_SEND_ACK        (0x05)
+#define TWI_OVERFLOW_STATE_NONE             (0x00)
+#define TWI_OVERFLOW_STATE_ACK_PR_RX        (0x01)
+#define TWI_OVERFLOW_STATE_DATA_RX          (0x02)
+#define TWI_OVERFLOW_STATE_ACK_PR_TX        (0x03)
+#define TWI_OVERFLOW_STATE_PR_ACK_TX        (0x04)
+#define TWI_OVERFLOW_STATE_DATA_TX          (0x05)
 
 // Device dependant defines
 #if defined(__AVR_ATtiny25__) | defined(__AVR_ATtiny45__) | defined(__AVR_ATtiny85__)
-    #define DDRTWI              DDRB
-    #define DDSDA               DDB0
-    #define DDSCL               DDB2
-    #define PORTTWI             PORTB
-    #define PORTSDA             PB0
-    #define PORTSCL             PB2
-    #define PINTWI              PINB
-    #define PINSDA              PINB0
-    #define PINSCL              PINB2
+    #define DDR_USI             DDRB
+    #define DD_SDA              DDB0
+    #define DD_SCL              DDB2
+    #define PORT_USI            PORTB
+    #define P_SDA               PB0
+    #define P_SCL               PB2
+    #define PIN_USI             PINB
+    #define PIN_SDA             PINB0
+    #define PIN_SCL             PINB2
 #endif
 
 
@@ -132,20 +132,13 @@ twi_slave_init(uint8_t slave_address)
     twi_rxhead = 0;
 
     // Set the slave address.
-    twi_slave_address = slave_address;
-
-    // Set the SCL AND SDA to default to high.
-    PORTTWI |= (1<<PORTSCL) | (1<<PORTSDA);
-
-    // Set SCL as output, SDA as input.
-    DDRTWI |= (1<<DDSCL);
-    DDRTWI &= ~(1<<DDSDA);
+    twi_slave_address = slave_address & 0x7f;
 
     // Set the interrupt enable, wire mode and clock settings.  Note: At this
     // time the wire mode must not be set to hold the SCL line low when the 
     // counter overflows. Otherwise, this TWI slave will interfere with other
     // TWI slaves.
-    USICR = (1<<USISIE) | (0<<USIOIE) |                 // Enable Start Condition interrupt. Disable overflow.
+    USICR = (0<<USISIE) | (0<<USIOIE) |                 // Disable start condition and overflow interrupt.
             (1<<USIWM1) | (0<<USIWM0) |                 // Set USI to two-wire mode without clock stretching.
             (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
             (0<<USITC);                                 // No toggle of clock pin.
@@ -153,6 +146,17 @@ twi_slave_init(uint8_t slave_address)
     // Clear the interrupt flags and reset the counter.
     USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) |        // Clear interrupt flags.
             (0x0<<USICNT0);                                 // USI to sample 8 bits or 16 edge toggles.
+
+    // Configure SDA.
+    DDR_USI &= ~(1<<DD_SDA);
+    PORT_USI &= ~(1<<P_SDA);
+
+    // Configure SCL.
+    DDR_USI |= (1<<DD_SCL);
+    PORT_USI |= (1<<P_SCL);
+
+    // Start condition interrupt enable.
+    USICR |= (1<<USISIE);
 }
 
 
@@ -185,78 +189,56 @@ SIGNAL(SIG_USI_START)
     // Wait until the "Start Condition" is complete when SCL goes low. If we fail to wait
     // for SCL to go low we may miscount the number of clocks pulses for the data because
     // the transition of SCL could be mistaken as one of the data clock pulses.
-    while ((PINTWI & (1<<PINSCL)) & ~(PINTWI & (1<<PINSDA)));
+    while ((PIN_USI & (1<<PIN_SCL)));
 
-    // Make sure SDA didn't return to high indicating a stop condition.
-    if (~(PINTWI & (1<<PINSDA)))
-    {
-        // Update our state.
-        twi_overflow_state = TWI_SLAVE_CHECK_ADDRESS;
-
-        // Set SDA as input
-        DDRTWI &= ~(1<<PORTSDA);
-
-        // Update the interrupt enable, wire mode and clock settings.
-        USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Overflow and Start Condition Interrupt.
-                (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
-                (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
-                (0<<USITC);                                 // No toggle of clock pin.
-    }
+    // Reset the overflow state.
+    twi_overflow_state = TWI_OVERFLOW_STATE_NONE;
 
     // Clear the interrupt flags and reset the counter.
-    USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) |        // Clear interrupt flags.
-            (0x00<<USICNT0);                                // USI to sample 8 bits or 16 edge toggles.
+    USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) |    // Clear interrupt flags.
+            (0x00<<USICNT0);                            // USI to sample 8 bits or 16 edge toggles.
+
+    // Update the interrupt enable, wire mode and clock settings.
+    USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Overflow and Start Condition Interrupt.
+            (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
+            (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
+            (0<<USITC);                                 // No toggle of clock pin.
 }
 
 
 SIGNAL(SIG_USI_OVERFLOW)
 // Handles all the comunication. Disabled only when waiting for new Start Condition.
 {
+    // Buffer the USI data.
+    uint8_t usi_data = USIDR;
+
+    // Handle the interrupt based on the overflow state.
     switch (twi_overflow_state)
     {
-        // ---------- Address mode ----------
-        // Check address and send ACK (and next TWI_SLAVE_SEND_DATA) if OK, else reset USI.
-        case TWI_SLAVE_CHECK_ADDRESS:
+        // Handle the first byte transmitted from master -- the slave address.
+        case TWI_OVERFLOW_STATE_NONE:
 
-            // USIDR now contains the TWI address in the upper seven bits
-            // and the data direction in the lowest bit.  We check here for
-            // an address we are insterested in.
-            if ((USIDR>>1) == (twi_slave_address & 0x7f))
+            // Are we receiving our address?
+            if ((usi_data >> 1) == twi_slave_address)
             {
-                // Check the lowest bit.
-                if (USIDR & 0x01)
-                {
-                    // We are to send data to the master.
-                    twi_overflow_state = TWI_SLAVE_SEND_DATA;
-                }
-                else
-                {
-                    // We are to recieve data from the master.
-                    twi_overflow_state = TWI_SLAVE_REQUEST_DATA;
-                }
+                // Yes. Are we to send or receive data?
+                twi_overflow_state = (usi_data & 0x01) ? TWI_OVERFLOW_STATE_ACK_PR_TX : TWI_OVERFLOW_STATE_ACK_PR_RX;
 
                 // Reset the command mode flag to assume command mode.
                 twi_command_mode = 1;
 
-                // Set SDA as output.
-                DDRTWI |= (1<<PORTSDA);
+                // Set SDA for output.
+                DDR_USI |= (1<<DD_SDA);
 
-                // Have the USI send an ACK.
+                // Load data for ACK.
                 USIDR = 0;
 
-                // Update the interrupt enable, wire mode and clock settings.
-                USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                        (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
-                        (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
-                        (0<<USITC);                                 // No toggle of clock pin.
-
-                // Clear the interrupt flags and reset the counter for one bit.
-                USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) |        // Clear interrupt flags.
-                        (0x0E<<USICNT0);                                // USI to sample 1 bit or two edge toggles.
+                // Reload counter for ACK -- two clock transitions.
+                USISR = 0x0E;
             }
             else
             {
-                // Reset USI to detect start condition.  Update the interrupt enable, 
+                // No. Reset USI to detect start condition.  Update the interrupt enable, 
                 // wire mode and clock settings.  Note: At this time the wire mode must
                 // not be set to hold the SCL line low when the counter overflows.  
                 // Otherwise, this TWI slave will interfere with other TWI slaves.
@@ -264,22 +246,75 @@ SIGNAL(SIG_USI_OVERFLOW)
                         (1<<USIWM1) | (0<<USIWM0) |                 // Maintain USI in two-wire mode without clock stretching.
                         (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                         (0<<USITC);                                 // No toggle of clock pin.
-
-                // Clear the interrupt flags and reset the counter.
-                USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) |    // Clear interrupt flags except start condition.
-                        (0x00<<USICNT0);                            // USI to sample 8 bits or 16 edge toggles.
-
             }
+
             break;
 
-        // ----- Master read data mode ------
+        // Ack sent to master so prepare to receive more data.
+        case TWI_OVERFLOW_STATE_ACK_PR_RX:
 
-        // Check reply and goto TWI_SLAVE_SEND_DATA if OK, else reset USI.
-        case TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA:
+            // Update our state.
+            twi_overflow_state = TWI_OVERFLOW_STATE_DATA_RX;
+
+            // Set SDA as input
+            DDR_USI &= ~(1<<DD_SDA);
+
+            break;
+
+        // Data received from master so prepare to send ACK.
+        case TWI_OVERFLOW_STATE_DATA_RX:
+
+            // Update our state.
+            twi_overflow_state = TWI_OVERFLOW_STATE_ACK_PR_RX;
+
+            // Is this an address or command?
+            if (twi_command_mode)
+            {
+                // Are we switching to addressed mode?
+                if (usi_data < TWI_CMD_RESET)
+                {
+                    // Yes. Capture the register address.
+                    twi_address = usi_data;
+
+                    // Switch out of command mode.
+                    twi_command_mode = 0;
+                }
+                else
+                {
+                    // Put the command into the receive buffer to be handled asynchronously.
+                    twi_rxhead = (twi_rxhead + 1) & TWI_RX_BUFFER_MASK;
+                    twi_rxbuf[twi_rxhead] = usi_data;
+                }
+            }
+            else
+            {
+                // Write the data to the addressed register.
+                twi_registers_write(twi_address, usi_data);
+
+                // Increment to the next address.
+                ++twi_address;
+            }
+
+            // Set SDA  output.
+            DDR_USI |= (1<<DD_SDA);
+
+            // Load data for ACK.
+            USIDR = 0;
+
+            // Reload counter for ACK -- two clock transitions.
+            USISR = 0x0E;
+
+            break;
+
+        // ACK received from master.  Reset USI state if NACK received.
+        case TWI_OVERFLOW_STATE_PR_ACK_TX:
 
             // Check the lowest bit for NACK?  If set, the master does not want more data.
-            if (USIDR & 0x01)
+            if (usi_data & 0x01)
             {
+                // Update our state.
+                twi_overflow_state = TWI_OVERFLOW_STATE_NONE;
+
                 // Reset USI to detect start condition. Update the interrupt enable,
                 // wire mode and clock settings. Note: At this time the wire mode must
                 // not be set to hold the SCL line low when the counter overflows.  
@@ -289,137 +324,47 @@ SIGNAL(SIG_USI_OVERFLOW)
                         (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
                         (0<<USITC);                                 // No toggle of clock pin.
 
-                // Clear the interrupt flags and reset the counter.
-                USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) |    // Clear interrupt flags except start condition.
-                        (0x00<<USICNT0);                            // USI to sample 8 bits or 16 edge toggles.
+
+                // Clear the overflow interrupt flag and release the hold on SCL.
+                USISR |= (1<<USIOIF);
 
                 return;
             }
 
-            // From here we just drop straight into TWI_SLAVE_SEND_DATA if the master sent an ACK
-
-        // Copy data from buffer to USIDR and set USI to shift byte. Next TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA
-        case TWI_SLAVE_SEND_DATA:
+        // Handle sending a byte of data.
+        case TWI_OVERFLOW_STATE_ACK_PR_TX:
 
             // Update our state.
-            twi_overflow_state = TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA;
+            twi_overflow_state = TWI_OVERFLOW_STATE_DATA_TX;
 
             // Set SDA as output.
-            DDRTWI |= (1<<PORTSDA);
+            PORT_USI |= (1<<P_SDA);
+            DDR_USI |= (1<<DD_SDA);
 
-            // Read the data from the addressed register.
-            USIDR = twi_registers_read(twi_address);
-
-            // Increment to the next address.
-            ++twi_address;
-
-            // Update the interrupt enable, wire mode and clock settings.
-            USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
-                    (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
-                    (0<<USITC);                                 // No toggle of clock pin.
-
-            // Clear the interrupt flags and reset the counter.
-            USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) |    // Clear interrupt flags except start condition.
-                    (0x00<<USICNT0);                            // USI to sample 8 bits or 16 edge toggles.
+            // Send the data from the addressed register and increment address.
+            USIDR = twi_registers_read(twi_address++);
 
             break;
 
-        // ----- Master write data mode ------
-        // Set USI to sample reply from master. Next TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA
-        case TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA:
+        // Data sent to to master so prepare to receive ack.
+        case TWI_OVERFLOW_STATE_DATA_TX:
 
             // Update our state.
-            twi_overflow_state = TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA;
+            twi_overflow_state = TWI_OVERFLOW_STATE_PR_ACK_TX;
 
-            // Set SDA as input
-            DDRTWI &= ~(1<<PORTSDA);
+            // Set SDA for input.
+            DDR_USI &= ~(1<<DD_SDA);
+            PORT_USI &= ~(1<<P_SDA);
 
-            // Update the interrupt enable, wire mode and clock settings.
-            USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
-                    (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
-                    (0<<USITC);                                 // No toggle of clock pin.
-
-            // Clear the interrupt flags and reset the counter for one bit.
-            USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) |    // Clear interrupt flags except start condition.
-                    (0x0E<<USICNT0);                            // USI to sample 1 bit or two edge toggles.
+            // Reload counter for ACK -- two clock transitions.
+            USISR = 0x0E;
 
             break;
 
-        // Set USI to sample data from master. Next TWI_SLAVE_GET_DATA_AND_SEND_ACK.
-        case TWI_SLAVE_REQUEST_DATA:
-
-            // Update our state.
-            twi_overflow_state = TWI_SLAVE_GET_DATA_AND_SEND_ACK;
-
-            // Set SDA as input
-            DDRTWI &= ~(1<<PORTSDA);
-
-            // Update the interrupt enable, wire mode and clock settings.
-            USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
-                    (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
-                    (0<<USITC);                                 // No toggle of clock pin.
-
-            // Clear the interrupt flags and reset the counter.
-            USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) |    // Clear interrupt flags except start condition.
-                    (0x00<<USICNT0);                            // USI to sample 8 bits or 16 edge toggles.
-
-            break;
-
-        // Copy data from USIDR and send ACK. Next TWI_SLAVE_REQUEST_DATA
-        case TWI_SLAVE_GET_DATA_AND_SEND_ACK:
-
-            // Update our state.
-            twi_overflow_state = TWI_SLAVE_REQUEST_DATA;
-
-            // Is this an address or command?
-            if (twi_command_mode)
-            {
-                // Are we switching to addressed mode?
-                if (USIDR < TWI_CMD_RESET)
-                {
-                    // Yes. Capture the register address.
-                    twi_address = USIDR;
-
-                    // Switch out of command mode.
-                    twi_command_mode = 0;
-                }
-                else
-                {
-                    // Put the command into the receive buffer to be handled asynchronously.
-                    twi_rxhead = (twi_rxhead + 1) & TWI_RX_BUFFER_MASK;
-                    twi_rxbuf[twi_rxhead] = USIDR;
-                }
-            }
-            else
-            {
-                // Write the data to the addressed register.
-                twi_registers_write(twi_address, USIDR);
-
-                // Increment to the next address.
-                ++twi_address;
-            }
-
-            // Set SDA as output.
-            DDRTWI |= (1<<PORTSDA);
-
-            // Have the USI send an ACK.
-            USIDR = 0;
-
-            // Update the interrupt enable, wire mode and clock settings.
-            USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Start Condition and overflow interrupt.
-                    (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
-                    (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
-                    (0<<USITC);                                 // No toggle of clock pin.
-
-            // Clear the interrupt flags and reset the counter for one bit.
-            USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) |        // Clear interrupt flags.
-                    (0x0E<<USICNT0);                                // USI to sample 1 bit or two edge toggles.
-
-            break;
     }
+
+    // Clear the overflow interrupt flag and release the hold on SCL.
+    USISR |= (1<<USIOIF);
 }
 
 
