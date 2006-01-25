@@ -35,6 +35,7 @@
 #define __AVR_ATtiny45__
 
 #include <inttypes.h>
+#include <avr/interrupt.h>
 #include <avr/io.h>
 
 #include "pwm.h"
@@ -137,6 +138,9 @@ void pwm_update(uint16_t position, int16_t pwm)
 void pwm_stop(void)
 // Stop all PWM signals to the motor.
 {
+    // Disable interrupts.
+    cli();
+
     // Set the saved pwm values to zero.
     pwm_cw_save = 0;
     pwm_ccw_save = 0;
@@ -161,6 +165,9 @@ void pwm_stop(void)
     GTCCR = (0<<PWM1B) |                                    // Disable timer 1B PWM.
             (0<<COM1B1) | (0<<COM1B0) |                     // Disconnect timer 1B from outputs.
             (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);            // Unused timer 1 features.
+
+    // Enable interrupts.
+    sei();
 }
 
 
@@ -173,6 +180,9 @@ void pwm_cw(uint8_t pwm_width)
         // Are we changing the pwm?
         if (pwm_width != pwm_cw_save)
         {
+            // Disable interrupts.
+            cli();
+
             // Store the new pwm.
             pwm_cw_save = pwm_width;
             pwm_ccw_save = 0;
@@ -200,6 +210,9 @@ void pwm_cw(uint8_t pwm_width)
             GTCCR = (1<<PWM1B) |                                    // Enable timer 1B PWM.
                     (1<<COM1B1) | (0<<COM1B0) |                     // OC1B cleared on compare match. Set on TCNT1=$01.
                     (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);            // Unused timer 1 features.
+
+            // Enable interrupts.
+            sei();
         }
 
         // Update the pwm values.
@@ -223,6 +236,9 @@ void pwm_ccw(uint8_t pwm_width)
         // Are we changing the pwm?
         if (pwm_width != pwm_ccw_save)
         {
+            // Disable interrupts.
+            cli();
+
             // Store the new pwm.
             pwm_cw_save = 0;
             pwm_ccw_save = pwm_width;
@@ -250,6 +266,9 @@ void pwm_ccw(uint8_t pwm_width)
                     (1<<PWM1A) |                                    // Enable timer 1A PWM.
                     (1<<COM1A1) | (0<<COM1A0) |                     // OC1A cleared on compare match. Set on TCNT1=$01.
                     (0<<CS13) | (0<<CS12) | (1<<CS11) | (0<<CS10);  // Prescale divide by 2.
+
+            // Enable interrupts.
+            sei();
         }
 
         // Update the pwm values.
