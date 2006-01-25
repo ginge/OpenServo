@@ -149,7 +149,7 @@ twi_slave_init(uint8_t slave_address)
 
     // Configure SDA.
     DDR_USI &= ~(1<<DD_SDA);
-    PORT_USI |= (1<<P_SDA);
+    PORT_USI &= ~(1<<P_SDA);
 
     // Configure SCL.
     DDR_USI |= (1<<DD_SCL);
@@ -230,6 +230,7 @@ SIGNAL(SIG_USI_OVERFLOW)
                 twi_command_mode = 1;
 
                 // Set SDA for output.
+                PORT_USI |= (1<<P_SDA);
                 DDR_USI |= (1<<DD_SDA);
 
                 // Load data for ACK.
@@ -260,6 +261,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 
             // Set SDA for input
             DDR_USI &= ~(1<<DD_SDA);
+            PORT_USI &= ~(1<<P_SDA);
 
             break;
 
@@ -298,6 +300,7 @@ SIGNAL(SIG_USI_OVERFLOW)
             }
 
             // Set SDA for output.
+            PORT_USI |= (1<<P_SDA);
             DDR_USI |= (1<<DD_SDA);
 
             // Load data for ACK.
@@ -340,6 +343,7 @@ SIGNAL(SIG_USI_OVERFLOW)
             twi_overflow_state = TWI_OVERFLOW_STATE_DATA_TX;
 
             // Set SDA for output.
+            PORT_USI |= (1<<P_SDA);
             DDR_USI |= (1<<DD_SDA);
 
             // Send the data from the addressed register and increment address.
@@ -354,7 +358,8 @@ SIGNAL(SIG_USI_OVERFLOW)
             twi_overflow_state = TWI_OVERFLOW_STATE_PR_ACK_TX;
 
             // Set SDA for input.
-            DDR_USI &= ~(1<<DD_SDA);
+           DDR_USI &= ~(1<<DD_SDA);
+           PORT_USI &= ~(1<<P_SDA);
 
             // Reload counter for ACK -- two clock transitions.
             USISR = 0x0E;
