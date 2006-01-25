@@ -149,7 +149,7 @@ twi_slave_init(uint8_t slave_address)
 
     // Configure SDA.
     DDR_USI &= ~(1<<DD_SDA);
-    PORT_USI &= ~(1<<P_SDA);
+    PORT_USI |= (1<<P_SDA);
 
     // Configure SCL.
     DDR_USI |= (1<<DD_SCL);
@@ -183,8 +183,8 @@ uint8_t twi_data_in_receive_buffer(void)
 
 
 SIGNAL(SIG_USI_START)
-// Detects the USI_TWI Start Condition and intialises the USI
-// for reception of the "TWI Address" packet.
+// Handle the TWI start condition.  This is called when the TWI master initiates
+// communication with a TWI slave by asserting the TWI start condition.
 {
     // Wait until the "Start Condition" is complete when SCL goes low. If we fail to wait
     // for SCL to go low we may miscount the number of clocks pulses for the data because
@@ -207,7 +207,9 @@ SIGNAL(SIG_USI_START)
 
 
 SIGNAL(SIG_USI_OVERFLOW)
-// Handles all the comunication. Disabled only when waiting for new Start Condition.
+// Handle the TWI overflow condition.  This is called when the TWI 4-bit counter
+// overflows indicating the TWI master has clocked in/out a databyte or a single
+// ack/nack byte following a databyte transfer.
 {
     // Buffer the USI data.
     uint8_t usi_data = USIDR;
@@ -256,7 +258,7 @@ SIGNAL(SIG_USI_OVERFLOW)
             // Update our state.
             twi_overflow_state = TWI_OVERFLOW_STATE_DATA_RX;
 
-            // Set SDA as input
+            // Set SDA for input
             DDR_USI &= ~(1<<DD_SDA);
 
             break;
@@ -295,7 +297,7 @@ SIGNAL(SIG_USI_OVERFLOW)
                 ++twi_address;
             }
 
-            // Set SDA  output.
+            // Set SDA for output.
             DDR_USI |= (1<<DD_SDA);
 
             // Load data for ACK.
@@ -337,8 +339,7 @@ SIGNAL(SIG_USI_OVERFLOW)
             // Update our state.
             twi_overflow_state = TWI_OVERFLOW_STATE_DATA_TX;
 
-            // Set SDA as output.
-            PORT_USI |= (1<<P_SDA);
+            // Set SDA for output.
             DDR_USI |= (1<<DD_SDA);
 
             // Send the data from the addressed register and increment address.
@@ -354,7 +355,6 @@ SIGNAL(SIG_USI_OVERFLOW)
 
             // Set SDA for input.
             DDR_USI &= ~(1<<DD_SDA);
-            PORT_USI &= ~(1<<P_SDA);
 
             // Reload counter for ACK -- two clock transitions.
             USISR = 0x0E;
