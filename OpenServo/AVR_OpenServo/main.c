@@ -209,7 +209,7 @@ int main (void)
             handle_twi_command();
         }
 
-#if 1
+#if 0
         // XXX This code is in place for having the servo drive itself between 
         // XXX two positions to aid in the servo tuning process.  This code 
         // XXX should normally be commented out.
