@@ -58,7 +58,7 @@ static void pwm_cw(uint8_t pwm_width)
     if (pwm_width != pwm_cw_save)
     {
         // Disable interrupts.
-        uint8_t sreg = disable_interrupts();
+        cli();
 
         // Store the new pwm.
         pwm_cw_save = pwm_width;
@@ -89,7 +89,7 @@ static void pwm_cw(uint8_t pwm_width)
                 (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);            // Unused timer 1 features.
 
         // Restore interrupts.
-        restore_interrupts(sreg);
+        sei();
     }
 }
 
@@ -102,7 +102,7 @@ static void pwm_ccw(uint8_t pwm_width)
     if (pwm_width != pwm_ccw_save)
     {
         // Disable interrupts.
-        uint8_t sreg = disable_interrupts();
+        cli();
 
         // Store the new pwm.
         pwm_cw_save = 0;
@@ -133,7 +133,7 @@ static void pwm_ccw(uint8_t pwm_width)
                 (0<<CS13) | (0<<CS12) | (1<<CS11) | (0<<CS10);  // Prescale divide by 2.
 
         // Restore interrupts.
-        restore_interrupts(sreg);
+        sei();
     }
 }
 
@@ -234,7 +234,7 @@ void pwm_stop(void)
 // Stop all PWM signals to the motor.
 {
     // Disable interrupts.
-    uint8_t sreg = disable_interrupts();
+    cli();
 
     // Set PB4/OC1B and PB1/OC1A to low.
     PORTB &= ~((1<<PB4) | (1<<PB1));
@@ -262,7 +262,7 @@ void pwm_stop(void)
     registers_write_byte(REG_PWM_CW, pwm_ccw_save);
 
     // Restore interrupts.
-    restore_interrupts(sreg);
+    sei();
 }
 
 
