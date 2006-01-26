@@ -38,9 +38,6 @@
 void pwm_init(void);
 void pwm_update(uint16_t position, int16_t pwm);
 void pwm_stop(void);
-void pwm_cw(uint8_t pwm_width);
-void pwm_ccw(uint8_t pwm_width);
-
 
 inline static void pwm_enable(void)
 {
@@ -62,25 +59,5 @@ inline static void pwm_disable(void)
     pwm_stop();
 }
 
-
-inline static void pwm_output(int16_t pwm)
-{
-    // Determine direction or stop.
-    if (pwm < 0)
-    {
-        // Turn clockwise.
-        pwm_cw(-pwm);
-    }
-    else if (pwm > 0)
-    {
-        // Turn counter-clockwise.
-        pwm_ccw(pwm);
-    }
-    else
-    {
-        // Stop the motor.
-        pwm_stop();
-    }
-}
 
 #endif // _OS_PWM_H_

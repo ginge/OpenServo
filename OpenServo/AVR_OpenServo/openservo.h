@@ -44,4 +44,33 @@
 #define SOFTWARE_VERSION_MAJOR          0
 #define SOFTWARE_VERSION_MINOR          1
 
+//
+// Utility functions.
+//
+
+// Disable interrupts and returns SREG value used to restore interrupts.
+inline static uint8_t disable_interrupts(void)
+{
+    uint8_t sreg;
+
+    asm volatile (
+        "in %0,__SREG__\n\t"
+        "cli\n\t"
+        : "=r" ((uint8_t) sreg)
+        :
+    );
+
+    return sreg;
+}
+
+// Restore interrupts Enables interrupts according to the SREG.
+inline static void restore_interrupts(uint8_t sreg)
+{
+    asm volatile (
+        "out __SREG__,%0\n\t"
+        :
+        : "r" ((uint8_t) sreg)
+    );
+}
+
 #endif // _OS_OPENSERVO_H_
