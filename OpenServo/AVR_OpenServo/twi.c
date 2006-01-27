@@ -54,7 +54,17 @@
         #error TWI RX buffer size is not a power of 2
 #endif
 
+#define TWI_CHK_WRITE_BUFFER_SIZE (16)
+#define TWI_CHK_WRITE_BUFFER_MASK (TWI_CHK_WRITE_BUFFER_SIZE - 1)
+
+#if (TWI_CHK_WRITE_BUFFER_SIZE & TWI_CHK_WRITE_BUFFER_MASK)
+        #error TWI CHK WRITE buffer size is not a power of 2
+#endif
 //////////////////////////////////////////////////////////////////
+
+// I2C Acknowledgment values
+#define TWI_ACK                             (0x00)
+#define TWI_NAK                             (0x01)
 
 #define TWI_OVERFLOW_STATE_NONE             (0x00)
 #define TWI_OVERFLOW_STATE_ACK_PR_RX        (0x01)
@@ -122,6 +132,19 @@ static volatile uint8_t twi_address;
 static uint8_t twi_rxbuf[TWI_RX_BUFFER_SIZE];
 static volatile uint8_t twi_rxhead;
 static volatile uint8_t twi_rxtail;
+
+
+// locals used for checked read/write
+
+#define TWI_CHK_STATE_NONE         (0x00)  // Not executing a checked transaction
+#define TWI_CHK_STATE_LOAD_COUNT   (0x01)  // Waiting for the count byte
+#define TWI_CHK_STATE_COUNTING     (0x02)  // Accumulating checksum
+
+static uint8_t twi_chk_state;
+static uint8_t twi_chk_write_buffer[TWI_CHK_WRITE_BUFFER_SIZE];
+static uint8_t twi_chk_count;            // current byte in transaction
+static uint8_t twi_chk_count_target;     // How many bytes are we reading/writing
+static uint8_t twi_chk_sum;              // Accumulator for checksum
 
 void
 twi_slave_init(uint8_t slave_address)
@@ -213,6 +236,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 {
     // Buffer the USI data.
     uint8_t usi_data = USIDR;
+	uint8_t ack = 0;
 
     // Handle the interrupt based on the overflow state.
     switch (twi_overflow_state)
@@ -234,7 +258,7 @@ SIGNAL(SIG_USI_OVERFLOW)
                 DDR_USI |= (1<<DD_SDA);
 
                 // Load data for ACK.
-                USIDR = 0;
+                USIDR = TWI_ACK;
 
                 // Reload counter for ACK -- two clock transitions.
                 USISR = 0x0E;
@@ -277,12 +301,33 @@ SIGNAL(SIG_USI_OVERFLOW)
                 // Are we switching to addressed mode?
                 if (usi_data < TWI_CMD_RESET)
                 {
-                    // Yes. Capture the register address.
-                    twi_address = usi_data;
+                    // Is this a count for a checked read/write instead of an address?
+                    if (twi_chk_state == TWI_CHK_STATE_LOAD_COUNT)
+                    {
+						// Read in the Count ( Make sure it's less than the max count)
+                        twi_chk_count_target = usi_data & TWI_CHK_WRITE_BUFFER_MASK;
 
-                    // Switch out of command mode.
-                    twi_command_mode = 0;
+                         // Clear the current index
+                        twi_chk_count = 0;
+
+                        // Clear the running checksum accumulator
+                        twi_chk_sum = 0;
+
+                        twi_chk_state = TWI_CHK_STATE_COUNTING;
+                    }
+                    else
+                    {
+                        // Yes. Capture the register address.
+                        twi_address = usi_data;
+
+                        // Switch out of command mode.
+                        twi_command_mode = 0;
+                    }
                 }
+                else if (usi_data == TWI_CMD_CHECKED_TXN)
+					// If we are doing a checked transaction, prepare to 
+					// receive the byte count
+                    twi_chk_state = TWI_CHK_STATE_LOAD_COUNT;
                 else
                 {
                     // Put the command into the receive buffer to be handled asynchronously.
@@ -292,19 +337,56 @@ SIGNAL(SIG_USI_OVERFLOW)
             }
             else
             {
-                // Write the data to the addressed register.
-                twi_registers_write(twi_address, usi_data);
+	            // Are we doing a checked write?
+				if (twi_chk_state == TWI_CHK_STATE_COUNTING)
+				{
+                    // Have we reached the end of the write?
+                    if (twi_chk_count < twi_chk_count_target)
+                    {
+		                // Write the data to the checksum buffer
+		                twi_chk_write_buffer[twi_chk_count & TWI_CHK_WRITE_BUFFER_MASK] = usi_data;
 
-                // Increment to the next address.
-                ++twi_address;
+						// Calculate the checksum
+			            twi_chk_sum += usi_data;
+					}
+					else
+					{
+						// This checked write transaction is finished
+						twi_chk_state = TWI_CHK_STATE_NONE;
+
+						// Verify the checksum
+						if (usi_data == twi_chk_sum)
+							for (twi_chk_count=0; twi_chk_count<twi_chk_count_target; twi_chk_count++)
+							{
+				                // Write the data to the addressed register.
+				                twi_registers_write(twi_address, twi_chk_write_buffer[twi_chk_count & TWI_CHK_WRITE_BUFFER_MASK]);
+
+				                // Increment to the next address.
+				                ++twi_address;
+							}
+						else
+							// Checksum did not match.  Don't save the values.  NAK!
+							ack = TWI_NAK;
+					}
+					// Increment the checked byte index
+					twi_chk_count++;
+				}
+				else
+				{
+	                // Write the data to the addressed register.
+	                twi_registers_write(twi_address, usi_data);
+
+	                // Increment to the next address.
+	                ++twi_address;
+				}
             }
 
             // Set SDA for output.
             PORT_USI |= (1<<P_SDA);
             DDR_USI |= (1<<DD_SDA);
 
-            // Load data for ACK.
-            USIDR = 0;
+            // Load data for ack/nak.
+            USIDR = ack;
 
             // Reload counter for ACK -- two clock transitions.
             USISR = 0x0E;
@@ -319,6 +401,7 @@ SIGNAL(SIG_USI_OVERFLOW)
             {
                 // Update our state.
                 twi_overflow_state = TWI_OVERFLOW_STATE_NONE;
+				twi_chk_state = TWI_CHK_STATE_NONE;
 
                 // Reset USI to detect start condition. Update the interrupt enable,
                 // wire mode and clock settings. Note: At this time the wire mode must
@@ -346,8 +429,20 @@ SIGNAL(SIG_USI_OVERFLOW)
             PORT_USI |= (1<<P_SDA);
             DDR_USI |= (1<<DD_SDA);
 
-            // Send the data from the addressed register and increment address.
-            USIDR = twi_registers_read(twi_address++);
+            // Are we doing a checked read?
+			if (twi_chk_state == TWI_CHK_STATE_COUNTING)
+			{
+                // Have we reached the end of the read?
+                if (twi_chk_count++ < twi_chk_count_target)
+                    // Send the data from the addressed register and increment address.
+                    twi_chk_sum += USIDR = twi_registers_read(twi_address++);
+                else
+                    // Send the checksum
+                    USIDR = twi_chk_sum;
+            }
+            else
+                // Send the data from the addressed register and increment address.
+                USIDR = twi_registers_read(twi_address++);
 
             break;
 
