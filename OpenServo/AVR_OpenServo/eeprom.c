@@ -45,12 +45,12 @@ uint8_t eeprom_is_erased(void)
 // and register values should not be restored from the EEPROM.
 {
     // Validate certain register values that should not be 0xFF.
-    if (eeprom_read_byte ((void *) (REG_TWI_ADDRESS - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_PID_PGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_PID_DGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_PID_IGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_MIN_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_MAX_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_TWI_ADDRESS - MIN_WP_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_PID_PGAIN_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_PID_DGAIN_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_PID_IGAIN_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_MIN_SEEK_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_MAX_SEEK_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
 
     // Doesn't appear to be erased.
     return 0;

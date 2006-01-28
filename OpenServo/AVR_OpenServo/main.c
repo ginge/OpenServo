@@ -128,12 +128,6 @@ void handle_twi_command(void)
 
 int main (void)
 {
-    asm volatile(".set __stack,0x15F" : : );
-
-    int16_t pwm;
-    int16_t position;
-    uint16_t power;
-
     // Initialize the watchdog module.
     watchdog_init();
 
@@ -182,10 +176,10 @@ int main (void)
         if (adc_position_value_is_ready())
         {
             // Get the new position value.
-            position = (int16_t) adc_get_position_value();
+            int16_t position = (int16_t) adc_get_position_value();
 
             // Call the motion module to get a new PWM value.
-            pwm = motion_position_to_pwm(position);
+            int16_t pwm = motion_position_to_pwm(position);
 
             // Update the servo movement as indicated by the PWM value.
             // Sanity checks are performed against the position value.
@@ -196,7 +190,7 @@ int main (void)
         if (adc_power_value_is_ready())
         {
             // Get the new power value.
-            power = adc_get_power_value();
+            uint16_t power = adc_get_power_value();
 
             // Update the power value for reporting.
             power_update(power);

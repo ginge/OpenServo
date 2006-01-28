@@ -273,9 +273,9 @@ int16_t motion_position_to_pwm(int16_t current_position)
     // by the current velocity of the servo to create the velocity output.
     velocity_output = fixed_multiply(current_velocity, velocity_gain);
 
-    registers_write_word(REG_RESERVED_38, REG_RESERVED_39, (uint16_t) position_output);
-    registers_write_word(REG_RESERVED_3A, REG_RESERVED_3B, (uint16_t) velocity_output);
-    registers_write_word(REG_RESERVED_3C, REG_RESERVED_3D, (uint16_t) integral_output);
+    // registers_write_word(REG_RESERVED_18, REG_RESERVED_19, (uint16_t) position_output);
+    // registers_write_word(REG_RESERVED_1A, REG_RESERVED_1B, (uint16_t) velocity_output);
+    // registers_write_word(REG_RESERVED_1C, REG_RESERVED_1D, (uint16_t) integral_output);
 
     // The integral output drives the output and the position and velocity outputs
     // function as a frictional component to counter the integral output.
