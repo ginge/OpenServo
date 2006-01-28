@@ -34,6 +34,7 @@
 #define _OS_TWI_H_ 1
 
 #define TWI_CMD_RESET               0x80        // Reset command
+#define TWI_CMD_CHECKED_TXN         0x81        // Read/Write registers with simple checksum
 #define TWI_CMD_PWM_ENABLE          0x82        // Enable PWM to motors
 #define TWI_CMD_PWM_DISABLE         0x83        // Disable PWM to servo motors
 #define TWI_CMD_WRITE_ENABLE        0x84        // Enable write of safe read/write registers
@@ -41,7 +42,6 @@
 #define TWI_CMD_REGISTERS_SAVE      0x86        // Save safe read/write registers fo EEPROM
 #define TWI_CMD_REGISTERS_RESTORE   0x87        // Restore safe read/write registers from EEPROM
 #define TWI_CMD_REGISTERS_DEFAULT   0x88        // Restore safe read/write registers to defaults
-#define TWI_CMD_CHECKED_TXN         0x89        // Read/Write registers with simple checksum
 
 void twi_slave_init(uint8_t);
 void twi_transmit_byte(uint8_t);
