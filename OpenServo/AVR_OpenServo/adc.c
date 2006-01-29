@@ -141,16 +141,8 @@ SIGNAL(SIG_OUTPUT_COMPARE0A)
 SIGNAL(SIG_ADC)
 // Handles ADC interrupt.
 {
-    uint16_t new_value;
-
-    // Read the 10-bit ADC values by reading ADCH first and then ADCL.
-    new_value = ADCL;
-    new_value |= (ADCH << 8);
-
-    // Make sure the value is never larger than 0x3ff.  This should never
-    // happen, but better save than sorry because many other modules
-    // assume this value is between 0x000 and 0x3ff.
-    new_value &= 0x3ff;
+    // Read the 10-bit ADC value.
+    uint16_t new_value = ADCW;
 
     // Is the position or power channel being read?
     if (adc_channel == ADC_CHANNEL_POSITION)
