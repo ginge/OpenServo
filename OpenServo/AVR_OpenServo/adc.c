@@ -133,8 +133,8 @@ void adc_init(void)
 SIGNAL(SIG_OUTPUT_COMPARE0A)
 // Handles timer/counter 0 compare match A.
 {
-    // Increment the timer.
-    timer_increment();
+    // Increment the timer when positions are being sampled.
+    if (adc_channel == ADC_CHANNEL_POSITION) timer_increment();
 }
 
 
