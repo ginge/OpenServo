@@ -261,11 +261,12 @@ static uint8_t twi_write_data(uint8_t usi_data)
 #if TWI_CHECKED_ENABLED
         case TWI_DATA_STATE_CHECKED_COUNTING:
 
-            // Read in the count (Make sure it's less than the max count).
-            twi_chk_count_target = usi_data & TWI_CHK_WRITE_BUFFER_MASK;
+            // Read in the count (Make sure it's less than the max count) 
+			// and start the checksum
+            twi_chk_sum = twi_chk_count_target = usi_data & TWI_CHK_WRITE_BUFFER_MASK;
 
             // Clear the checksum and count.
-            twi_chk_sum = twi_chk_count = 0;
+            twi_chk_count = 0;
 
             // Update the write state.
             twi_data_state = TWI_DATA_STATE_CHECKED_ADDRESS;
@@ -274,8 +275,8 @@ static uint8_t twi_write_data(uint8_t usi_data)
 
         case TWI_DATA_STATE_CHECKED_ADDRESS:
 
-            // Capture the address.
-            twi_address = usi_data;
+            // Capture the address and include it in the checksum
+            twi_chk_sum += twi_address = usi_data;
 
             // Update the write state.
             twi_data_state = TWI_DATA_STATE_CHECKED_DATA;
