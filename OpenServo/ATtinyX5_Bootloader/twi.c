@@ -104,7 +104,7 @@ BOOTLOADER_SECTION void twi_init(void)
 
     // Configure SDA.
     DDR_USI &= ~(1<<DD_SDA);
-    PORT_USI |= (1<<P_SDA);
+    PORT_USI &= ~(1<<P_SDA);
 
     // Configure SCL.
     DDR_USI |= (1<<DD_SCL);
@@ -233,6 +233,7 @@ BOOTLOADER_SECTION void twi_handle_overflow_condition(void)
                 twi_write_state = TWI_WRITE_ADDR_HI_BYTE;
 
                 // Set SDA for output.
+                PORT_USI |= (1<<P_SDA);
                 DDR_USI |= (1<<DD_SDA);
 
                 // Load data for ACK.
@@ -263,6 +264,7 @@ BOOTLOADER_SECTION void twi_handle_overflow_condition(void)
 
             // Set SDA for input
             DDR_USI &= ~(1<<DD_SDA);
+            PORT_USI &= ~(1<<P_SDA);
 
             break;
 
@@ -299,6 +301,7 @@ BOOTLOADER_SECTION void twi_handle_overflow_condition(void)
             }
 
             // Set SDA for output.
+            PORT_USI |= (1<<P_SDA);
             DDR_USI |= (1<<DD_SDA);
 
             // Load data for ACK.
@@ -341,6 +344,7 @@ BOOTLOADER_SECTION void twi_handle_overflow_condition(void)
             twi_overflow_state = TWI_OVERFLOW_STATE_DATA_TX;
 
             // Set SDA for output.
+            PORT_USI |= (1<<P_SDA);
             DDR_USI |= (1<<DD_SDA);
 
             // Get the data to send.
@@ -356,6 +360,7 @@ BOOTLOADER_SECTION void twi_handle_overflow_condition(void)
 
             // Set SDA for input.
             DDR_USI &= ~(1<<DD_SDA);
+            PORT_USI &= ~(1<<P_SDA);
 
             // Reload counter for ACK -- two clock transitions.
             USISR = 0x0E;
