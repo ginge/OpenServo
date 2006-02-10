@@ -33,6 +33,7 @@
 #include <avr/interrupt.h>
 #include <avr/signal.h>
 
+#include "config.h"
 #include "adc.h"
 #include "timer.h"
 

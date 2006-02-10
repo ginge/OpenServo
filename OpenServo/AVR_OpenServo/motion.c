@@ -28,16 +28,14 @@
 #undef __AVR_ATtiny2313__
 #define __AVR_ATtiny45__
 
-// I'm currently working with different algorithms -- PID and IPD.  The
-// defines below control which set of algorithms are included in the build.
-#define USE_IPD
-// #define USE_PID
-
-#ifdef USE_IPD
-
 #include <inttypes.h>
+
+#include "config.h"
 #include "motion.h"
 #include "registers.h"
+
+// Compile following for IPD motion control algorithm.
+#if MOTION_IPD_ENABLED
 
 // The minimum and maximum servo position.
 #define MIN_POSITION            (0)
@@ -300,14 +298,10 @@ int16_t motion_position_to_pwm(int16_t current_position)
     return output;
 }
 
-#endif // USE_IPD
+#endif // MOTION_IPD_ENABLED
 
-
-#ifdef USE_PID
-
-#include <inttypes.h>
-#include "motion.h"
-#include "registers.h"
+// Compile following for PID motion control algorithm.
+#if MOTION_PID_ENABLED
 
 // The minimum and maximum positions are defined by 10-bit ADC values.
 #define MIN_POSITION        (0)
@@ -524,4 +518,4 @@ int16_t motion_position_to_pwm(int16_t current_position)
     return output;
 }
 
-#endif // USE_PID
+#endif // MOTION_PID_ENABLED

@@ -32,6 +32,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
+#include "config.h"
 #include "adc.h"
 #include "eeprom.h"
 #include "motion.h"
@@ -197,10 +198,10 @@ int main (void)
             handle_twi_command();
         }
 
-#if 0
-        // XXX This code is in place for having the servo drive itself between 
-        // XXX two positions to aid in the servo tuning process.  This code 
-        // XXX should normally be commented out.
+#if MAIN_MOTION_TEST_ENABLED
+        // This code is in place for having the servo drive itself between 
+        // two positions to aid in the servo tuning process.  This code 
+        // should normally be disabled.
         {
             // Get the timer.  This timer is defined by the position/power sample
             // frequency and has a cycle time of approximately 512 microseconds.

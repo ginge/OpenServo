@@ -30,6 +30,7 @@
 
 #include <inttypes.h>
 
+#include "config.h"
 #include "timer.h"
 
 // Implementation contained within in-line functions in header file.

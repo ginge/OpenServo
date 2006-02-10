@@ -34,6 +34,7 @@
 
 #include <inttypes.h>
 
+#include "config.h"
 #include "power.h"
 #include "registers.h"
 

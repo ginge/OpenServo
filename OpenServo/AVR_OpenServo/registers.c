@@ -30,6 +30,7 @@
 
 #include <inttypes.h>
 
+#include "config.h"
 #include "eeprom.h"
 #include "motion.h"
 #include "openservo.h"

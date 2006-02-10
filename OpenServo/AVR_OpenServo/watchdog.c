@@ -35,6 +35,7 @@
 #include <inttypes.h>
 #include <avr/io.h>
 
+#include "config.h"
 #include "pwm.h"
 
 void watchdog_init(void)

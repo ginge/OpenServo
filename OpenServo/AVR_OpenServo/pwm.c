@@ -32,6 +32,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
+#include "config.h"
 #include "pwm.h"
 #include "registers.h"
 #include "openservo.h"

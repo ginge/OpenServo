@@ -33,11 +33,9 @@
 #include <avr/interrupt.h>
 #include <avr/signal.h>
 
-#include "twi.h"
+#include "config.h"
 #include "registers.h"
-
-// Set define to 1 to enable checksum handling, 0 to disable checksum handling.
-#define TWI_CHECKED_ENABLED                 1
+#include "twi.h"
 
 //////////////////////////////////////////////////////////////////
 ///////////////// Driver Buffer Definitions //////////////////////
