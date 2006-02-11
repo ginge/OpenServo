@@ -35,6 +35,7 @@
 #include "config.h"
 #include "adc.h"
 #include "eeprom.h"
+#include "estimator.h"
 #include "motion.h"
 #include "power.h"
 #include "pwm.h"
@@ -138,6 +139,11 @@ int main (void)
     // Initialize the motion module.
     motion_init();
 
+#if ESTIMATOR_ENABLED
+    // Initialize the state estimator module.
+    estimator_init();
+#endif
+
     // Initialize the power module.
     power_init();
 
@@ -172,6 +178,11 @@ int main (void)
         {
             // Get the new position value.
             int16_t position = (int16_t) adc_get_position_value();
+
+#if ESTIMATOR_ENABLED
+            // Estimate velocity.
+            estimate_velocity(position);
+#endif
 
             // Call the motion module to get a new PWM value.
             int16_t pwm = motion_position_to_pwm(position);

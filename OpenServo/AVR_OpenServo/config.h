@@ -43,15 +43,37 @@
 // of Flash code space when enabled.
 #define TWI_CHECKED_ENABLED         1
 
+// Enable (1) or disable (0) the Luenberg state estimator 
+// algorithm for determining servo speed.  It is a realtime 
+// simulation of the servo behavior with a internal controller 
+// which keeps track of the difference between the simulated 
+// position and the measured one.  This must be enabled when
+// the MOTION_REGULATOR_ENABLED flag is enabled.  
+//
+// NOTE: The estimator code is still under development.  Please
+// contact Stefan Engelke for more information regarding how
+// this code should be used.
+#define ESTIMATOR_ENABLED           0
+
 // Enable (1) or disable (0) the PID algorithm for motion 
 // control in the motion.c module.  This setting cannot be
-// set when the MOTION_IPD_ENABLED setting is enabled.
+// set when the other MOTION_XXX_ENABLED flags are set.
 #define MOTION_PID_ENABLED          0
 
 // Enable (1) or disable (0) the IPD algorithm for motion 
 // control in the motion.c module.  This setting cannot be
-// set when the MOTION_PID_ENABLED setting is enabled.
+// set when the other MOTION_XXX_ENABLED flags are set.
 #define MOTION_IPD_ENABLED          1
+
+// Enable (1) or disable (0) the state regulator algorithm
+// for motion control in the motion.c module.  This setting
+// cannot be set when the other MOTION_XXX_ENABLED flags are
+// set.
+//
+// NOTE: The state regulator code is still under development.  
+// Please contact Stefan Engelke for more information regarding
+// how this code should be used.
+#define MOTION_REGULATOR_ENABLED    0
 
 // Enable (1) or disable (0) some test motion code within the
 // main.c module.  This test code can be enabled to test basic
@@ -60,8 +82,17 @@
 #define MAIN_MOTION_TEST_ENABLED    0
 
 // Perform some sanity check of settings here.
-#if MOTION_PID_ENABLED && MOTION_IPD_ENABLED
-#  error "Conflicting settings for MOTION_PID_ENABLED and MOTION_IPD_ENABLED."
+#if MOTION_PID_ENABLED && (MOTION_IPD_ENABLED || MOTION_REGULATOR_ENABLED)
+#  error "Conflicting configuration settings for MOTION_PID_ENABLED."
+#endif
+#if MOTION_IPD_ENABLED && (MOTION_PID_ENABLED || MOTION_REGULATOR_ENABLED)
+#  error "Conflicting configuration settings for MOTION_IPD_ENABLED"
+#endif
+#if MOTION_REGULATOR_ENABLED && (MOTION_PID_ENABLED || MOTION_IPD_ENABLED)
+#  error "Conflicting configuration settings for MOTION_REGULATOR_ENABLED"
+#endif
+#if MOTION_REGULATOR_ENABLED && !ESTIMATOR_ENABLED
+#  error "Configuration settings for MOTION_REGULATOR_ENABLED requires ESTIMATOR_ENABLED"
 #endif
 
 #endif // _OS_ADC_H_

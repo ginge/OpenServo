@@ -32,6 +32,7 @@
 
 #include "config.h"
 #include "eeprom.h"
+#include "estimator.h"
 #include "motion.h"
 #include "openservo.h"
 #include "registers.h"
@@ -76,6 +77,13 @@ void registers_defaults(void)
 
     // Default TWI address.
     registers_write_byte(REG_TWI_ADDRESS, 0x10);
+
+#if ESTIMATOR_ENABLED
+    // Call the motion module to initialize the velocity estimator related 
+    // default values. This is done so the estimator related parameters can
+    // be kept in a single file.
+    estimator_registers_defaults();
+#endif
 
     // Call the motion module to initialize the motion related default values.
     // This is done so the motion related parameters can be kept in a single file.

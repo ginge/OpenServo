@@ -95,6 +95,32 @@
 #define REG_RESERVED_2E             0x2E
 #define REG_RESERVED_2F             0x2F
 
+// Set additional safe read/write registers for
+// the state estimator algorithm.
+#ifdef ESTIMATOR_ENABLED
+
+#define REG_RESERVED_30             0x30
+#define REG_RESERVED_31             0x31
+#define REG_RESERVED_32             0x32
+#define REG_RESERVED_33             0x33
+#define REG_RESERVED_34             0x34
+#define REG_RESERVED_35             0x35
+#define REG_RESERVED_36             0x36
+#define REG_RESERVED_37             0x37
+
+//
+// Define the register ranges.
+//
+#define MIN_RO_REGISTER             0x00
+#define MAX_RO_REGISTER             0x0F
+#define MIN_RW_REGISTER             0x10
+#define MAX_RW_REGISTER             0x1F
+#define MIN_WP_REGISTER             0x20
+#define MAX_WP_REGISTER             0x37
+#define MAX_REGISTER                MAX_WP_REGISTER
+
+#else // ESTIMATOR_ENABLED
+
 //
 // Define the register ranges.
 //
@@ -105,6 +131,8 @@
 #define MIN_WP_REGISTER             0x20
 #define MAX_WP_REGISTER             0x2F
 #define MAX_REGISTER                MAX_WP_REGISTER
+
+#endif // ESTIMATOR_ENABLED
 
 //
 // Define the flag register REG_FLAGS_HI and REG_FLAGS_LO bits.
