@@ -36,7 +36,9 @@
 #include "adc.h"
 #include "eeprom.h"
 #include "estimator.h"
-#include "motion.h"
+#include "ipd.h"
+#include "pid.h"
+#include "regulator.h"
 #include "power.h"
 #include "pwm.h"
 #include "timer.h"
@@ -136,12 +138,24 @@ int main (void)
     // Initialize the ADC module.
     adc_init();
 
-    // Initialize the motion module.
-    motion_init();
-
 #if ESTIMATOR_ENABLED
     // Initialize the state estimator module.
     estimator_init();
+#endif
+
+#if PID_MOTION_ENABLED
+    // Initialize the PID algorithm module.
+    pid_init();
+#endif
+
+#if IPD_MOTION_ENABLED
+    // Initialize the IPD algorithm module.
+    ipd_init();
+#endif
+
+#if REGULATOR_MOTION_ENABLED
+    // Initialize the regulator algorithm module.
+    regulator_init();
 #endif
 
     // Initialize the power module.
@@ -176,16 +190,31 @@ int main (void)
         // Is position value ready?
         if (adc_position_value_is_ready())
         {
+            int16_t pwm;
+            int16_t position;
+
             // Get the new position value.
-            int16_t position = (int16_t) adc_get_position_value();
+            position = (int16_t) adc_get_position_value();
 
 #if ESTIMATOR_ENABLED
             // Estimate velocity.
             estimate_velocity(position);
 #endif
 
-            // Call the motion module to get a new PWM value.
-            int16_t pwm = motion_position_to_pwm(position);
+#if PID_MOTION_ENABLED
+            // Call the PID algorithm module to get a new PWM value.
+            pwm = pid_position_to_pwm(position);
+#endif
+
+#if IPD_MOTION_ENABLED
+            // Call the IPD algorithm module to get a new PWM value.
+            pwm = ipd_position_to_pwm(position);
+#endif
+
+#if REGULATOR_MOTION_ENABLED
+            // Call the state regulator algorithm module to get a new PWM value.
+            pwm = regulator_position_to_pwm(position);
+#endif
 
             // Update the servo movement as indicated by the PWM value.
             // Sanity checks are performed against the position value.

@@ -33,7 +33,9 @@
 #include "config.h"
 #include "eeprom.h"
 #include "estimator.h"
-#include "motion.h"
+#include "ipd.h"
+#include "pid.h"
+#include "regulator.h"
 #include "openservo.h"
 #include "registers.h"
 
@@ -85,8 +87,20 @@ void registers_defaults(void)
     estimator_registers_defaults();
 #endif
 
-    // Call the motion module to initialize the motion related default values.
-    // This is done so the motion related parameters can be kept in a single file.
-    motion_registers_defaults();
+#if PID_MOTION_ENABLED
+    // Call the PID algorithm module to initialize the PID related default values.
+    pid_registers_defaults();
+#endif
+
+#if IPD_MOTION_ENABLED
+    // Call the IPD algorithm module to initialize the IPD related default values.
+    ipd_registers_defaults();
+#endif
+
+#if REGULATOR_MOTION_ENABLED
+    // Call the regulator algorithm module to initialize the regulator 
+    // related default values.
+    regulator_registers_defaults();
+#endif
 }
 

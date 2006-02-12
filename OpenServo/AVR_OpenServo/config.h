@@ -57,23 +57,23 @@
 
 // Enable (1) or disable (0) the PID algorithm for motion 
 // control in the motion.c module.  This setting cannot be
-// set when the other MOTION_XXX_ENABLED flags are set.
-#define MOTION_PID_ENABLED          0
+// set when the other XXX_MOTION_ENABLED flags are set.
+#define PID_MOTION_ENABLED          0
 
 // Enable (1) or disable (0) the IPD algorithm for motion 
 // control in the motion.c module.  This setting cannot be
-// set when the other MOTION_XXX_ENABLED flags are set.
-#define MOTION_IPD_ENABLED          1
+// set when the other XXX_MOTION_ENABLED flags are set.
+#define IPD_MOTION_ENABLED          1
 
 // Enable (1) or disable (0) the state regulator algorithm
 // for motion control in the motion.c module.  This setting
-// cannot be set when the other MOTION_XXX_ENABLED flags are
+// cannot be set when the other XXX_MOTION_ENABLED flags are
 // set.
 //
 // NOTE: The state regulator code is still under development.  
 // Please contact Stefan Engelke for more information regarding
 // how this code should be used.
-#define MOTION_REGULATOR_ENABLED    0
+#define REGULATOR_MOTION_ENABLED    0
 
 // Enable (1) or disable (0) some test motion code within the
 // main.c module.  This test code can be enabled to test basic
@@ -82,17 +82,17 @@
 #define MAIN_MOTION_TEST_ENABLED    0
 
 // Perform some sanity check of settings here.
-#if MOTION_PID_ENABLED && (MOTION_IPD_ENABLED || MOTION_REGULATOR_ENABLED)
-#  error "Conflicting configuration settings for MOTION_PID_ENABLED."
+#if PID_MOTION_ENABLED && (IPD_MOTION_ENABLED || REGULATOR_MOTION_ENABLED)
+#  error "Conflicting configuration settings for PID_MOTION_ENABLED"
 #endif
-#if MOTION_IPD_ENABLED && (MOTION_PID_ENABLED || MOTION_REGULATOR_ENABLED)
+#if IPD_MOTION_ENABLED && (PID_MOTION_ENABLED || REGULATOR_MOTION_ENABLED)
 #  error "Conflicting configuration settings for MOTION_IPD_ENABLED"
 #endif
-#if MOTION_REGULATOR_ENABLED && (MOTION_PID_ENABLED || MOTION_IPD_ENABLED)
-#  error "Conflicting configuration settings for MOTION_REGULATOR_ENABLED"
+#if REGULATOR_MOTION_ENABLED && (PID_MOTION_ENABLED || IPD_MOTION_ENABLED)
+#  error "Conflicting configuration settings for REGULATOR_MOTION_ENABLED"
 #endif
-#if MOTION_REGULATOR_ENABLED && !ESTIMATOR_ENABLED
-#  error "Configuration settings for MOTION_REGULATOR_ENABLED requires ESTIMATOR_ENABLED"
+#if REGULATOR_MOTION_ENABLED && !ESTIMATOR_ENABLED
+#  error "Configuration settings for REGULATOR_MOTION_ENABLED requires ESTIMATOR_ENABLED"
 #endif
 
 #endif // _OS_ADC_H_

@@ -24,11 +24,18 @@
     $Id$
 */
 
-#ifndef _OS_MOTION_H_
-#define _OS_MOTION_H_ 1
+#ifndef _OS_REGULATOR_H_
+#define _OS_REGULATOR_H_ 1
 
-// This file is obsolete.  The motion control algorithms have
-// been broken into three separate source files (pid.c, ipd.c and 
-// regulator.c) and associated header files.
+// Initialize the regulator algorithm module.
+void regulator_init(void);
 
-#endif // _OS_MOTION_H_
+// Initialize the regulator algorithm related register values.
+void regulator_registers_defaults(void);
+
+// Take the 10-bit position as input and output a signed PWM to be
+// applied to the servo motors.
+int16_t regulator_position_to_pwm(int16_t position);
+
+#endif // _OS_REGULATOR_H_
+

@@ -24,11 +24,17 @@
     $Id$
 */
 
-#ifndef _OS_MOTION_H_
-#define _OS_MOTION_H_ 1
+#ifndef _OS_PID_H_
+#define _OS_PID_H_ 1
 
-// This file is obsolete.  The motion control algorithms have
-// been broken into three separate source files (pid.c, ipd.c and 
-// regulator.c) and associated header files.
+// Initialize the PID algorithm module.
+void pid_init(void);
 
-#endif // _OS_MOTION_H_
+// Initialize the PID related register values.
+void pid_registers_defaults(void);
+
+// Take the 10-bit position as input and output a signed PWM to be
+// applied to the servo motors.
+int16_t pid_position_to_pwm(int16_t position);
+
+#endif // _OS_PID_H_
