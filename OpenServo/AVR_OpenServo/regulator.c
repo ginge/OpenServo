@@ -31,7 +31,7 @@
 #include <inttypes.h>
 
 #include "config.h"
-#include "estimator.h"
+#include "math.h"
 #include "regulator.h"
 #include "registers.h"
 
@@ -100,7 +100,6 @@ int16_t regulator_position_to_pwm(int16_t current_position)
 
         // Adjust command position for the reverse sense.
         command_position = MAX_POSITION - command_position;
-
     }
     else
     {
@@ -114,19 +113,26 @@ int16_t regulator_position_to_pwm(int16_t current_position)
     k1 = (int16_t) registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
     k2 = (int16_t) registers_read_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
 
-    // ** Bits of fixed point **
-    // fp_k1          = 5
-    // fp_k2          = 5
+    // The following operations are fixpoint operations. To add/substract
+	// two fixpoint values they have to be the same fixpoint bit.
+	// If two fixpoint values are multiplied, the fixpoint bit of the result
+	// is the sum of the fixpoint bits of the the factors.
+	// To reach the best possible precision the fixpoint bit is chosen
+	// for each variable separately according to its maximum and dimension.
 
-    // fixed point: 5+0  -> 0  : 2^(- 5) = 1/32
-    output  = multiply(k1, command_position-current_position, 32);
-    // fixed point: 5+11 -> 0 : 2^(- 16) = 1/0xFFFF
-    output += multiply(k2, -current_velocity, 0xFFFF);
+    // Used fixpoint bits, counted from the lowest bit:
+    // Control Param. k1:  fp_k1     =  5
+    // Control Param. k2:  fp_k2     =  5
+    // Position state z1:  fp_z1     =  5 
+    // Velocity state z2:  fp_z2     = 11
+	// Real Position  x1:  fp_x1     =  0
+	// PWM output:         fp_output =  0
 
-    // XXX I don't believe the checks below are needed as similar checks
-    // XXX are made in the pwm.c file - Mike.
-    if ((current_position < 100) && (output < 0)) output = 0;
-    if ((current_position > 900) && (output > 0)) output = 0;
+	// output = k1 * x1 + k2 * x2
+    output  = multiply(k1, command_position-current_position, 5); 
+	  // fp: 5+0  -> 0 : rshift = 5
+    output += multiply(k2, -current_velocity, 16);
+	  // fp: 5+11 -> 0 : rshift = 16
 
     // Check for output saturation.
     if (output > MAX_OUTPUT) output = MAX_OUTPUT;
