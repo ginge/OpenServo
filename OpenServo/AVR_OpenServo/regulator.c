@@ -83,6 +83,7 @@ int16_t regulator_position_to_pwm(int16_t current_position)
     int16_t output;
     int16_t command_position;
     int16_t current_velocity;
+    int16_t current_error;
 
     // Get the command position to where the servo is moving to from the registers.
     command_position = (int16_t) registers_read_word(REG_SEEK_HI, REG_SEEK_LO);
@@ -113,14 +114,21 @@ int16_t regulator_position_to_pwm(int16_t current_position)
     k1 = (int16_t) registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
     k2 = (int16_t) registers_read_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
 
-    // The following operations are fixpoint operations. To add/substract
-	// two fixpoint values they have to be the same fixpoint bit.
-	// If two fixpoint values are multiplied, the fixpoint bit of the result
-	// is the sum of the fixpoint bits of the the factors.
-	// To reach the best possible precision the fixpoint bit is chosen
-	// for each variable separately according to its maximum and dimension.
+    // Determine the current error.
+    current_error = command_position - current_position;
 
-    // Used fixpoint bits, counted from the lowest bit:
+	// The following operations are fixed point operations. To add/substract
+	// two fixed point values they must have the same fractional precision
+    // (the same number of bits behind the decimal).  When two fixed point
+    // values are multiplied the fractional precision of the result is the sum
+    // of the fractional precision of the the the factors (the sum of the bits
+    // behind the decimal of each factor).  To reach the best possible precision
+    // the fixed point bit is chosen for each variable separately according to 
+    // its maximum and dimension.  A shift factor is then applied after
+    // multiplication in the fixed_multiply() function to adjust the fractional
+    // precision of the product for addition or subtraction.
+
+    // Used fixed point bits, counted from the lowest bit:
     // Control Param. k1:  fp_k1     =  5
     // Control Param. k2:  fp_k2     =  5
     // Position state z1:  fp_z1     =  5 
@@ -129,10 +137,8 @@ int16_t regulator_position_to_pwm(int16_t current_position)
 	// PWM output:         fp_output =  0
 
 	// output = k1 * x1 + k2 * x2
-    output  = multiply(k1, command_position-current_position, 5); 
-	  // fp: 5+0  -> 0 : rshift = 5
-    output += multiply(k2, -current_velocity, 16);
-	  // fp: 5+11 -> 0 : rshift = 16
+    output  = fixed_multiply(k1, current_error, 5);         // fp: 5 + 0  -> 0 : rshift = 5
+    output += fixed_multiply(k2, -current_velocity, 16);    // fp: 5 + 11 -> 0 : rshift = 16
 
     // Check for output saturation.
     if (output > MAX_OUTPUT) output = MAX_OUTPUT;

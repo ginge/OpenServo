@@ -29,42 +29,39 @@
 
 #include <inttypes.h>
 
+#include "config.h"
 #include "math.h"
 
-static int32_t shift_right32(int32_t val, uint8_t cnt)
-// Arithmetic shift right of the signed 32-bit value.
-{
-    asm volatile (
-        "L_asr1%=:" "\n\t"
-        "cp %1,__zero_reg__" "\n\t"
-        "breq L_asr2%=" "\n\t"
-        "dec %1" "\n\t"
-        "asr %D0" "\n\t"
-        "ror %C0" "\n\t"
-        "ror %B0" "\n\t"
-        "ror %A0" "\n\t"
-        "rjmp L_asr1%=" "\n\t"
-        "L_asr2%=:" "\n\t"
-        : "=&r" (val)
-        : "r" (cnt), "0" (val)
-        );
+#if FIXED_MATH_ENABLED
 
-    return val;
-}
-
-int16_t multiply(int16_t num1, int16_t num2, int8_t shift)
-// Multiplies the two values num1 and num2 as int32 and shifts 
-// the result to the right to correct the fixpoint.
-// While multiplying two fixpoint values with fixpoints at 
-// bit fp_1 and fp_2 (counted from the lowest bit), the result 
-// will have the fixpoint at bit
-//   fp_result = fp_1 + fp_2
-// To fit it to a desired fixpoint fp_3 the result must shifted by
-//   shift = fp_result - fp_3
-// bits to the right.
+int16_t fixed_multiply(int16_t num1, int16_t num2, int8_t shift)
+// Multiplies the two 16-bit values num1 and num2 into a 32-bit
+// product.  The product is then right shifted by the specified 
+// amount and the lower 16-bits of the value returned.  The purpose
+// of this function is to facilitate fixed point arithmetic.  When
+// multiplying two fixed point numbers with fixed points at bit 
+// fp_1 and fp_2 (counted from the least significant bit), the 
+// result will have the fixed point bit at:
+//
+//    fp_result = fp_1 + fp_2
+//
+// To fit to a desired fixed point precision fp_3 the result must
+// be shifted to the right by:
+//
+//    shift = fp_result - fp_3
+//
 {
     int32_t result;
+
+    // Multiply the 16-bit values into a 32-bit product.
     result = (int32_t) num1 * (int32_t) num2;
+
+    // Right shift to adjust fixed point precision.
     result = shift_right32(result,shift);
+
+    // Return lower 16-bits of result.  The caller should be 
+    // careful to not overflow the result.
     return (int16_t) result;
 }
+
+#endif

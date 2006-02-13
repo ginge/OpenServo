@@ -43,18 +43,6 @@
 // of Flash code space when enabled.
 #define TWI_CHECKED_ENABLED         1
 
-// Enable (1) or disable (0) the Luenberg state estimator 
-// algorithm for determining servo speed.  It is a realtime 
-// simulation of the servo behavior with a internal controller 
-// which keeps track of the difference between the simulated 
-// position and the measured one.  This must be enabled when
-// the MOTION_REGULATOR_ENABLED flag is enabled.  
-//
-// NOTE: The estimator code is still under development.  Please
-// contact Stefan Engelke for more information regarding how
-// this code should be used.
-#define ESTIMATOR_ENABLED           0
-
 // Enable (1) or disable (0) the PID algorithm for motion 
 // control in the motion.c module.  This setting cannot be
 // set when the other XXX_MOTION_ENABLED flags are set.
@@ -74,6 +62,19 @@
 // Please contact Stefan Engelke for more information regarding
 // how this code should be used.
 #define REGULATOR_MOTION_ENABLED    0
+
+// Enable (1) or disable (0) the Luenberg state estimator 
+// algorithm for determining servo speed.  It is a realtime 
+// simulation of the servo behavior with a internal controller 
+// which keeps track of the difference between the simulated 
+// position and the measured one.  This must be enabled when
+// the MOTION_REGULATOR_ENABLED flag is enabled.  
+#define ESTIMATOR_ENABLED           (REGULATOR_MOTION_ENABLED)
+
+// Enable (1) or disable (0) fixed point utility functions in 
+// the math.c module.  Currently these routines are only used
+// by the state estimator and state regulator.
+#define FIXED_MATH_ENABLED          (ESTIMATOR_ENABLED || REGULATOR_ENABLED)
 
 // Enable (1) or disable (0) some test motion code within the
 // main.c module.  This test code can be enabled to test basic
