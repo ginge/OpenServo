@@ -24,14 +24,9 @@
     $Id$
 */
 
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 #include <inttypes.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/signal.h>
 
 #include "config.h"
 #include "registers.h"

@@ -24,10 +24,6 @@
     $Id$
 */
 
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 // This file is obsolete.  The motion control algorithms have
 // been broken into three separate source files (pid.c, ipd.c and 
 // regulator.c) and associated header files.

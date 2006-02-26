@@ -24,10 +24,6 @@
     $Id$
 */
 
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 // Minimal module to support watchdog timer.  This module may be expanded in
 // the future to support more robust use of the watchdog timer to monitor
 // error conditions in the servo.

@@ -47,10 +47,6 @@
 #error "GCC version >= 3.3 required"
 #endif
 
-/* The following is needed until WINAVR supports the ATtinyX5 MCUs. */
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 #include <avr/io.h>
 
     .macro  vector name

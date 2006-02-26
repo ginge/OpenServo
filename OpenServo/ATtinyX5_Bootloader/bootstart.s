@@ -24,10 +24,6 @@
     $Id$
 */
 
-/* Hack to get around GCC limitation regarding ATtiny45 for now. */
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 /* Don't build if BOOTSTRAPPER defined. */
 #ifndef BOOTSTRAPPER
 

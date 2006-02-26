@@ -24,9 +24,6 @@
     $Id$
 */
 
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 #include <inttypes.h>
 #include <avr/io.h>
 

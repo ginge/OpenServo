@@ -24,10 +24,6 @@
     $Id$
 */
 
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 // Minimal module to support power reporting.  In the future this module
 // may be expanded for the servo to monitor it's own power usage and take
 // action when action when too much power is being consumed.

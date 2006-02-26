@@ -43,9 +43,6 @@
     $Id$
 */
 
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 #include <inttypes.h>
 #include <avr/io.h>
 #include <avr/boot.h>
@@ -209,8 +206,8 @@ BOOTLOADER_SECTION static void prog_eeprom_page_write(uint16_t address)
           "I" (_SFR_IO_ADDR(EEARH)),
           "I" (_SFR_IO_ADDR(EEARL)),
           "I" (_SFR_IO_ADDR(EEDR)),
-          "I" (EEWE),
-          "I" (EEMWE),
+          "I" (EEPE),
+          "I" (EEMPE),
           "r"  ((uint8_t) PROG_PAGE_SIZE),
           "x"  ((uint16_t) address),
           "z"  ((uint16_t) prog_buffer)
@@ -241,7 +238,7 @@ BOOTLOADER_SECTION static void prog_eeprom_page_read(uint16_t address)
           "I" (_SFR_IO_ADDR(EEARH)),
           "I" (_SFR_IO_ADDR(EEARL)),
           "I" (_SFR_IO_ADDR(EEDR)),
-          "I" (EEWE),
+          "I" (EEPE),
           "I" (EERE),
           "r" ((uint8_t) PROG_PAGE_SIZE),
           "x" ((uint16_t) address),
