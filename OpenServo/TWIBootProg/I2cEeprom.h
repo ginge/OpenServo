@@ -50,6 +50,8 @@ protected:
         USHORT m_PageSize;
         USHORT m_AddrOffset;
         BYTE m_AddrByteNum;
+		USHORT m_SkipReset;
+		DWORD m_Delay;
     };
     static EepromTypes sm_EepromTypes[];
     int m_Subtype;
