@@ -35,6 +35,7 @@
 
 //
 // ATtiny25/45/85
+// ==============
 //
 // PWM output to the servo motor utilizes Timer/Counter1.  Output to the
 // motor is assigned as follows:
@@ -43,9 +44,13 @@
 //  OC1B (PB4) - Servo clockwise output
 //
 // ATmega168
+// =========
 //
-//  OC2A (PB3) - Servo counter-clockwise output
-//  OC2B (PD3) - Servo clockwise output
+// PWM output to the servo motor utilizes Timer/Counter1 in 8-bit mode.  
+// Output to the motor is assigned as follows:
+//
+//  OC1A (PB1) - Servo counter-clockwise output
+//  OC1B (PB2) - Servo clockwise output
 //
 
 
@@ -98,28 +103,25 @@ static void pwm_cw(uint8_t pwm_width)
 #endif // __AVR_ATtinyX5__
 
 #ifdef __AVR_ATmega168__
-        // Set PB3/OC2A to low.
-        PORTB &= ~(1<<PB3);
+        // Set PB1/OC1A to low.
+        PORTB &= ~(1<<PB1);
 
         // Stop the timer counter.
-        TCCR2B = 0;
-
-        // Disable asynchronous operation.
-        ASSR = 0;
+        TCCR1B = 0;
 
         // Set the timer compare registers.  The ratio of this value to 0xFF
-        // determines the duty cycle of the PWM signal on OC2A and OC2B.
-        OCR2A = 0;
-        OCR2B = pwm_width;
+        // determines the duty cycle of the PWM signal on OC1A and OC1B.
+        OCR1A = 0;
+        OCR1B = pwm_width;
 
         // Disable timer 1 and enable timer 2.
-        TCCR2A = (0<<COM2A1) | (0<<COM2A0) |                    // OC2A disconnected.
-                 (1<<COM2B1) | (0<<COM2B0) |                    // Clear OC2B on compare match on up-count.
-                 (0<<WGM21) | (1<<WGM20);                       // Phase correct PWM - waveform generation mode 1.
+        TCCR1A = (0<<COM1A1) | (0<<COM1A0) |                    // OC1A disconnected.
+                 (1<<COM1B1) | (0<<COM1B0) |                    // Clear OC1B on compare match on up-count.
+                 (0<<WGM11) | (1<<WGM10);                       // Phase correct PWM 8-bit - waveform generation mode 1.
 
         // Set clock select bits to start timer.
-        TCCR2B = (0<<FOC2A) | (0<<FOC2B) |                      // Ignored in PWM mode.
-                 (0<<WGM22) |                                   // Select waveform mode 1.
+        TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
+                 (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
                  (0<<CS22) | (0<<CS21) | (1<<CS20);             // No prescaling.
 #endif // __AVR_ATtinyX5__
 
@@ -170,28 +172,25 @@ static void pwm_ccw(uint8_t pwm_width)
 #endif // __AVR_ATtinyX5__
 
 #ifdef __AVR_ATmega168__
-        // Set PD3/OC2B to low.
-        PORTD &= ~(1<<PD3);
+        // Set PB2/OC1B to low.
+        PORTB &= ~(1<<PB2);
 
         // Stop the timer counter.
-        TCCR2B = 0;
-
-        // Disable asynchronous operation.
-        ASSR = 0;
+        TCCR1B = 0;
 
         // Set the timer compare registers.  The ratio of this value to 0xFF
-        // determines the duty cycle of the PWM signal on OC2A and OC2B.
-        OCR2A = pwm_width;
-        OCR2B = 0;
+        // determines the duty cycle of the PWM signal on OC1A and OC1B.
+        OCR1A = pwm_width;
+        OCR1B = 0;
 
-        // Enable timer 1 and disable timer 2.
-        TCCR2A = (1<<COM2A1) | (0<<COM2A0) |                    // Clear OC2A on compare match on up-count.
-                 (0<<COM2B1) | (0<<COM2B0) |                    // OC2B disconnected.
-                 (0<<WGM21) | (1<<WGM20);                       // Phase correct PWM - waveform generation mode 1.
+        // Disable timer 1 and enable timer 2.
+        TCCR1A = (1<<COM1A1) | (0<<COM1A0) |                    // Clear OC1A on compare match on up-count.
+                 (0<<COM1B1) | (0<<COM1B0) |                    // OC1B disconnected.
+                 (0<<WGM11) | (1<<WGM10);                       // Phase correct PWM 8-bit - waveform generation mode 1.
 
         // Set clock select bits to start timer.
-        TCCR2B = (0<<FOC2A) | (0<<FOC2B) |                      // Ignored in PWM mode.
-                 (0<<WGM22) |                                   // Select waveform mode 1.
+        TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
+                 (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
                  (0<<CS22) | (0<<CS21) | (1<<CS20);             // No prescaling.
 #endif // __AVR_ATtinyX5__
 
@@ -312,24 +311,22 @@ void pwm_stop(void)
 #endif // __AVR_ATtinyX5__
 
 #ifdef __AVR_ATmega168__
-    // Set PB3/OC2A and PD3/OC2B to low.
-    PORTB &= ~(1<<PB3);
-    PORTD &= ~(1<<PD3);
+    // Set PB1/OC1A and PB2/OC1B to low.
+    PORTB &= ~((1<<PB2) | (1<<PB1));
 
-    // Enable PB3/OC2A and PD3/OC2B as outputs.
-    DDRB |= (1<<DDB3);
-    DDRD |= (1<<DDD3);
+    // Enable PB1/OC1A and PB2/OC1B as outputs.
+    DDRB |= ((1<<DDB2) | (1<<DDB1));
 
     // Reset count and compare registers.
-    TCNT2 = 0;
-    OCR2A = 0;
-    OCR2B = 0;
+    TCNT1 = 0;
+    OCR1A = 0;
+    OCR1B = 0;
 
-    // Disable timer/counter2.
-    ASSR = 0;
-    TCCR2B = 0;
-    TCCR2A = 0;
-#endif // __AVR_ATtinyX5__
+    // Disable timer/counter1.
+    TCCR1C = 0;
+    TCCR1B = 0;
+    TCCR1A = 0;
+#endif // __AVR_ATmega168__
 
     // Set the saved pwm values to zero.
     pwm_cw_save = 0;
