@@ -34,7 +34,7 @@
 #include "registers.h"
 
 //
-// ATtiny25/45/85
+// ATtiny45/85
 // ==============
 //
 // PWM output to the servo motor utilizes Timer/Counter1.  Output to the
@@ -42,6 +42,17 @@
 //
 //  OC1A (PB1) - Servo counter-clockwise output
 //  OC1B (PB4) - Servo clockwise output
+//
+//
+// ATmega8
+// =======
+//
+// PWM output to the servo motor utilizes Timer/Counter1 in 8-bit mode.  
+// Output to the motor is assigned as follows:
+//
+//  OC1A (PB1) - Servo counter-clockwise output
+//  OC1B (PB2) - Servo clockwise output
+//
 //
 // ATmega168
 // =========

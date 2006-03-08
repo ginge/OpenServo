@@ -1,7 +1,7 @@
 AVR OpenServo
 =============
 
-March 7th, 2006
+March 8th, 2006
 
 Mike Thompson
 mpthompson@gmail.com
@@ -13,6 +13,7 @@ currently supported:
 
     ATtiny45
     ATtiny85 (Untested)
+    ATmega8
     ATmega168
 
 The servo code is meant to function with the OpenServo Bootloader for easy 
@@ -24,6 +25,7 @@ sizes:
     -----------------------------
     ATtiny45        3072 bytes
     ATtiny85        7168 bytes
+    ATmega8         7168 bytes
     ATmega168       15360 bytes
 
 After compilation, the map file be checked to make sure that the OpenServo
@@ -37,6 +39,11 @@ to be compatible with the OpenServo Bootloader.
 
     ATtiny45/85 Link Options
     ========================
+
+    -nostartfiles
+
+    ATmega8 Link Options
+    ====================
 
     -nostartfiles
 
