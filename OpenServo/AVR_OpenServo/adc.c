@@ -53,7 +53,7 @@
 // analog inputs are assigned as follows:
 //
 //  ADC0 (PC0) - Power input
-//  ADC3 (PC1) - Position input
+//  ADC1 (PC1) - Position input
 //
 // NOTE: Unlike the ATtiny45/85 and ATmega168 the ATmega8 ADC sampling
 // cannot be directly started from a timer compare.  Therefore, we have
@@ -68,7 +68,7 @@
 // analog inputs are assigned as follows:
 //
 //  ADC0 (PC0) - Power input
-//  ADC3 (PC1) - Position input
+//  ADC1 (PC1) - Position input
 //
 
 // Defines for the power and position channels.
