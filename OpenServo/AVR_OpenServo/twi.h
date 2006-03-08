@@ -37,7 +37,7 @@
 #define TWI_CMD_REGISTERS_RESTORE   0x87        // Restore safe read/write registers from EEPROM
 #define TWI_CMD_REGISTERS_DEFAULT   0x88        // Restore safe read/write registers to defaults
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
 
 //
 // ATmega TWI State codes
@@ -81,7 +81,7 @@
 #define TWI_NO_STATE               0xF8  // No relevant state information available; TWINT = "0"
 #define TWI_BUS_ERROR              0x00  // Bus error due to an illegal START or STOP condition
 
-#endif // __AVR_ATmega168__
+#endif // __AVR_ATmega8__ || __AVR_ATmega168____
 
 void twi_slave_init(uint8_t);
 uint8_t twi_receive_byte(void);

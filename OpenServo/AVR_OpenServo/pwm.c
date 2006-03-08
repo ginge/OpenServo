@@ -76,7 +76,7 @@ static void pwm_cw(uint8_t pwm_width)
         pwm_cw_save = pwm_width;
         pwm_ccw_save = 0;
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
         // Set PB1/OC1A to low.
         PORTB &= ~(1<<PB1);
 
@@ -100,9 +100,9 @@ static void pwm_cw(uint8_t pwm_width)
         GTCCR = (1<<PWM1B) |                                    // Enable timer 1B PWM.
                 (1<<COM1B1) | (0<<COM1B0) |                     // OC1B cleared on compare match. Set on TCNT1=$01.
                 (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);            // Unused timer 1 features.
-#endif // __AVR_ATtinyX5__
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
         // Set PB1/OC1A to low.
         PORTB &= ~(1<<PB1);
 
@@ -123,7 +123,7 @@ static void pwm_cw(uint8_t pwm_width)
         TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
                  (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
                  (0<<CS22) | (0<<CS21) | (1<<CS20);             // No prescaling.
-#endif // __AVR_ATtinyX5__
+#endif // __AVR_ATmega8 || __AVR_ATmega168__
 
         // Restore interrupts.
         sei();
@@ -145,7 +145,7 @@ static void pwm_ccw(uint8_t pwm_width)
         pwm_cw_save = 0;
         pwm_ccw_save = pwm_width;
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
         // Set PB4/OC1B to low.
         PORTB &= ~(1<<PB4);
 
@@ -169,9 +169,9 @@ static void pwm_ccw(uint8_t pwm_width)
                 (1<<PWM1A) |                                    // Enable timer 1A PWM.
                 (1<<COM1A1) | (0<<COM1A0) |                     // OC1A cleared on compare match. Set on TCNT1=$01.
                 (0<<CS13) | (0<<CS12) | (1<<CS11) | (0<<CS10);  // Prescale divide by 2.
-#endif // __AVR_ATtinyX5__
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
         // Set PB2/OC1B to low.
         PORTB &= ~(1<<PB2);
 
@@ -192,7 +192,7 @@ static void pwm_ccw(uint8_t pwm_width)
         TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
                  (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
                  (0<<CS22) | (0<<CS21) | (1<<CS20);             // No prescaling.
-#endif // __AVR_ATtinyX5__
+#endif // __AVR_ATmega8 || __AVR_ATmega168__
 
         // Restore interrupts.
         sei();
@@ -298,7 +298,7 @@ void pwm_stop(void)
     // Disable interrupts.
     cli();
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
     // Set PB4/OC1B and PB1/OC1A to low.
     PORTB &= ~((1<<PB4) | (1<<PB1));
 
@@ -308,9 +308,9 @@ void pwm_stop(void)
     // Disable timer1/counter2.
     TCCR1 = 0;
     GTCCR = 0;
-#endif // __AVR_ATtinyX5__
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
     // Set PB1/OC1A and PB2/OC1B to low.
     PORTB &= ~((1<<PB2) | (1<<PB1));
 
@@ -323,10 +323,12 @@ void pwm_stop(void)
     OCR1B = 0;
 
     // Disable timer/counter1.
+#if defined(__AVR_ATmega168__)
     TCCR1C = 0;
+#endif
     TCCR1B = 0;
     TCCR1A = 0;
-#endif // __AVR_ATmega168__
+#endif // __AVR_ATmega8 || __AVR_ATmega168__
 
     // Set the saved pwm values to zero.
     pwm_cw_save = 0;

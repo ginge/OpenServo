@@ -38,18 +38,6 @@
 #define SOFTWARE_VERSION_MAJOR          0
 #define SOFTWARE_VERSION_MINOR          1
 
-// Common define for ATtiny25/45/85 series of MCUs.
-#ifdef __AVR_ATtiny25__
-#define __AVR_ATtinyX5__                1
-#endif
-#ifdef __AVR_ATtiny45__
-#define __AVR_ATtinyX5__                1
-#endif
-#ifdef __AVR_ATtiny85__
-#define __AVR_ATtinyX5__                1
-#endif
-
-
 //
 // Utility functions.
 //

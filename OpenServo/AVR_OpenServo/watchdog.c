@@ -38,7 +38,7 @@
 void watchdog_init(void)
 // Initialize the watchdog module.
 {
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
     // Clear WDRF in MCUSR.
     MCUSR = 0x00;
 
@@ -49,7 +49,15 @@ void watchdog_init(void)
     WDTCR = 0x00;
 #endif
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__)
+    // Write logical one to WDCE and WDE.
+    WDTCR |= (1<<WDCE) | (1<<WDE);
+
+    // Turn off WDT.
+    WDTCR = 0x00;
+#endif
+
+#if defined(__AVR_ATmega168__)
     // Clear WDRF in MCUSR.
     MCUSR &= ~(1<<WDRF);
 
@@ -68,7 +76,7 @@ void watchdog_hard_reset(void)
     // Disable PWM to the servo motor.
     pwm_disable();
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
     // Enable the watchdog.
     WDTCR = (1<<WDIF) |                                     // Reset any interrupt.
             (0<<WDIE) |                                     // Disable interrupt.
@@ -76,7 +84,14 @@ void watchdog_hard_reset(void)
             (0<<WDP3) | (0<<WDP2) | (0<<WDP1) | (0<<WDP0);  // Minimum prescaling - 16mS.
 #endif
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__)
+    // Enable the watchdog.
+    WDTCR = (0<<WDCE) |                                      // Don't set change enable.
+            (1<<WDE) |                                       // Watchdog enable.
+            (0<<WDP2) | (0<<WDP1) | (0<<WDP0);               // Minimum prescaling - 16mS.
+#endif
+
+#if defined(__AVR_ATmega168__)
     // Enable the watchdog.
     WDTCSR = (1<<WDIF) |                                     // Reset any interrupt.
              (0<<WDIE) |                                     // Disable interrupt.

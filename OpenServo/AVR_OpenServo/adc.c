@@ -85,7 +85,7 @@ void adc_init(void)
     // Initialize ADC registers to yield a 125KHz clock.
     //
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
     // Make sure port PB4 (ADC3) and PB5 (ADC0) are set as input.
     PORTB &= ~((1<<PB4) | (1<<PB5));
 
@@ -108,9 +108,9 @@ void adc_init(void)
              (1<<ADATE) |                                   // Start auto triggering.
              (1<<ADIE) |                                    // Activate ADC conversion complete interrupt.
              (1<<ADPS2) | (1<<ADPS1) | (0<<ADPS0);          // Prescale to divide input clock by 64.
-#endif // __AVR_ATtinyX5__
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
     // Make sure port PC0 (ADCC) thru PC3 (ADC3) are set as input.
     PORTC &= ~((1<<PC3) | (1<<PC2) | (1<<PC1) | (1<<PC0));
 
@@ -131,7 +131,7 @@ void adc_init(void)
              (1<<ADATE) |                                   // Start auto triggering.
              (1<<ADIE) |                                    // Activate ADC conversion complete interrupt.
              (1<<ADPS2) | (1<<ADPS1) | (0<<ADPS0);          // Prescale to divide input clock by 64.
-#endif // __AVR_ATmega168__
+#endif // __AVR_ATmega8__ || __AVR_ATmega168____
 
     //
     // Timer/Counter 0 settings.  This timer is used to trigger a ADC sample alternating
@@ -149,14 +149,14 @@ void adc_init(void)
              (0<<WGM02) |                                   // Mode 2 - clear timer on compare match.
              (1<<CS02) | (0<<CS01) | (0<<CS00);             // Prescale divide by 256.
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
     // Set the timer/counter interrupt masks.
     TIMSK = (1<<OCIE0A) |                                   // Interrupt on compare match A.
             (0<<OCIE0B) |                                   // No interrupt on compare match B.
             (0<<TOIE0);                                     // No interrupt on overflow.
 #endif
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
     // Set the timer/counter interrupt masks.
     TIMSK0 = (1<<OCIE0A) |                                  // Interrupt on compare match A.
              (0<<OCIE0B) |                                  // No interrupt on compare match B.
@@ -198,14 +198,14 @@ SIGNAL(SIG_ADC)
         // Switch to power for the next reading.
         adc_channel = ADC_CHANNEL_POWER;
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
         // Set the ADC multiplexer selection register.
         ADMUX = (0<<REFS2) | (0<<REFS1) | (0<<REFS0) |          // Select VCC as voltage reference.
                 (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (0<<MUX0) | // Select ADC0 (PB5), no gain.
                 (0<<ADLAR);                                     // Keep high bits right adjusted.
 #endif
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
         // Set the ADC multiplexer selection register.
         ADMUX = (0<<REFS1) | (0<<REFS0) |                       // Select AVCC as voltage reference.
                 (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (0<<MUX0) | // Select ADC0 (PC0) as analog input.
@@ -223,14 +223,14 @@ SIGNAL(SIG_ADC)
         // Switch to position for the next reading.
         adc_channel = ADC_CHANNEL_POSITION;
 
-#ifdef __AVR_ATtinyX5__
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
         // Set the ADC multiplexer selection register.
         ADMUX = (0<<REFS2) | (0<<REFS1) | (0<<REFS0) |          // Select VCC as voltage reference.
                 (0<<MUX3) | (0<<MUX2) | (1<<MUX1) | (1<<MUX0) | // Select ADC3 (PB3), no gain.
                 (0<<ADLAR);                                     // Keep high bits right adjusted.
 #endif
 
-#ifdef __AVR_ATmega168__
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
         // Set the ADC multiplexer selection register.
         ADMUX = (0<<REFS1) | (0<<REFS0) |                       // Select AVCC as voltage reference.
                 (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (1<<MUX0) | // Select ADC1 (PC1) as analog input.
