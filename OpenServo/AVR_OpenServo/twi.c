@@ -28,6 +28,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "registers.h"
 #include "twi.h"
@@ -57,14 +58,6 @@
 #define TWI_ACK                             (0x00)
 #define TWI_NAK                             (0x01)
 
-// Overflow state values.
-#define TWI_OVERFLOW_STATE_NONE             (0x00)
-#define TWI_OVERFLOW_STATE_ACK_PR_RX        (0x01)
-#define TWI_OVERFLOW_STATE_DATA_RX          (0x02)
-#define TWI_OVERFLOW_STATE_ACK_PR_TX        (0x03)
-#define TWI_OVERFLOW_STATE_PR_ACK_TX        (0x04)
-#define TWI_OVERFLOW_STATE_DATA_TX          (0x05)
-
 // Data state values.
 #define TWI_DATA_STATE_COMMAND              (0x00)
 #define TWI_DATA_STATE_DATA                 (0x01)
@@ -75,20 +68,32 @@
 #endif
 
 // Device dependant defines
-#if defined(__AVR_ATtiny25__) | defined(__AVR_ATtiny45__) | defined(__AVR_ATtiny85__)
-    #define DDR_USI                         DDRB
-    #define DD_SDA                          DDB0
-    #define DD_SCL                          DDB2
-    #define PORT_USI                        PORTB
-    #define P_SDA                           PB0
-    #define P_SCL                           PB2
-    #define PIN_USI                         PINB
-    #define PIN_SDA                         PINB0
-    #define PIN_SCL                         PINB2
+#ifdef __AVR_ATtinyX5__
+
+// Overflow state values.
+#define TWI_OVERFLOW_STATE_NONE             (0x00)
+#define TWI_OVERFLOW_STATE_ACK_PR_RX        (0x01)
+#define TWI_OVERFLOW_STATE_DATA_RX          (0x02)
+#define TWI_OVERFLOW_STATE_ACK_PR_TX        (0x03)
+#define TWI_OVERFLOW_STATE_PR_ACK_TX        (0x04)
+#define TWI_OVERFLOW_STATE_DATA_TX          (0x05)
+
+#define DDR_USI                             DDRB
+#define DD_SDA                              DDB0
+#define DD_SCL                              DDB2
+#define PORT_USI                            PORTB
+#define P_SDA                               PB0
+#define P_SCL                               PB2
+#define PIN_USI                             PINB
+#define PIN_SDA                             PINB0
+#define PIN_SCL                             PINB2
+
+#endif // __AVR_ATtinyX5__
+
+#ifdef __AVR_ATtinyX5__
+static uint8_t twi_slave_address;
 #endif
 
-// Locals.
-static uint8_t twi_slave_address;
 static volatile uint8_t twi_address;
 static volatile uint8_t twi_data_state;
 static volatile uint8_t twi_overflow_state;
@@ -315,6 +320,7 @@ twi_slave_init(uint8_t slave_address)
     twi_rxtail = 0;
     twi_rxhead = 0;
 
+#ifdef __AVR_ATtinyX5__
     // Set the slave address.
     twi_slave_address = slave_address & 0x7f;
 
@@ -341,6 +347,24 @@ twi_slave_init(uint8_t slave_address)
 
     // Start condition interrupt enable.
     USICR |= (1<<USISIE);
+#endif // __AVR_ATtinyX5__
+
+#ifdef __AVR_ATmega168__
+    // Set own TWI slave address.
+    TWAR = slave_address << 1;
+
+    // Default content = SDA released.
+    TWDR = 0xFF;
+
+    // Initialize the TWI interrupt to wait for a new event.
+    TWCR = (1<<TWEN) |                                  // Keep the TWI interface enabled.
+           (1<<TWIE) |                                  // Keep the TWI interrupt enabled.
+           (0<<TWSTA) |                                 // Don't generate start condition.
+           (0<<TWSTO) |                                 // Don't generate stop condition.
+           (1<<TWINT) |                                 // Clear the TWI interrupt.
+           (1<<TWEA) |                                  // Acknowledge the data.
+           (0<<TWWC);                                   //
+#endif // __AVR_ATmega168__
 }
 
 
@@ -365,6 +389,8 @@ uint8_t twi_data_in_receive_buffer(void)
     return (twi_rxhead != twi_rxtail);
 }
 
+
+#ifdef __AVR_ATtinyX5__
 
 SIGNAL(SIG_USI_START)
 // Handle the TWI start condition.  This is called when the TWI master initiates
@@ -533,4 +559,144 @@ SIGNAL(SIG_USI_OVERFLOW)
     USISR |= (1<<USIOIF);
 }
 
+#endif // __AVR_ATtinyX5__
+
+
+#ifdef __AVR_ATmega168__
+
+SIGNAL(SIG_TWI)
+// Handle the TWI interrupt condition.
+{
+    switch (TWSR)
+    {
+        // Own SLA+R has been received; ACK has been returned.
+        case TWI_STX_ADR_ACK:
+        // Data byte in TWDR has been transmitted; ACK has been received.
+        case TWI_STX_DATA_ACK:
+
+            // Read the checked/non-checked data.
+            TWDR = twi_read_data();
+
+            // Data byte will be transmitted and ACK should be received.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (0<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+            break;
+
+        // Data byte in TWDR has been transmitted; NOT ACK has been received.
+        case TWI_STX_DATA_NACK:
+        // Last data byte in TWDR has been transmitted (TWEA = "0"); ACK has been received.
+        case TWI_STX_DATA_ACK_LAST_BYTE:
+
+            // Switched to the not addressed slave mode; own SLA will be recognized.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (0<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+            break;
+
+        // Own SLA+W has been received; ACK has been returned.
+        case TWI_SRX_ADR_ACK:
+
+            // Reset the data state.
+            twi_data_state = TWI_DATA_STATE_COMMAND;
+
+            // Data byte will be received and ACK will be returned.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (0<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+
+            break;
+
+        // Previously addressed with own SLA+W; data has been received; ACK has been returned.
+        case TWI_SRX_ADR_DATA_ACK:
+
+            // Write the data and return ack/nack.
+            if (twi_write_data(TWDR) == TWI_ACK)
+            {
+                // Data byte will be received and ACK will be returned.
+                TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
+                       (1<<TWIE) |                          // Keep the TWI interrupt enabled.
+                       (0<<TWSTA) |                         // Don't generate start condition.
+                       (0<<TWSTO) |                         // Don't generate stop condition.
+                       (1<<TWINT) |                         // Clear the TWI interrupt.
+                       (1<<TWEA) |                          // Acknowledge the data.
+                       (0<<TWWC);                           //
+            }
+            else
+            {
+                // Data byte will be received and NOT ACK will be returned.
+                TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
+                       (1<<TWIE) |                          // Keep the TWI interrupt enabled.
+                       (0<<TWSTA) |                         // Don't generate start condition.
+                       (0<<TWSTO) |                         // Don't generate stop condition.
+                       (1<<TWINT) |                         // Clear the TWI interrupt.
+                       (0<<TWEA) |                          // Not acknowledge the data.
+                       (0<<TWWC);                           //
+            }
+
+            break;
+
+        // Previously addressed with own SLA+W; data has been received; NOT ACK has been returned.
+        case TWI_SRX_ADR_DATA_NACK:
+        // A STOP condition or repeated START condition has been received while still addressed as Slave.
+        case TWI_SRX_STOP_RESTART:
+
+             // Switch to the not addressed slave mode; own SLA will be recognized.
+             TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                    (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                    (0<<TWSTA) |                             // Don't generate start condition.
+                    (0<<TWSTO) |                             // Don't generate stop condition.
+                    (1<<TWINT) |                             // Clear the TWI interrupt.
+                    (1<<TWEA) |                              // Acknowledge the data.
+                    (0<<TWWC);                               //
+
+            break;
+
+        // Bus error due to an illegal START or STOP condition.
+        case TWI_BUS_ERROR:
+
+            // Only the internal hardware is affected, no STOP condition is sent on the bus.
+            // In all cases, the bus is released and TWSTO is cleared.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (1<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+            break;
+
+        // No relevant state information available; TWINT="0".
+        case TWI_NO_STATE:
+
+            // No action required.
+            break;
+
+        default:
+
+            // Reset the TWI interrupt to wait for a new event.
+            TWCR = (1<<TWEN) |                                  // Keep the TWI interface enabled.
+                   (1<<TWIE) |                                  // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                                 // Don't generate start condition.
+                   (0<<TWSTO) |                                 // Don't generate stop condition.
+                   (1<<TWINT) |                                 // Clear the TWI interrupt.
+                   (1<<TWEA) |                                  // Acknowledge the data.
+                   (0<<TWWC);                                   //
+            break;
+    }
+}
+
+#endif // __AVR_ATmega168__
 

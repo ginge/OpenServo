@@ -26,6 +26,7 @@
 
 #include <inttypes.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "math.h"
 #include "regulator.h"

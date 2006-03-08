@@ -26,13 +26,13 @@
 
 #include <inttypes.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "eeprom.h"
 #include "estimator.h"
 #include "ipd.h"
 #include "pid.h"
 #include "regulator.h"
-#include "openservo.h"
 #include "registers.h"
 
 // Register values.

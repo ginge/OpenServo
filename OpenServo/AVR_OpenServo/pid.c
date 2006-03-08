@@ -26,6 +26,7 @@
 
 #include <inttypes.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "pid.h"
 #include "registers.h"

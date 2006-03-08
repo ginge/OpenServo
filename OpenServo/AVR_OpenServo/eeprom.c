@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <avr/eeprom.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "eeprom.h"
 #include "registers.h"

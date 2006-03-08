@@ -30,6 +30,7 @@
 
 #include <inttypes.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "power.h"
 #include "registers.h"

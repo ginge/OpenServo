@@ -28,6 +28,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "adc.h"
 #include "eeprom.h"
@@ -41,12 +42,6 @@
 #include "twi.h"
 #include "watchdog.h"
 #include "registers.h"
-
-#if defined(__AVR_ATtiny45__)
-    // Do nothing.
-#else
-#  error "Don't know what kind of MCU you are compiling for"
-#endif
 
 void handle_twi_command(void)
 {

@@ -1,59 +1,48 @@
 /*
-    Portions of this file derived from gcrt1.S v1.8 from avr-libc project.
-    See the following link for details:
-    
-    http://www.nongnu.org/avr-libc/
-    
-    Original copyright notice included below:
-    
-    Copyright (c) 2002, 2003, 2004, 2005  Eric B. Weddington
-    All rights reserved.
-    
-    Redistribution and use in source and binary forms, with or without 
-    modification, are permitted provided that the following conditions are 
-    met:
-    
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in
-      the documentation and/or other materials provided with the
-      distribution.
-    * Neither the name of the copyright holders nor the names of
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-    
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS 
-    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
-    TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
-    PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-    OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-    
-    Copyright for original code not derived from gcrt1.S:
-    
-    Copyright (c) 2005, Michael P. Thompson <mpthompson@gmail.com>
-    All rights reserved.
-    
-    $Id$
+   Copyright (c) 2002, Marek Michalkiewicz <marekm@amelek.gda.pl>
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+
+   * Neither the name of the copyright holders nor the names of
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE.
 */
+
+/* $Id$ */
 
 #if (__GNUC__ < 3) || (__GNUC__ == 3 && __GNUC_MINOR__ < 3)
 #error "GCC version >= 3.3 required"
 #endif
 
-#include <avr/io.h>
+#include "macros.h"
 
     .macro  vector name
     .if (. - __vectors < _VECTORS_SIZE)
     .weak   \name
     .set    \name, __bad_interrupt
-    rjmp    \name
+    XJMP    \name
     .endif
     .endm
 
@@ -61,7 +50,7 @@
     .global __vectors
     .func   __vectors
 __vectors:
-    rjmp    __init
+    XJMP    __init
     vector  __vector_1
     vector  __vector_2
     vector  __vector_3
@@ -124,11 +113,11 @@ __vectors:
 __boot_vector:
 
     /* Jump vector for bootloader. */
-    rjmp    __boot_start
+    XJMP    __boot_start
 
-    /* Handle unexpected interrupts (enabled and no handler) by
-       jumping to the __vector_default function defined by the user,
-       otherwise jump to the reset address.
+    /* Handle unexpected interrupts (enabled and no handler), which
+       usually indicate a bug.  Jump to the __vector_default function
+       if defined by the user, otherwise jump to the reset address.
 
        This must be in a different section, otherwise the assembler
        will resolve "rjmp" offsets and there will be no relocs.  */
@@ -139,7 +128,7 @@ __boot_vector:
 __bad_interrupt:
     .weak   __vector_default
     .set    __vector_default, __vectors
-    rjmp    __vector_default
+    XJMP    __vector_default
     .endfunc
 
     .section .init0,"ax",@progbits
@@ -148,30 +137,77 @@ __bad_interrupt:
 __boot_start:
 
     .weak   __init
+;   .func   __init
 __init:
 
+#ifndef __AVR_ASM_ONLY__
     .weak   __stack
-    .set    __stack, RAMEND
 
+    /* By default, malloc() uses the current value of the stack pointer
+       minus __malloc_margin as the highest available address.
+
+       In some applications with external SRAM, the stack can be below
+       the data section (in the internal SRAM - faster), and __heap_end
+       should be set to the highest address available for malloc().  */
     .weak   __heap_end
     .set    __heap_end, 0
 
     .section .init2,"ax",@progbits
-
-    /* Clear out the status register. */
-    clr r1
-    out _SFR_IO_ADDR(SREG), r1
-
-    /* Configure stack. */
+    clr __zero_reg__
+    out _SFR_IO_ADDR(SREG), __zero_reg__
     ldi r28,lo8(__stack)
+#ifdef SPH
     ldi r29,hi8(__stack)
     out _SFR_IO_ADDR(SPH), r29
+#endif
     out _SFR_IO_ADDR(SPL), r28
 
-    /* Other init sections provided by libgcc.S will be linked as needed here. */
+#if BIG_CODE
+    /* Only for >64K devices with RAMPZ, replaces the default code
+       provided by libgcc.S which is only linked in if necessary.  */
+
+    .section .init4,"ax",@progbits
+    .global __do_copy_data
+__do_copy_data:
+    ldi r17, hi8(__data_end)
+    ldi r26, lo8(__data_start)
+    ldi r27, hi8(__data_start)
+    ldi r30, lo8(__data_load_start)
+    ldi r31, hi8(__data_load_start)
+
+    /* On the enhanced core, "elpm" with post-increment updates RAMPZ
+       automatically.  Otherwise we have to handle it ourselves.  */
+
+#ifdef __AVR_ENHANCED__
+    ldi r16, hh8(__data_load_start)
+#else
+    ldi r16, hh8(__data_load_start - 0x10000)
+.L__do_copy_data_carry:
+    inc r16
+#endif
+    out _SFR_IO_ADDR(RAMPZ), r16
+    rjmp    .L__do_copy_data_start
+.L__do_copy_data_loop:
+#ifdef __AVR_ENHANCED__
+    elpm    r0, Z+
+#else
+    elpm
+#endif
+    st  X+, r0
+#ifndef __AVR_ENHANCED__
+    adiw    r30, 1
+    brcs    .L__do_copy_data_carry
+#endif
+.L__do_copy_data_start:
+    cpi r26, lo8(__data_end)
+    cpc r27, r17
+    brne    .L__do_copy_data_loop
+#endif /* BIG_CODE */
+
+    .set    __stack, RAMEND
+#endif /* !__AVR_ASM_ONLY__ */
 
     .section .init9,"ax",@progbits
-
-    /* Jump to the main function. */
-    rjmp    main
+    XJMP    main
+;   .endfunc
 
