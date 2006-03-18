@@ -40,7 +40,6 @@ main (void)
 // bootloader programming.  When built with BOOTSTRAPPER defined the
 // application will allow the bootloader itself to be programmed.
 {
-
 #ifdef BOOTSTRAPPER
     // Initialize the bootloader exit and active flags.
     bootloader_exit = 0;
