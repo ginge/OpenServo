@@ -296,9 +296,9 @@ SIGNAL(SIG_ADC)
                 (0<<ADLAR);                                     // Keep high bits right adjusted.
 #endif
 
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
         // Set the ADC multiplexer selection register.
-        ADMUX = (0<<REFS1) | (0<<REFS0) |                       // Select AVCC as voltage reference.
+        ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
                 (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (0<<MUX0) | // Select ADC0 (PC0) as analog input.
                 (0<<ADLAR);                                     // Keep high bits right adjusted.
 #endif
@@ -321,7 +321,7 @@ SIGNAL(SIG_ADC)
                 (0<<ADLAR);                                     // Keep high bits right adjusted.
 #endif
 
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
         // Set the ADC multiplexer selection register.
         ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
                 (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (1<<MUX0) | // Select ADC1 (PC1) as analog input.
