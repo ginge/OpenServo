@@ -47,6 +47,7 @@
 #include <avr/io.h>
 #include <avr/boot.h>
 
+#include "config.h"
 #include "bootloader.h"
 #include "prog.h"
 

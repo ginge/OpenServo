@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <avr/io.h>
 
+#include "config.h"
 #include "bootloader.h"
 #include "prog.h"
 #include "twi.h"

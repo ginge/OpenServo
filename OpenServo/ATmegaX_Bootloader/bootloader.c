@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <avr/io.h>
 
+#include "config.h"
 #include "bootloader.h"
 #include "prog.h"
 #include "timer.h"
@@ -38,13 +39,19 @@ uint8_t bootloader_active;
 // Don't build this function if the BOOTSTRAPPER is being built.
 #ifndef BOOTSTRAPPER
 
+#if FAST_CLOCK_ENABLED
+#define TIMEOUT     256
+#else
+#define TIMEOUT     128
+#endif
+
 BOOTLOADER_SECTION void bootloader(void)
 // This is the main bootloader function.  When this function returns
 // the application code loaded into lower memory will be executed.
 // The application code must reside immediately after the vector
 // table at address 0x001E.
 {
-    uint8_t timer_count = 0;
+    uint16_t timer_count = 0;
 
 #if 0
     // XXX Enable PB1/PB3 as outputs and clear the LED.
@@ -78,7 +85,7 @@ BOOTLOADER_SECTION void bootloader(void)
             ++timer_count ;
 
             // Have we exceeded the bootloader timeout (about three seconds)?
-            if (timer_count > 128)
+            if (timer_count > TIMEOUT)
             {
                 // Set the bootloader exit flag if the bootloader is not active.
                 if (!bootloader_active) bootloader_exit = 1;
