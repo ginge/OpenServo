@@ -46,12 +46,12 @@
 // Enable (1) or disable (0) the PID algorithm for motion 
 // control in the motion.c module.  This setting cannot be
 // set when the other XXX_MOTION_ENABLED flags are set.
-#define PID_MOTION_ENABLED          0
+#define PID_MOTION_ENABLED          1
 
 // Enable (1) or disable (0) the IPD algorithm for motion 
 // control in the motion.c module.  This setting cannot be
 // set when the other XXX_MOTION_ENABLED flags are set.
-#define IPD_MOTION_ENABLED          1
+#define IPD_MOTION_ENABLED          0
 
 // Enable (1) or disable (0) the state regulator algorithm
 // for motion control in the motion.c module.  This setting
@@ -82,6 +82,19 @@
 // the OpenServo.  It should normally be disabled.
 #define MAIN_MOTION_TEST_ENABLED    0
 
+// Enable (1) or disable (0) the swapping of PWM output A and B.
+// This swapping must sometimes enabled depending on whether the
+// positive lead to the motor is attached to MOSFET/PWM output A
+// or MOSFET/PWM output B.  This option makes this easy to control
+// within software.
+#define SWAP_PWM_DIRECTION_ENABLED  0
+
+// Enable (1) or disable (0) timing for a 20 MHz system clock on
+// an ATmega168 or a 16 MHz system clock on an ATmega8.
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
+#define FAST_CLOCK_ENABLED			0
+#endif
+
 // Perform some sanity check of settings here.
 #if PID_MOTION_ENABLED && (IPD_MOTION_ENABLED || REGULATOR_MOTION_ENABLED)
 #  error "Conflicting configuration settings for PID_MOTION_ENABLED"
@@ -93,7 +106,15 @@
 #  error "Conflicting configuration settings for REGULATOR_MOTION_ENABLED"
 #endif
 #if REGULATOR_MOTION_ENABLED && !ESTIMATOR_ENABLED
-#  error "Configuration settings for REGULATOR_MOTION_ENABLED requires ESTIMATOR_ENABLED"
+#  error "Configuration settings for REGULATOR_MOTION_ENABLED requires ESTIMATOR_ENABLED."
+#endif
+
+#if FAST_CLOCK_ENABLED && (defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__))
+#   error "Fast clock support cannot be enabled for ATtinyX5 MCUs."
+#endif
+
+#if FAST_CLOCK_ENABLED
+#   warning "Fast clock support enabled.  All timing dependent defines should be verified."
 #endif
 
 #endif // _OS_ADC_H_

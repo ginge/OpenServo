@@ -43,7 +43,34 @@
 #include "watchdog.h"
 #include "registers.h"
 
-void handle_twi_command(void)
+static void config_pin_defaults(void)
+// Configure pins to their default states to conform to recommendation that all 
+// AVR MCU pins have a defined level.  We do this by configuring unused pins
+// as inputs and enabling the internal pull-ups.
+{
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
+    // Configure unused port B pins as inputs and enable internal pull-up resistor.
+    DDRB = (0<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) |
+           (0<<PORTB3) | (1<<PORTB2) | (1<<PORTB1) | (0<<PORTB0);
+    PORTB = (1<<DDB7) | (1<<DDB6) | (0<<DDB5) | (1<<DDB4) |
+            (1<<DDB3) | (0<<DDB2) | (0<<DDB1) | (1<<DDB0);
+
+    // Configure unused port C pins as inputs and enable internal pull-up resistor.
+    DDRC = (0<<PORTC6) | (0<<PORTC5) | (0<<PORTC4) |
+           (0<<PORTC3) | (0<<PORTC2) | (0<<PORTC1) | (0<<PORTC0);
+    PORTC = (1<<DDC6) | (0<<DDC5) | (0<<DDC4) |
+            (1<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
+
+    // Configure port D pins as inputs and enable internal pull-up resistor.
+    DDRD = (0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) |
+           (0<<DDD3) | (0<<DDD2) | (0<<DDD1) | (0<<DDD0);
+    PORTD = (1<<PORTD7) | (1<<PORTD6) | (1<<PORTD5) | (1<<PORTD4) |
+            (1<<PORTD3) | (1<<PORTD2) | (1<<PORTD1) | (1<<PORTD0);
+#endif
+}
+
+
+static void handle_twi_command(void)
 {
     uint8_t command;
 
@@ -117,6 +144,9 @@ void handle_twi_command(void)
 
 int main (void)
 {
+	// Configure pins to the default states.
+	config_pin_defaults();
+
     // Initialize the watchdog module.
     watchdog_init();
 

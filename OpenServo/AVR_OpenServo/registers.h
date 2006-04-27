@@ -49,8 +49,8 @@
 #define REG_VELOCITY_LO             0x0B
 #define REG_POWER_HI                0x0C
 #define REG_POWER_LO                0x0D
-#define REG_PWM_CW                  0x0E
-#define REG_PWM_CCW                 0x0F
+#define REG_PWM_DIRA                0x0E
+#define REG_PWM_DIRB                0x0F
 
 // TWI read/write registers.  Writing these
 // registers controls operation of the servo.
