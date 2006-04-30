@@ -49,7 +49,7 @@
 #define MIN_INTEGRAL_ERROR  (-4000)
 
 // Borrow a reserved register.
-#define REG_PID_OFFSET          REG_RESERVED_21
+#define REG_PID_OFFSET          REG_RESERVED_2D
 
 // Values preserved across multiple PID iterations.
 static int16_t integral_error = 0;
@@ -92,6 +92,9 @@ void pid_registers_defaults(void)
 // Initialize the PID algorithm related register values.  This is done 
 // here to keep the PID related code in a single file.  
 {
+    // Default deadband.
+    registers_write_byte(REG_DEADBAND, 0x00);
+
     // Default gain values.
     registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0600);
     registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x7000);
@@ -117,6 +120,7 @@ int16_t pid_position_to_pwm(int16_t current_position)
 // zero indicating counter-clockwise rotation.
 {
     int16_t output;
+    int16_t deadband;
     int16_t output_range;
     int16_t output_offset;
     int16_t command_position;
@@ -135,6 +139,9 @@ int16_t pid_position_to_pwm(int16_t current_position)
     command_position = (int16_t) registers_read_word(REG_SEEK_HI, REG_SEEK_LO);
     minimum_position = (int16_t) registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
     maximum_position = (int16_t) registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
+
+    // Get the deadband value and divide by two for calculations below.
+    deadband = (int16_t) (registers_read_byte(REG_DEADBAND) / 2);
 
     // Are we reversing the seek sense?
     if (registers_read_byte(REG_REVERSE_SEEK) != 0)
@@ -165,6 +172,26 @@ int16_t pid_position_to_pwm(int16_t current_position)
     // Determine the proportional error as the difference between the
     // command position and the current position.
     proportional_error = command_position - current_position;
+
+    // Adjust proportional error due to deadband.  The potentiometer readings are a 
+    // bit noisy and there is typically one or two units of difference from reading 
+    // to reading when the servo is holding position.  Adding deadband decreases some 
+    // of the twitchiness in the servo caused by this noise.
+    if (proportional_error > deadband)
+    {
+        // Factor out deadband from the proportional error.
+        proportional_error -= deadband;
+    }
+    else if (proportional_error < -deadband)
+    {
+        // Factor out deadband from the proportional error.
+        proportional_error += deadband;
+    }
+    else
+    {
+        // Adjust to proportional error to zero within deadband.
+        proportional_error = 0;
+    }
 
     // Determine the derivative error as the difference between the 
     // current position and the previous position.  This is value is

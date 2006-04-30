@@ -78,7 +78,7 @@
 // may only be written to when write enabled.
 
 #define REG_TWI_ADDRESS             0x20
-#define REG_RESERVED_21             0x21
+#define REG_DEADBAND                0x21
 #define REG_PID_PGAIN_HI            0x22
 #define REG_PID_PGAIN_LO            0x23
 #define REG_PID_DGAIN_HI            0x24

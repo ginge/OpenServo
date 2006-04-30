@@ -128,6 +128,9 @@ void ipd_registers_defaults(void)
 // Initialize the PID algorithm related register values.  This is done 
 // here to keep the PID related code in a single file.  
 {
+    // Default deadband.
+    registers_write_byte(REG_DEADBAND, 0x02);
+
     // Default gain values.
     registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0800);
     registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x2800);
@@ -171,6 +174,7 @@ int16_t ipd_position_to_pwm(int16_t current_position)
 //
 {
     uint8_t i;
+    int16_t deadband;
     int16_t command_position;
     int16_t maximum_position;
     int16_t minimum_position;
@@ -205,6 +209,9 @@ int16_t ipd_position_to_pwm(int16_t current_position)
     minimum_position = (int16_t) registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
     maximum_position = (int16_t) registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
+    // Get the deadband value and divide by two for calculations below.
+    deadband = (int16_t) (registers_read_byte(REG_DEADBAND) / 2);
+
     // Are we reversing the seek sense?
     if (registers_read_byte(REG_REVERSE_SEEK) != 0)
     {
@@ -234,13 +241,25 @@ int16_t ipd_position_to_pwm(int16_t current_position)
     // The command error is the difference between the command position and current position.
     command_error = command_position - current_position;
 
-    // Add a bit of deadband into the command error to minimize twitching.  The 
-    // potentiometer readings are a bit noisy and there is typically one or two
-    // units of difference from reading to reading when the servo is holding 
-    // position.  Adding deadband decreases some of the twitchiness in the servo
-    // caused by this noise.
-    if (command_error == 1) command_error = 0;
-    if (command_error == -1) command_error = 0;
+    // Adjust proportional error due to deadband.  The potentiometer readings are a 
+    // bit noisy and there is typically one or two units of difference from reading 
+    // to reading when the servo is holding position.  Adding deadband decreases some 
+    // of the twitchiness in the servo caused by this noise.
+    if (command_error > deadband)
+    {
+        // Factor out deadband from the command error.
+        command_error -= deadband;
+    }
+    else if (command_error < -deadband)
+    {
+        // Factor out deadband from the command error.
+        command_error += deadband;
+    }
+    else
+    {
+        // Adjust to command error to zero within deadband.
+        command_error = 0;
+    }
 
     // Get the positional, velocity and integral gains from the registers.
     position_gain = registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
