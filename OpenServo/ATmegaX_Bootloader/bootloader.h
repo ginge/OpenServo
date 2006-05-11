@@ -31,18 +31,10 @@ extern uint8_t bootloader_exit;
 extern uint8_t bootloader_active;
 
 // The BOOTLOADER_SECTION macro is used to locate functions into the bootloader
-// section of the text segment.  Normally, the bootloader section is located
-// in the upper 1024 bytes of Flash unless the bootstrap version of the software
-// is being built.
+// section of the text segment.
 
-
-#ifdef BOOTSTRAPPER
-#undef BOOTLOADER_SECTION
-#define BOOTLOADER_SECTION
-#else
 #ifndef BOOTLOADER_SECTION
 #define BOOTLOADER_SECTION __attribute__ ((section (".bootloader")))
-#endif
 #endif
 
 #endif // _BOOTLOADER_H_

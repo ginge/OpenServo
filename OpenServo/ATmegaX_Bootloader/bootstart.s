@@ -24,15 +24,18 @@
     $Id$
 */
 
-/* Don't build if BOOTSTRAPPER defined. */
-#ifndef BOOTSTRAPPER
-
+#include "config.h"
 #include "macros.h"
+
+/* Don't build if BOOTSTRAPPER enabled. */
+#if !BOOTSTRAPPER
 
     .text
 
     /* Define this code section as the bootloader. */
     .section    .bootloader,"ax",@progbits
+
+    .skip 1024, 0xff
 
     .global bootstart
 bootstart:

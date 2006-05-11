@@ -307,7 +307,7 @@ BOOTLOADER_SECTION void prog_buffer_set_address(uint16_t address)
     // Which part of Flash/EEPROM are we reading.
     if (prog_page_address < PROG_FLASH_BOOTLOADER)
     {
-#ifndef BOOTSTRAPPER
+#if !BOOTSTRAPPER
         // Read the Flash page into the programming buffer.
         prog_flash_page_read(prog_page_address - PROG_FLASH_START);
 #else
@@ -317,7 +317,7 @@ BOOTLOADER_SECTION void prog_buffer_set_address(uint16_t address)
     }
     else if (prog_page_address < PROG_FLASH_END)
     {
-#ifdef BOOTSTRAPPER
+#if BOOTSTRAPPER
         // Read the Flash page into the programming buffer.
         prog_flash_page_read(prog_page_address - PROG_FLASH_START);
 #else
@@ -386,7 +386,7 @@ BOOTLOADER_SECTION void prog_buffer_update(void)
         // Which part of Flash/EEPROM are we writing.
         if (prog_page_address < PROG_FLASH_BOOTLOADER)
         {
-#ifndef BOOTSTRAPPER
+#if !BOOTSTRAPPER
             // Write the programming buffer to Flash.
             prog_flash_page_write(prog_page_address - PROG_FLASH_START);
 #else
@@ -396,7 +396,7 @@ BOOTLOADER_SECTION void prog_buffer_update(void)
         }
         else if (prog_page_address < PROG_FLASH_END)
         {
-#ifdef BOOTSTRAPPER
+#if BOOTSTRAPPER
             // Write the programming buffer to Flash.
             prog_flash_page_write(prog_page_address - PROG_FLASH_START);
 #else

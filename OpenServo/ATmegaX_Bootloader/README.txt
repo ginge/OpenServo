@@ -63,7 +63,7 @@ written.
    6F     3B80-1BFF   Flash
    70     3C00-3C7F   Flash (bootloader)
    ...
-   7F     1FC0-1FFF   Flash (bootloader)
+   7F     3FC0-3FFF   Flash (bootloader)
    80     4000-407F   EEPROM
    ...
    83     4180-41FF   EEPROM
@@ -101,13 +101,13 @@ configuration to have the bootloader code loaded in the upper 1K of Flash.
   ====================
 
   -nostartfiles
-  -Wl,-section-start=.bootloader=0x1C00
+  -Wl,-section-start=.bootloader=0x1800
 
   ATmega168 Link Options
   ======================
 
   -nostartfiles
-  -Wl,-section-start=.bootloader=0x3C00
+  -Wl,-section-start=.bootloader=0x3800
 
 The order in which the source files are added to the bootloader project are
 imporant.  They must be added to the project in the following order.

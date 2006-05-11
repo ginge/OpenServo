@@ -37,13 +37,9 @@ uint8_t bootloader_exit;
 uint8_t bootloader_active;
 
 // Don't build this function if the BOOTSTRAPPER is being built.
-#ifndef BOOTSTRAPPER
+#if !BOOTSTRAPPER
 
-#if FAST_CLOCK_ENABLED
-#define TIMEOUT     256
-#else
 #define TIMEOUT     128
-#endif
 
 BOOTLOADER_SECTION void bootloader(void)
 // This is the main bootloader function.  When this function returns

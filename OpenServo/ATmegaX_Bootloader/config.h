@@ -30,10 +30,9 @@
 // This file is intended to consolidate configuration settings
 // for the OpenServo bootloader into a single location.
 
-// Enable (1) or disable (0) timing for a 20 MHz system clock on
-// an ATmega168 or a 16 MHz system clock on an ATmega8.
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
-#define FAST_CLOCK_ENABLED			0
-#endif
+// Enable (1) or disable (0) bootstrapper build.  When enabled 
+// a special version of the bootloader is created as an application
+// that allows the bootloader itself to be updated in Flash.
+#define BOOTSTRAPPER 0
 
 #endif // _CONFIG_H_

@@ -28,8 +28,10 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include "config.h"
 #include "bootloader.h"
-#ifdef BOOTSTRAPPER
+
+#if BOOTSTRAPPER
 #include "prog.h"
 #include "twi.h"
 #endif
@@ -40,7 +42,7 @@ main (void)
 // bootloader programming.  When built with BOOTSTRAPPER defined the
 // application will allow the bootloader itself to be programmed.
 {
-#ifdef BOOTSTRAPPER
+#if BOOTSTRAPPER
     // Initialize the bootloader exit and active flags.
     bootloader_exit = 0;
     bootloader_active = 0;
@@ -55,13 +57,13 @@ main (void)
     // Loop forever.
     for (;;)
     {
-#ifdef BOOTSTRAPPER
+#if BOOTSTRAPPER
         // Check for TWI conditions that require handling.
         twi_check_conditions();
 #endif
     }
 
-#ifdef BOOTSTRAPPER
+#if BOOTSTRAPPER
     // Restore TWI interface to powerup defaults.
     twi_deinit();
 #endif
