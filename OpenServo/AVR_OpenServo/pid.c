@@ -93,15 +93,15 @@ void pid_registers_defaults(void)
 // here to keep the PID related code in a single file.  
 {
     // Default deadband.
-    registers_write_byte(REG_DEADBAND, 0x00);
+    registers_write_byte(REG_DEADBAND, 0x02);
 
     // Default gain values.
     registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0600);
-    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x7000);
-    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, 0x0001);
+    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x0800);
+    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, 0x0008);
 
     // Default offset value.
-    registers_write_byte(REG_PID_OFFSET, 0x80);
+    registers_write_byte(REG_PID_OFFSET, 0x60);
 
     // Default position limits.
     registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, 0x0060);
@@ -191,6 +191,10 @@ int16_t pid_position_to_pwm(int16_t current_position)
     {
         // Adjust to proportional error to zero within deadband.
         proportional_error = 0;
+
+        // Adjust the current position to match the command position. This is to 
+        // minimize the chance the ADC noise would be interpretted as velocity.
+        current_position = command_position;
     }
 
     // Determine the derivative error as the difference between the 
@@ -200,6 +204,9 @@ int16_t pid_position_to_pwm(int16_t current_position)
     // use velocity instead so a large change in the command position
     // doesn't induce a large derivative error.
     derivative_error = current_position - previous_position;
+
+    // Update the system registers with the velocity.  This value can be negative.
+    registers_write_word(REG_VELOCITY_HI, REG_VELOCITY_LO, (uint16_t) derivative_error);
 
     // Update the previous position.
     previous_position = current_position;

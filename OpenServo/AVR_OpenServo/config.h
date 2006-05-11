@@ -46,11 +46,19 @@
 // Enable (1) or disable (0) the PID algorithm for motion 
 // control in the motion.c module.  This setting cannot be
 // set when the other XXX_MOTION_ENABLED flags are set.
+//
+// NOTE: This is the motion control algorithm most people should
+// use until the other algorithms are further developed.
 #define PID_MOTION_ENABLED          1
 
 // Enable (1) or disable (0) the IPD algorithm for motion 
 // control in the motion.c module.  This setting cannot be
 // set when the other XXX_MOTION_ENABLED flags are set.
+//
+// NOTE: The IPD algorithm is still under development and is
+// currently unstable.  Please contact Mike Thompson in the 
+// OpenServo forums for more information before enabling this
+// feature.
 #define IPD_MOTION_ENABLED          0
 
 // Enable (1) or disable (0) the state regulator algorithm
@@ -59,8 +67,8 @@
 // set.
 //
 // NOTE: The state regulator code is still under development.  
-// Please contact Stefan Engelke for more information regarding
-// how this code should be used.
+// Please contact Stefan Engelke in the OpenServo forums for 
+// more information before enabling this feature.
 #define REGULATOR_MOTION_ENABLED    0
 
 // Enable (1) or disable (0) the Luenberg state estimator 
@@ -89,12 +97,6 @@
 // within software.
 #define SWAP_PWM_DIRECTION_ENABLED  0
 
-// Enable (1) or disable (0) timing for a 20 MHz system clock on
-// an ATmega168 or a 16 MHz system clock on an ATmega8.
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
-#define FAST_CLOCK_ENABLED			0
-#endif
-
 // Perform some sanity check of settings here.
 #if PID_MOTION_ENABLED && (IPD_MOTION_ENABLED || REGULATOR_MOTION_ENABLED)
 #  error "Conflicting configuration settings for PID_MOTION_ENABLED"
@@ -107,14 +109,6 @@
 #endif
 #if REGULATOR_MOTION_ENABLED && !ESTIMATOR_ENABLED
 #  error "Configuration settings for REGULATOR_MOTION_ENABLED requires ESTIMATOR_ENABLED."
-#endif
-
-#if FAST_CLOCK_ENABLED && (defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__))
-#   error "Fast clock support cannot be enabled for ATtinyX5 MCUs."
-#endif
-
-#if FAST_CLOCK_ENABLED
-#   warning "Fast clock support enabled.  All timing dependent defines should be verified."
 #endif
 
 #endif // _OS_ADC_H_

@@ -77,46 +77,17 @@
 #define ADC_CHANNEL_POWER       0
 #define ADC_CHANNEL_POSITION    1
 
-// ADC prescale settings.  The ADC successive approximation circuitry requires an
-// input clock frequency between 50 kHz and 200 kHz to get maximum resolution.
-#if FAST_CLOCK_ENABLED
-// The ADC clock prescaler of 128 is selected to yield a 156.25 KHz ADC clock 
-// for a 20 MHz ATmega168 and a 125 KHz clock for a 16 MHz ATmega8.
-#define ADPS		((1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0))
-#else
 // The ADC clock prescaler of 64 is selected to yield a 125 KHz ADC clock
 // from an 8 MHz system clock.
 #define ADPS		((1<<ADPS2) | (1<<ADPS1) | (0<<ADPS0))
-#endif // FAST_CLOCK_ENABLED
 
-// Timer clock prescale settings.  This timer is set to initiate an 
-// ADC sample every 512 microseconds.
-#if FAST_CLOCK_ENABLED
-// The timer clock prescaler of 64 is selected to yield a 312.5 kHz clock 
-// for a 20 MHz ATmega168 and a 250 kHz clock for an 16 MHz ATmega8.
-#define CSPS		((0<<CS02) | (1<<CS01) | (1<<CS00))
-
-#if defined(__AVR_ATmega168__)
-// Define the compare register value to generate a timer interrupt and initiate
-// an ADC sample every 256 microseconds and yield a 3.90625 kHz sample rate.
-#define CRVALUE		80
-#endif
-
-#if defined(__AVR_ATmega8__)
-// Define the compare register value to generate a timer interrupt and initiate
-// an ADC sample every 256 microseconds and yield a 3.90625 kHz sample rate.
-#define CRVALUE		64
-#endif
-
-#else
-// The timer clock prescaler of 64 is selected to yield a 125 KHz ADC clock
+// The timer clock prescaler of 1024 is selected to yield a 7.8125 KHz ADC clock
 // from an 8 MHz system clock.
-#define CSPS		((0<<CS02) | (1<<CS01) | (1<<CS00))
+#define CSPS		((1<<CS02) | (0<<CS01) | (1<<CS00))
 
 // Define the compare register value to generate a timer interrupt and initiate
-// an ADC sample every 256 microseconds and yield a 3.90625 kHz sample rate.
-#define CRVALUE		32
-#endif // FAST_CLOCK_ENABLED
+// an ADC sample every 5.12 milliseconds and yield a 195.3125 Hz sample rate.
+#define CRVALUE		40
 
 
 // Globals used to maintain ADC state and values.
@@ -205,9 +176,7 @@ void adc_init(void)
     // Set the ADC control and status register B.
     ADCSRB = (0<<ADTS2) | (1<<ADTS1) | (1<<ADTS0);          // Timer/Counter0 Compare Match A.
 
-    // Set the ADC control and status register A. The ADC clock prescaler of 128 is selected 
-	// to yield a 156 KHz clock for a 20 MHz system clock and 64 to yield a 125 KHz ADC clock 
-	// for an 8 MHz system clock.
+    // Set the ADC control and status register A.
     ADCSRA = (1<<ADEN) |                                    // Enable ADC.
              (0<<ADSC) |                                    // Don's start yet, will be auto triggered.
              (1<<ADATE) |                                   // Start auto triggering.
@@ -222,7 +191,6 @@ void adc_init(void)
              (1<<WGM01) | (0<<WGM00);                       // Mode 2 - clear timer on compare match.
 
     // Set timer/counter0 control register B.
-    // Note: The clock is 8 MHz / 256 = 31.250 KHz or 32 microseconds per cycle.
     TCCR0B = (0<<FOC0A) | (0<<FOC0B) |                      // No force output compare A or B.
              (0<<WGM02) |                                   // Mode 2 - clear timer on compare match.
              CSPS;											// Timer clock prescale -- see above.
@@ -254,7 +222,6 @@ void adc_init(void)
              (1<<WGM01) | (0<<WGM00);                       // Mode 2 - clear timer on compare match.
 
     // Set timer/counter0 control register B.
-    // Note: The clock is 8 MHz / 256 = 31.250 KHz or 32 microseconds per cycle.
     TCCR0B = (0<<FOC0A) | (0<<FOC0B) |                      // No force output compare A or B.
              (0<<WGM02) |                                   // Mode 2 - clear timer on compare match.
              CSPS;											// Timer clock prescale -- see above.

@@ -264,19 +264,18 @@ int main (void)
         // two positions to aid in the servo tuning process.  This code 
         // should normally be disabled.
         {
-            // Get the timer.  This timer is defined by the position/power sample
-            // frequency and has a cycle time of approximately 512 microseconds.
+            // Get the timer.
             uint16_t timer = timer_get();
 
-            // Reset the timer if greater than 16000.
-            if (timer > 16000) timer_set(0);
+            // Reset the timer if greater than 800.
+            if (timer > 800) timer_set(0);
 
             // Look for specific events.
             if (timer == 0)
             {
                 registers_write_word(REG_SEEK_HI, REG_SEEK_LO, 0x0100);
             }
-            else if (timer == 8000)
+            else if (timer == 400)
             {
                 registers_write_word(REG_SEEK_HI, REG_SEEK_LO, 0x0300);
             }

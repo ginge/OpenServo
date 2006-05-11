@@ -132,9 +132,9 @@ void ipd_registers_defaults(void)
     registers_write_byte(REG_DEADBAND, 0x02);
 
     // Default gain values.
-    registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0800);
-    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x2800);
-    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, 0x0B80);
+    registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0400);
+    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x0300);
+    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, 0x4000);
 
     // Default position limits.
     registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, 0x0060);
