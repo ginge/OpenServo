@@ -57,12 +57,12 @@
 
 #define REG_SEEK_HI                 0x10
 #define REG_SEEK_LO                 0x11
-#define REG_MAXIMUM_PWM             0x12
-#define REG_RESERVED_13             0x13
-#define REG_RESERVED_14             0x14
-#define REG_RESERVED_15             0x15
-#define REG_RESERVED_16             0x16
-#define REG_RESERVED_17             0x17
+#define REG_SEEK_NEXT_HI            0x12
+#define REG_SEEK_NEXT_LO            0x13
+#define REG_SEEK_SPEED_HI           0x14
+#define REG_SEEK_SPEED_LO           0x15
+#define REG_SEEK_TIME_HI            0x16
+#define REG_SEEK_TIME_LO            0x17
 
 #define REG_RESERVED_18             0x18
 #define REG_RESERVED_19             0x19

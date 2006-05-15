@@ -38,6 +38,7 @@
 #include "regulator.h"
 #include "power.h"
 #include "pwm.h"
+#include "seek.h"
 #include "timer.h"
 #include "twi.h"
 #include "watchdog.h"
@@ -200,9 +201,9 @@ int main (void)
     // Wait until initial position value is ready.
     while (!adc_position_value_is_ready());
 
-    // Store the initial position as the initial command position.  If PWM is 
-    // enabled this will have the servo hold the position it is currently at.
-    registers_write_word(REG_SEEK_HI, REG_SEEK_LO, adc_get_position_value());
+    // Initialize the seek module with the current position of the servo.  If 
+    // PWM is enabled this will have the servo hold the current position.
+    seek_init(adc_get_position_value());
 
     // This is the main processing loop for the servo.  It basically looks
     // for new position, power or TWI commands to be processed.
@@ -216,6 +217,9 @@ int main (void)
 
             // Get the new position value.
             position = (int16_t) adc_get_position_value();
+
+            // Update the seek position.
+            seek_update();
 
 #if ESTIMATOR_ENABLED
             // Estimate velocity.
