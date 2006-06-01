@@ -32,17 +32,23 @@
 #include "eeprom.h"
 #include "registers.h"
 
+// Define the number of write protect registers.
+#define WRITE_PROTECT_REGISTER_COUNT    (MAX_WRITE_PROTECT_REGISTER - MIN_WRITE_PROTECT_REGISTER + 1)
+
+// Define the number of redirect registers.
+#define REDIRECT_REGISTER_COUNT         (MAX_REDIRECT_REGISTER - MIN_REDIRECT_REGISTER + 1)
+
 uint8_t eeprom_is_erased(void)
 // Perform simple test to determine if the EEPROM may have been erased
 // and register values should not be restored from the EEPROM.
 {
     // Validate certain register values that should not be 0xFF.
-    if (eeprom_read_byte ((void *) (REG_TWI_ADDRESS - MIN_WP_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_PID_PGAIN_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_PID_DGAIN_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_PID_IGAIN_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_MIN_SEEK_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
-    if (eeprom_read_byte ((void *) (REG_MAX_SEEK_HI - MIN_WP_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_TWI_ADDRESS - MIN_WRITE_PROTECT_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_PID_PGAIN_HI - MIN_WRITE_PROTECT_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_PID_DGAIN_HI - MIN_WRITE_PROTECT_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_PID_IGAIN_HI - MIN_WRITE_PROTECT_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_MIN_SEEK_HI - MIN_WRITE_PROTECT_REGISTER)) == 0xFF) return 1;
+    if (eeprom_read_byte ((void *) (REG_MAX_SEEK_HI - MIN_WRITE_PROTECT_REGISTER)) == 0xFF) return 1;
 
     // Doesn't appear to be erased.
     return 0;
@@ -54,8 +60,8 @@ void eeprom_restore_registers(void)
 {
     // XXX Disable PWM to servo motor while reading registers.
 
-    // Read the safe read/write registers from EEPROM.
-    eeprom_read_block(&registers[MAX_RW_REGISTER + 1], (void *) 0, 16);
+    // Read the write protected and redirect registers from EEPROM.
+    eeprom_read_block(&registers[MIN_WRITE_PROTECT_REGISTER], (void *) 0, WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT);
 
     // XXX Restore PWM to servo motor.
 
@@ -68,8 +74,8 @@ void eeprom_save_registers(void)
 {
     // XXX Disable PWM to servo motor while reading registers.
 
-    // Write the safe read/write registers from EEPROM.
-    eeprom_write_block(&registers[MAX_RW_REGISTER + 1], (void *) 0, 16);
+    // Write the write protected and redirect registers from EEPROM.
+    eeprom_write_block(&registers[MIN_WRITE_PROTECT_REGISTER], (void *) 0, WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT);
 
     // XXX Restore PWM to servo motor.
 

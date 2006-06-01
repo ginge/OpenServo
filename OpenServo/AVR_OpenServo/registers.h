@@ -111,26 +111,45 @@
 //
 // Define the register ranges.
 //
-#define MIN_RO_REGISTER             0x00
-#define MAX_RO_REGISTER             0x0F
-#define MIN_RW_REGISTER             0x10
-#define MAX_RW_REGISTER             0x1F
-#define MIN_WP_REGISTER             0x20
-#define MAX_WP_REGISTER             0x37
-#define MAX_REGISTER                MAX_WP_REGISTER
+#define MIN_READ_ONLY_REGISTER      0x00
+#define MAX_READ_ONLY_REGISTER      0x0F
+#define MIN_READ_WRITE_REGISTER     0x10
+#define MAX_READ_WRITE_REGISTER     0x1F
+#define MIN_WRITE_PROTECT_REGISTER  0x20
+#define MAX_WRITE_PROTECT_REGISTER  0x37
+#define MIN_UNUSED_REGISTER         0x38
+#define MAX_UNUSED_REGISTER         0x5F
+#define MIN_REDIRECT_REGISTER       0x60
+#define MAX_REDIRECT_REGISTER       0x6F
+#define MIN_REDIRECTED_REGISTER     0x70
+#define MAX_REDIRECTED_REGISTER     0x7F
+
+
+// Define the total number of registers define.  This includes 
+// all registers except unused and redirected registers.
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER + 16)
 
 #else // ESTIMATOR_ENABLED
 
 //
 // Define the register ranges.
 //
-#define MIN_RO_REGISTER             0x00
-#define MAX_RO_REGISTER             0x0F
-#define MIN_RW_REGISTER             0x10
-#define MAX_RW_REGISTER             0x1F
-#define MIN_WP_REGISTER             0x20
-#define MAX_WP_REGISTER             0x2F
-#define MAX_REGISTER                MAX_WP_REGISTER
+#define MIN_READ_ONLY_REGISTER      0x00
+#define MAX_READ_ONLY_REGISTER      0x0F
+#define MIN_READ_WRITE_REGISTER     0x10
+#define MAX_READ_WRITE_REGISTER     0x1F
+#define MIN_WRITE_PROTECT_REGISTER  0x20
+#define MAX_WRITE_PROTECT_REGISTER  0x2F
+#define MIN_UNUSED_REGISTER         0x30
+#define MAX_UNUSED_REGISTER         0x5F
+#define MIN_REDIRECT_REGISTER       0x60
+#define MAX_REDIRECT_REGISTER       0x6F
+#define MIN_REDIRECTED_REGISTER     0x70
+#define MAX_REDIRECTED_REGISTER     0x7F
+
+// Define the total number of registers define.  This includes 
+// all registers except unused and redirected registers.
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER + 16)
 
 #endif // ESTIMATOR_ENABLED
 
@@ -156,8 +175,11 @@
 #define FLAGS_LO_WRITE_ENABLED      0x01
 #define FLAGS_LO_PWM_ENABLED        0x00
 
-// Global register array.
-extern uint8_t registers[MAX_REGISTER + 1];
+// Global register array.  Note: to minimize memory the register count doesn't
+// include the unused and redirected registers.  For this reason care must be
+// taken when referencing the redirect registers which come after the unused
+// registers in this array.
+extern uint8_t registers[REGISTER_COUNT];
 
 // Register functions.
 

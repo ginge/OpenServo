@@ -36,7 +36,7 @@
 #include "registers.h"
 
 // Register values.
-uint8_t registers[MAX_REGISTER + 1];
+uint8_t registers[REGISTER_COUNT];
 
 void registers_init(void)
 // Function to initialize all registers.
@@ -44,7 +44,7 @@ void registers_init(void)
     uint8_t i;
 
     // Initialize all registers to zero.
-    for (i = 0; i < (MAX_REGISTER + 1); ++i)
+    for (i = 0; i < REGISTER_COUNT; ++i)
     {
         // Initialize the word.
         registers_write_byte(i, 0x00);

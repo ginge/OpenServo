@@ -110,38 +110,134 @@ static uint8_t twi_chk_write_buffer[TWI_CHK_WRITE_BUFFER_SIZE];
 #endif
 
 static uint8_t twi_registers_read(uint8_t address)
-// Read registers.  This function is meant to safely read
-// the registers for the TWI master.
+// Read the byte from the specified register.  This function handles the
+// reading of special registers such as unused registers, redirect and 
+// redirected registers.
 {
-    // Prevent overflow by wrapping.
+    // Mask the most significant bit of the address.
     address &= 0x7F;
 
-    // Avoid reading unimplemented registers.
-    if (address > MAX_REGISTER) return 0;
+    // Are we reading a normal register?
+    if (address <= MAX_WRITE_PROTECT_REGISTER)
+    {
+        // Yes. Complete the read.
+        return registers_read_byte(address);
+    }
 
-    // Read the register.
-    return registers_read_byte(address);
+    // Are we reading an unused register.
+    if (address <= MAX_UNUSED_REGISTER)
+    {
+        // Block the read.
+        return 0;
+    }
+
+    // Are we reading a redirect register.
+    if (address <= MAX_REDIRECT_REGISTER)
+    {
+        // Yes. Complete the read.
+        return registers_read_byte(address - (MIN_REDIRECT_REGISTER - MIN_UNUSED_REGISTER));
+    }
+
+    // Are we reading a redirected register?
+    if (address <= MAX_REDIRECTED_REGISTER)
+    {
+        // Adjust address to reference appropriate redirect register.
+        address = MIN_REDIRECT_REGISTER  + (address - MIN_REDIRECTED_REGISTER);
+
+        // Get the address from the redirect register.
+        address = registers_read_byte(address - (MIN_REDIRECT_REGISTER - MIN_UNUSED_REGISTER));
+
+        // Prevent infinite recursion.
+        if (address <= MAX_REDIRECT_REGISTER)
+        {
+            // Recursively read redirected address.
+            return twi_registers_read(address);
+        }
+    }
+
+    // All other reads are blocked.
+    return 0;
 }
 
 
 static void twi_registers_write(uint8_t address, uint8_t data)
-// Write non-write protected registers.  This function
-// is meant to safely write registers for the TWI master.
+// Write non-write protected registers.  This function handles the
+// writing of special registers such as unused registers, redirect and 
+// redirected registers.
 {
-    // Prevent overflow by wrapping.
+    // Mask the most significant bit of the address.
     address &= 0x7F;
 
-    // Avoid writing unimplemented registers.
-    if (address > MAX_REGISTER) return;
+    // Are we writing a read only register?
+    if (address <= MAX_READ_ONLY_REGISTER)
+    {
+        // Yes. Block the write.
+        return;
+    }
 
-    // Don't write to read/only registers.
-    if (address <= MAX_RO_REGISTER) return;
+    // Are we writing a read/write register?
+    if (address <= MAX_READ_WRITE_REGISTER)
+    {
+        // Yes. Complete the write.
+        registers_write_byte(address, data);
 
-    // Don't write to safe read/write registers unless enabled.
-    if ((address > MAX_RW_REGISTER) && registers_is_write_disabled()) return;
+        return;
+    }
 
-    // Write the data to the address address.
-    registers_write_byte(address, data);
+    // Is writing to the upper registers disabled?
+    if (registers_is_write_disabled())
+    {
+        // Yes. Block the write.
+        return;
+    }
+
+    // Are we writing a write protected register?
+    if (address <= MAX_WRITE_PROTECT_REGISTER)
+    {
+        // Yes. Complete the write if writes are enabled.
+        registers_write_byte(address, data);
+
+        return;
+    }
+
+    // Are we writing an unused register.
+    if (address <= MAX_UNUSED_REGISTER)
+    {
+        // Yes. Block the write.
+        return;
+    }
+
+
+    // Are we writing a redirect register.
+    if (address <= MAX_REDIRECT_REGISTER)
+    {
+        // Yes. Complete the write.
+        registers_write_byte(address - (MIN_REDIRECT_REGISTER - MIN_UNUSED_REGISTER), data);
+
+        return;
+    }
+
+    // Are we writing a redirected register?
+    if (address <= MAX_REDIRECTED_REGISTER)
+    {
+        // Adjust address to reference appropriate redirect register.
+        address = MIN_REDIRECT_REGISTER  + (address - MIN_REDIRECTED_REGISTER);
+
+        // Get the address from the redirect register.
+        address = registers_read_byte(address - (MIN_REDIRECTED_REGISTER - MIN_UNUSED_REGISTER));
+
+        // Prevent infinite recursion.
+        if (address <= MAX_REDIRECT_REGISTER)
+        {
+            // Recursively write redirected address.
+            twi_registers_write(address, data);
+
+            return;
+        }
+    }
+
+    // All other writes are blocked.
+    return;
 }
 
 
@@ -166,7 +262,7 @@ static uint8_t twi_read_data()
 // Handle checked/non-checked read of data.
 {
     // By default read the data to be returned.
-    uint8_t usi_data = twi_registers_read(twi_address);
+    uint8_t data = twi_registers_read(twi_address);
 
 #if TWI_CHECKED_ENABLED
     // Are we handling checked data?
@@ -176,7 +272,7 @@ static uint8_t twi_read_data()
         if (twi_chk_count < twi_chk_count_target)
         {
             // Add the data to the check sum.
-            twi_chk_sum += usi_data;
+            twi_chk_sum += data;
 
             // Increment the check sum data count.
             ++twi_chk_count;
@@ -187,7 +283,7 @@ static uint8_t twi_read_data()
         else
         {
             // Replace the data with the checksum.
-            usi_data = twi_chk_sum;
+            data = twi_chk_sum;
         }
     }
     else
@@ -200,11 +296,11 @@ static uint8_t twi_read_data()
     ++twi_address;
 #endif
 
-    return usi_data;
+    return data;
 }
 
 
-static uint8_t twi_write_data(uint8_t usi_data)
+static uint8_t twi_write_data(uint8_t data)
 // Handle checked/non-checked write of data or command.
 {
     // By default, return ACK from write.
@@ -216,16 +312,16 @@ static uint8_t twi_write_data(uint8_t usi_data)
         case TWI_DATA_STATE_COMMAND:
 
             // This is a byte.
-            if (usi_data < TWI_CMD_RESET)
+            if (data < TWI_CMD_RESET)
             {
                 // Capture the address.
-                twi_address = usi_data;
+                twi_address = data;
 
                 // Update the write state.
                 twi_data_state = TWI_DATA_STATE_DATA;
             }
 #if TWI_CHECKED_ENABLED
-            else if (usi_data == TWI_CMD_CHECKED_TXN)
+            else if (data == TWI_CMD_CHECKED_TXN)
             {
                 // Update the write state.
                 twi_data_state = TWI_DATA_STATE_CHECKED_COUNTING;
@@ -235,7 +331,7 @@ static uint8_t twi_write_data(uint8_t usi_data)
             {
                 // Handle the command asynchronously.
                 twi_rxhead = (twi_rxhead + 1) & TWI_RX_BUFFER_MASK;
-                twi_rxbuf[twi_rxhead] = usi_data;
+                twi_rxbuf[twi_rxhead] = data;
             }
 
             break;
@@ -243,7 +339,7 @@ static uint8_t twi_write_data(uint8_t usi_data)
         case TWI_DATA_STATE_DATA:
 
             // Write the data to the addressed register.
-            twi_registers_write(twi_address, usi_data);
+            twi_registers_write(twi_address, data);
 
             // Increment to the next address.
             ++twi_address;
@@ -255,7 +351,7 @@ static uint8_t twi_write_data(uint8_t usi_data)
 
             // Read in the count (Make sure it's less than the max count) 
 			// and start the checksum
-            twi_chk_sum = twi_chk_count_target = usi_data & TWI_CHK_WRITE_BUFFER_MASK;
+            twi_chk_sum = twi_chk_count_target = data & TWI_CHK_WRITE_BUFFER_MASK;
 
             // Clear the checksum and count.
             twi_chk_count = 0;
@@ -268,7 +364,7 @@ static uint8_t twi_write_data(uint8_t usi_data)
         case TWI_DATA_STATE_CHECKED_ADDRESS:
 
             // Capture the address and include it in the checksum
-            twi_chk_sum += twi_address = usi_data;
+            twi_chk_sum += twi_address = data;
 
             // Update the write state.
             twi_data_state = TWI_DATA_STATE_CHECKED_DATA;
@@ -281,10 +377,10 @@ static uint8_t twi_write_data(uint8_t usi_data)
             if (twi_chk_count < twi_chk_count_target)
             {
                 // No. Write the data to the checksum buffer
-                twi_chk_write_buffer[twi_chk_count & TWI_CHK_WRITE_BUFFER_MASK] = usi_data;
+                twi_chk_write_buffer[twi_chk_count & TWI_CHK_WRITE_BUFFER_MASK] = data;
 
                 // Add the data to the checksum.
-                twi_chk_sum += usi_data;
+                twi_chk_sum += data;
 
                 // Increment the check sum data count.
                 ++twi_chk_count;
@@ -292,7 +388,7 @@ static uint8_t twi_write_data(uint8_t usi_data)
             else
             {
                 // Verify the checksum
-                if (usi_data == twi_chk_sum)
+                if (data == twi_chk_sum)
                 {
                     // Write the checksum buffer to addressed registers.
                     twi_write_buffer();
@@ -626,29 +722,17 @@ SIGNAL(SIG_TWI)
         // Previously addressed with own SLA+W; data has been received; ACK has been returned.
         case TWI_SRX_ADR_DATA_ACK:
 
-            // Write the data and return ack/nack.
-            if (twi_write_data(TWDR) == TWI_ACK)
-            {
-                // Data byte will be received and ACK will be returned.
-                TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
-                       (1<<TWIE) |                          // Keep the TWI interrupt enabled.
-                       (0<<TWSTA) |                         // Don't generate start condition.
-                       (0<<TWSTO) |                         // Don't generate stop condition.
-                       (1<<TWINT) |                         // Clear the TWI interrupt.
-                       (1<<TWEA) |                          // Acknowledge the data.
-                       (0<<TWWC);                           //
-            }
-            else
-            {
-                // Data byte will be received and NOT ACK will be returned.
-                TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
-                       (1<<TWIE) |                          // Keep the TWI interrupt enabled.
-                       (0<<TWSTA) |                         // Don't generate start condition.
-                       (0<<TWSTO) |                         // Don't generate stop condition.
-                       (1<<TWINT) |                         // Clear the TWI interrupt.
-                       (0<<TWEA) |                          // Not acknowledge the data.
-                       (0<<TWWC);                           //
-            }
+            // Write the data.
+            twi_write_data(TWDR);
+
+            // Next data byte will be received and ACK will be returned.
+            TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
+                   (1<<TWIE) |                          // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                         // Don't generate start condition.
+                   (0<<TWSTO) |                         // Don't generate stop condition.
+                   (1<<TWINT) |                         // Clear the TWI interrupt.
+                   (1<<TWEA) |                          // Acknowledge the data.
+                   (0<<TWWC);                           //
 
             break;
 
