@@ -54,7 +54,30 @@ void seek_init(uint16_t init_position)
 
 
 void seek_update(void)
-// Update the seek position as needed.
+// Update the seek position as needed.  This function uses three additional 
+// registers to independently update the REG_SEEK register pair over time.
+// The REG_SEEK_NEXT register pairis the position the servo should seek to 
+// over time.  Speed of the seek is set by two different methods:
+//
+// Speed Based Seek
+//
+// With speed based seek the REG_SEEK_SPEED register pair is set to the
+// speed the servo should seek.  This is an 8:8 unsigned fixed point 
+// number that the servo should increment with each time period of about
+// 1/100th of a second.  A value of 0x0100 will have the servo move 1.0 
+// position each sample time.
+// 
+//
+// Time Based Seek
+//
+// With time based seek the REG_SEEK_TIME register pair is set to the 
+// time the servo should take to accomplish the seek.  The result of 
+// setting the time will automatically update the REG_SEEK_SPEED value
+// with the speed to accomplish the seek.
+//
+// A seek doesn't begin until both the REG_SEEK_NEXT and REG_SEEK_SPEED 
+// or the REG_SEEK_NEXT and REG_SEEK_TIME registers pairs are set.
+//
 {
     uint16_t seek;
     uint16_t seek_next;
@@ -66,6 +89,10 @@ void seek_update(void)
     seek_next = (int16_t) registers_read_word(REG_SEEK_NEXT_HI, REG_SEEK_NEXT_LO);
     seek_time = (int16_t) registers_read_word(REG_SEEK_TIME_HI, REG_SEEK_TIME_LO);
     seek_speed = (int16_t) registers_read_word(REG_SEEK_SPEED_HI, REG_SEEK_SPEED_LO);
+
+    // Sanity check the values.
+    if (seek > 0x3FF) seek = 0x3FF;
+    if (seek_next > 0x3FF) seek_next = 0x3FF;
 
     // Do we have a time?  If so, we will automatically determine seek_speed based
     // on the value of seek_time.  On exist the seek_time value will be cleared and
@@ -142,7 +169,7 @@ void seek_update(void)
 
             // Check for overflow of the accumulator.  If there is an overflow
             // then set the accumulator to the maximum seek position.
-            if (seek_accumulator > 0x040000) seek_accumulator = 0x040000;
+            if (seek_accumulator > 0x03FFFFF) seek_accumulator = 0x03FFFFF;
 
             // Get the seek position from the accumulator.  The seek position is
             // truncated to an unsigned 16 bit value with the fractional portion of
@@ -172,7 +199,7 @@ void seek_update(void)
 
             // Check for underflow of the accumulator.  If there is an underflow
             // then set the accumulator to the minimum seek position.
-            if (seek_accumulator > 0x040000) seek_accumulator = 0x000000;
+            if (seek_accumulator > 0x03FFFFF) seek_accumulator = 0x03FFFFF;
 
             // Get the seek position from the accumulator.  The seek position is
             // truncated to an unsigned 16 bit value with the fractional portion of
