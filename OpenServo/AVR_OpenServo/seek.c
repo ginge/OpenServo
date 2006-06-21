@@ -33,7 +33,9 @@
 #include "registers.h"
 #include "seek.h"
 
-// Persistant seek variables.
+// Persistant seek variables.  The seek_accumulator is an unsigned 24:8 fixed
+// point value.  The fractional component is used to accomodate speeds less
+// slower than 1.0 units for each increment.
 static uint8_t seek_state;
 static uint32_t seek_accumulator;
 
@@ -65,7 +67,9 @@ void seek_update(void)
     seek_time = (int16_t) registers_read_word(REG_SEEK_TIME_HI, REG_SEEK_TIME_LO);
     seek_speed = (int16_t) registers_read_word(REG_SEEK_SPEED_HI, REG_SEEK_SPEED_LO);
 
-    // Do we have a time?
+    // Do we have a time?  If so, we will automatically determine seek_speed based
+    // on the value of seek_time.  On exist the seek_time value will be cleared and
+    // the seek_speed value will be set.
     if (seek_time > 0)
     {
         // Are we seeking upward or downward?
@@ -74,13 +78,17 @@ void seek_update(void)
             // Automatically determine the speed.
             uint32_t delta = seek_next - seek;
 
-            // Adjust for 8:8 fixed point value.
+            // Adjust for 24:8 fixed point value.
             delta <<= 8;
 
             // Divide by time.
             delta /= seek_time;
 
-            // Set the speed.
+            // Prevent the delta from overflowing the maximum 16-bit speed.
+            if (delta > 0xFFFF) delta = 0xFFFF;
+
+            // Set the speed as an 8:8 unsigned fixed value.  The upper 16 bits 
+            // of the 24:8 fixed detla value is truncated.
             seek_speed = (uint16_t) delta;
 
             // Write the new speed.
@@ -91,13 +99,17 @@ void seek_update(void)
             // Automatically determine the speed.
             uint32_t delta = seek - seek_next;
 
-            // Adjust for 8:8 fixed point value.
+            // Adjust for 24:8 fixed point value.
             delta <<= 8;
 
             // Divide by time.
             delta /= seek_time;
 
-            // Set the speed.
+            // Prevent the delta from overflowing the maximum 16-bit speed.
+            if (delta > 0xFFFF) delta = 0xFFFF;
+
+            // Set the speed as an 8:8 unsigned fixed value.  The upper 16 bits 
+            // of the 24:8 fixed detla value is truncated.
             seek_speed = (uint16_t) delta;
 
             // Write the new speed.
@@ -126,12 +138,18 @@ void seek_update(void)
         if (seek < seek_next)
         {
             // Add speed to position accumulator.
-            seek_accumulator += (int16_t) seek_speed;
+            seek_accumulator += seek_speed;
 
-            // Move accumulator to seek position.
+            // Check for overflow of the accumulator.  If there is an overflow
+            // then set the accumulator to the maximum seek position.
+            if (seek_accumulator > 0x040000) seek_accumulator = 0x040000;
+
+            // Get the seek position from the accumulator.  The seek position is
+            // truncated to an unsigned 16 bit value with the fractional portion of
+            // 24:8 fixed point number shifted out.
             seek = seek_accumulator >> 8;
 
-            // Adjust seek as needed.
+            // Clear out the seek speed if the next seek position has been reached.
             if (seek >= seek_next)
             {
                 // Reset the seek position.
@@ -152,13 +170,16 @@ void seek_update(void)
             // Subtract speed from position accumulator.
             seek_accumulator -= seek_speed;
 
-            // Make sure we haven't underflowed to less than zero.
-            if (seek_accumulator < 0) seek_accumulator = 0;
+            // Check for underflow of the accumulator.  If there is an underflow
+            // then set the accumulator to the minimum seek position.
+            if (seek_accumulator > 0x040000) seek_accumulator = 0x000000;
 
-            // Move accumulator to seek position.
+            // Get the seek position from the accumulator.  The seek position is
+            // truncated to an unsigned 16 bit value with the fractional portion of
+            // 24:8 fixed point number shifted out.
             seek = seek_accumulator >> 8;
 
-            // Adjust seek as needed.
+            // Clear out the seek speed if the next seek position has been reached.
             if (seek <= seek_next)
             {
                 // Reset the seek position.
