@@ -96,16 +96,16 @@ void pid_registers_defaults(void)
     registers_write_byte(REG_DEADBAND, 0x02);
 
     // Default gain values.
-    registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0600);
-    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x0800);
-    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, 0x0008);
+    registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, DEFAULT_PID_PGAIN);
+    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, DEFAULT_PID_DGAIN);
+    registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, DEFAULT_PID_IGAIN);
 
     // Default offset value.
     registers_write_byte(REG_PID_OFFSET, 0x60);
 
     // Default position limits.
-    registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, 0x0060);
-    registers_write_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO, 0x03A0);
+    registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, DEFAULT_MIN_SEEK);
+    registers_write_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO, DEFAULT_MAX_SEEK);
 
     // Default reverse seek setting.
     registers_write_byte(REG_REVERSE_SEEK, 0x00);

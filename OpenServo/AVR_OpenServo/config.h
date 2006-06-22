@@ -111,4 +111,66 @@
 #  error "Configuration settings for REGULATOR_MOTION_ENABLED requires ESTIMATOR_ENABLED."
 #endif
 
+// The known OpenServo hardware types are listed below.
+#define HARDWARE_TYPE_UNKNOWN           0
+#define HARDWARE_TYPE_FUTABA_S3003      1
+#define HARDWARE_TYPE_HITEC_HS_311      2
+#define HARDWARE_TYPE_HITEC_HS_475HB    3
+
+// By default the hardware type is unknown.  This value should be 
+// changed to reflect the hardware type that the code is actually 
+// being compiled for.
+#define HARDWARE_TYPE                   HARDWARE_TYPE_UNKNOWN
+
+// Set configuration values based on HARDWARE_TYPE.
+#if (HARDWARE_TYPE == HARDWARE_TYPE_UNKNOWN)
+
+// By default the PID gains are set to zero because they are the 
+// safest default when implementing an OpenServo on a new hardware.  
+// These defaults should be overriden by specifying the HARDWARE_TYPE
+// above for actual known servo hardware.
+#define DEFAULT_PID_PGAIN               0x0000
+#define DEFAULT_PID_DGAIN               0x0000
+#define DEFAULT_PID_IGAIN               0x0000
+
+// Specify default mininimum and maximum seek positions.  The OpenServo will
+// not attempt to seek beyond these positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+#elif (HARDWARE_TYPE == HARDWARE_TYPE_FUTABA_S3003)
+
+// Futaba S3003 hardware default PID gains.
+#define DEFAULT_PID_PGAIN               0x0600
+#define DEFAULT_PID_DGAIN               0x0800
+#define DEFAULT_PID_IGAIN               0x0008
+
+// Futaba S3003 hardware default mininimum and maximum seek positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+#elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_311)
+
+// Hitec HS-311 hardware default PID gains.
+#define DEFAULT_PID_PGAIN               0x0600
+#define DEFAULT_PID_DGAIN               0x0800
+#define DEFAULT_PID_IGAIN               0x0008
+
+// Hitec HS-311 hardware default mininimum and maximum seek positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+#elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_475HB)
+
+// Hitec HS-475HB hardware default PID gains.
+#define DEFAULT_PID_PGAIN               0x0600
+#define DEFAULT_PID_DGAIN               0x0800
+#define DEFAULT_PID_IGAIN               0x0008
+
+// Hitec HS-475HB hardware default mininimum and maximum seek positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+#endif
+
 #endif // _OS_ADC_H_
