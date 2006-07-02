@@ -25,6 +25,7 @@
 */
 
 #include <inttypes.h>
+#include <string.h>
 
 #include "openservo.h"
 #include "config.h"
@@ -41,14 +42,8 @@ uint8_t registers[REGISTER_COUNT];
 void registers_init(void)
 // Function to initialize all registers.
 {
-    uint8_t i;
-
     // Initialize all registers to zero.
-    for (i = 0; i < REGISTER_COUNT; ++i)
-    {
-        // Initialize the word.
-        registers_write_byte(i, 0x00);
-    }
+    memset(&registers[0], 0, REGISTER_COUNT);
 
     // Set device and software identification information.
     registers_write_byte(REG_DEVICE_TYPE, OPENSERVO_DEVICE_TYPE);
@@ -56,14 +51,16 @@ void registers_init(void)
     registers_write_byte(REG_VERSION_MAJOR, SOFTWARE_VERSION_MAJOR);
     registers_write_byte(REG_VERSION_MINOR, SOFTWARE_VERSION_MINOR);
 
-    // Initialize read/write protected registers to defaults.
-    registers_defaults();
-
-    // Does the EEPROM appear to be erased?
-    if (!eeprom_is_erased())
+    // Restore the read/write protected registers from EEPROM.  If the
+    // EEPROM fails checksum this function will return zero and the
+    // read/write protected registers should be initialized to defaults.
+    if (!eeprom_restore_registers())
     {
-        // No. Restore the register values.
-        eeprom_restore_registers();
+        // Reset read/write protected registers to zero.
+        memset(&registers[MIN_WRITE_PROTECT_REGISTER], WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT, REGISTER_COUNT);
+
+        // Initialize read/write protected registers to defaults.
+        registers_defaults();
     }
 }
 

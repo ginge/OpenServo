@@ -153,6 +153,12 @@
 
 #endif // ESTIMATOR_ENABLED
 
+// Define the number of write protect registers.
+#define WRITE_PROTECT_REGISTER_COUNT    (MAX_WRITE_PROTECT_REGISTER - MIN_WRITE_PROTECT_REGISTER + 1)
+
+// Define the number of redirect registers.
+#define REDIRECT_REGISTER_COUNT         (MAX_REDIRECT_REGISTER - MIN_REDIRECT_REGISTER + 1)
+
 //
 // Define the flag register REG_FLAGS_HI and REG_FLAGS_LO bits.
 //

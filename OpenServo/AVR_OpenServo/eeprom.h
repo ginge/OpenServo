@@ -27,8 +27,15 @@
 #ifndef _OS_EEPROM_H_
 #define _OS_EEPROM_H_ 1
 
-uint8_t eeprom_is_erased(void);
-void eeprom_restore_registers(void);
-void eeprom_save_registers(void);
+// The following defines the EEPROM version.  This value should 
+// be changed in code whenever changes to the OpenServo registers
+// would cause the data stored in EEPROM to be incompatible from 
+// one version of the OpenServo firmware to the next version of 
+// the OpenServo firmware.
+#define EEPROM_VERSION      0x01
+
+uint8_t eeprom_erase(void);
+uint8_t eeprom_restore_registers(void);
+uint8_t eeprom_save_registers(void);
 
 #endif // _OS_EEPROM_H_

@@ -135,6 +135,13 @@ static void handle_twi_command(void)
             registers_defaults();
             break;
 
+        case TWI_CMD_EEPROM_ERASE:
+
+            // Erase the EEPROM.
+            eeprom_erase();
+
+            break;
+
         default:
 
             // Ignore unknown command.
