@@ -64,8 +64,8 @@
 #define REG_SEEK_TIME_HI            0x16
 #define REG_SEEK_TIME_LO            0x17
 
-#define REG_RESERVED_18             0x18
-#define REG_RESERVED_19             0x19
+#define REG_VOLTAGE_HI              0x18
+#define REG_VOLTAGE_LO              0x19
 #define REG_RESERVED_1A             0x1A
 #define REG_RESERVED_1B             0x1B
 #define REG_RESERVED_1C             0x1C

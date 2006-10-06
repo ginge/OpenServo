@@ -37,6 +37,7 @@
 #define TWI_CMD_REGISTERS_RESTORE   0x87        // Restore safe read/write registers from EEPROM
 #define TWI_CMD_REGISTERS_DEFAULT   0x88        // Restore safe read/write registers to defaults
 #define TWI_CMD_EEPROM_ERASE        0x89        // Erase the EEPROM.
+#define TWI_CMD_VOLTAGE_READ        0x90        // Starts a ADC on the supply voltage channel
 
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
 

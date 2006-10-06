@@ -35,6 +35,8 @@ extern volatile uint8_t adc_power_ready;
 extern volatile uint16_t adc_power_value;
 extern volatile uint8_t adc_position_ready;
 extern volatile uint16_t adc_position_value;
+extern volatile uint8_t adc_voltage_needed;
+
 
 // In-lines for fast access to power flags and values.
 
@@ -84,6 +86,12 @@ inline static void adc_position_value_clear_ready(void)
 // Clear the ready ADC power value ready flag.
 {
     adc_position_ready = 0;
+}
+
+inline static void adc_read_voltage(void) 
+// Set a flag to start a adc on supply voltage channel.
+{
+    adc_voltage_needed = 1;
 }
 
 #endif // _OS_ADC_H_
