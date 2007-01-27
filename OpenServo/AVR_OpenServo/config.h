@@ -84,6 +84,14 @@
 // by the state estimator and state regulator.
 #define FIXED_MATH_ENABLED          (ESTIMATOR_ENABLED || REGULATOR_ENABLED)
 
+// Enable (1) or disable (0) cubic Hermite curve following motion
+// functions.  These functions allow the OpenServo to be controlled
+// by keypoints along a cubic Hermite curve with each keypoint
+// indicating servo position and velocity at a particular time.
+// As of Jan. 27th, 2007 this feature is not yet fully implemented
+// and should remain disabled.
+#define CURVE_MOTION_ENABLED        0
+
 // Enable (1) or disable (0) some test motion code within the
 // main.c module.  This test code can be enabled to test basic
 // positioning of the OpenServo without a TWI master controlling
