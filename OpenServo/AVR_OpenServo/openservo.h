@@ -36,7 +36,7 @@
 // so that external TWI clients can query the version of the software
 // running on the servo.
 #define SOFTWARE_VERSION_MAJOR          0
-#define SOFTWARE_VERSION_MINOR          1
+#define SOFTWARE_VERSION_MINOR          2
 
 //
 // Utility functions.

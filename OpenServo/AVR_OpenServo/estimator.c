@@ -98,8 +98,8 @@ void estimate_velocity(int16_t current_position)
     
     
     // Read last PWM
-    int16_t lastPWM = (int16_t) registers_read_byte(REG_PWM_CCW) - 
-                      (int16_t) registers_read_byte(REG_PWM_CW);
+    int16_t lastPWM = (int16_t) registers_read_byte(REG_PWM_DIRB) - 
+                      (int16_t) registers_read_byte(REG_PWM_DIRA);
     
 	// The following operations are fixed point operations. To add/substract
 	// two fixed point values they must have the same fractional precision

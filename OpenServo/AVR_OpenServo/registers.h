@@ -55,30 +55,29 @@
 // TWI read/write registers.  Writing these
 // registers controls operation of the servo.
 
-#define REG_SEEK_HI                 0x10
-#define REG_SEEK_LO                 0x11
-#define REG_SEEK_NEXT_HI            0x12
-#define REG_SEEK_NEXT_LO            0x13
-#define REG_SEEK_SPEED_HI           0x14
-#define REG_SEEK_SPEED_LO           0x15
-#define REG_SEEK_TIME_HI            0x16
-#define REG_SEEK_TIME_LO            0x17
+#define REG_SEEK_POSITION_HI        0x10
+#define REG_SEEK_POSITION_LO        0x11
+#define REG_SEEK_VELOCITY_HI        0x12
+#define REG_SEEK_VELOCITY_LO        0x13
+#define REG_VOLTAGE_HI              0x14
+#define REG_VOLTAGE_LO              0x15
+#define REG_CURVE_RESERVED          0x16
+#define REG_CURVE_BUFFER            0x17
 
-#define REG_VOLTAGE_HI              0x18
-#define REG_VOLTAGE_LO              0x19
-#define REG_RESERVED_1A             0x1A
-#define REG_RESERVED_1B             0x1B
-#define REG_RESERVED_1C             0x1C
-#define REG_RESERVED_1D             0x1D
-#define REG_RESERVED_1E             0x1E
-#define REG_RESERVED_1F             0x1F
-
+#define REG_CURVE_DELTA_HI          0x18
+#define REG_CURVE_DELTA_LO          0x19
+#define REG_CURVE_POSITION_HI       0x1A
+#define REG_CURVE_POSITION_LO       0x1B
+#define REG_CURVE_IN_VELOCITY_HI    0x1C
+#define REG_CURVE_IN_VELOCITY_LO    0x1D
+#define REG_CURVE_OUT_VELOCITY_HI   0x1E
+#define REG_CURVE_OUT_VELOCITY_LO   0x1F
 
 // TWI safe read/write registers.  These registers
 // may only be written to when write enabled.
 
 #define REG_TWI_ADDRESS             0x20
-#define REG_DEADBAND                0x21
+#define REG_PID_OFFSET              0x21
 #define REG_PID_PGAIN_HI            0x22
 #define REG_PID_PGAIN_LO            0x23
 #define REG_PID_DGAIN_HI            0x24
@@ -177,7 +176,7 @@
 #define FLAGS_LO_RESERVED_05        0x05
 #define FLAGS_LO_RESERVED_04        0x04
 #define FLAGS_LO_RESERVED_03        0x03
-#define FLAGS_LO_RESERVED_02        0x02
+#define FLAGS_LO_MOTION_ENABLED     0x02
 #define FLAGS_LO_WRITE_ENABLED      0x01
 #define FLAGS_LO_PWM_ENABLED        0x00
 

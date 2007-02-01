@@ -34,6 +34,7 @@
 #include "eeprom.h"
 #include "estimator.h"
 #include "ipd.h"
+#include "motion.h"
 #include "pid.h"
 #include "regulator.h"
 #include "power.h"
@@ -149,6 +150,35 @@ static void handle_twi_command(void)
 
             break;
 
+#if CURVE_MOTION_ENABLED
+        case TWI_CMD_CURVE_MOTION_ENABLE:
+
+            // Enable curve motion handling.
+            motion_enable();
+
+            break;
+
+        case TWI_CMD_CURVE_MOTION_DISABLE:
+
+            // Disable curve motion handling.
+            motion_disable();
+
+            break;
+
+        case TWI_CMD_CURVE_MOTION_RESET:
+
+            // Reset the motion to the current position.
+            motion_reset(adc_get_position_value());
+
+            break;
+
+        case TWI_CMD_CURVE_MOTION_APPEND:
+
+            // Append motion curve data stored in the registers.
+            motion_append();
+
+            break;
+#endif
 
         default:
 
@@ -180,6 +210,11 @@ int main (void)
     estimator_init();
 #endif
 
+#if REGULATOR_MOTION_ENABLED
+    // Initialize the regulator algorithm module.
+    regulator_init();
+#endif
+
 #if PID_MOTION_ENABLED
     // Initialize the PID algorithm module.
     pid_init();
@@ -190,9 +225,9 @@ int main (void)
     ipd_init();
 #endif
 
-#if REGULATOR_MOTION_ENABLED
-    // Initialize the regulator algorithm module.
-    regulator_init();
+#if CURVE_MOTION_ENABLED
+    // Initialize curve motion module.
+    motion_init();
 #endif
 
     // Initialize the power module.
@@ -207,18 +242,23 @@ int main (void)
     // Enable interrupts.
     sei();
 
+    // Wait until initial position value is ready.
+    while (!adc_position_value_is_ready());
+
+#if CURVE_MOTION_ENABLED
+    // Reset the curve motion with the current position of the servo.
+    motion_reset(adc_get_position_value());
+#endif
+
+    // Set the initial seek position and velocity.
+    registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, adc_get_position_value());
+    registers_write_word(REG_SEEK_VELOCITY_HI, REG_SEEK_VELOCITY_LO, 0);
+
     // XXX Enable PWM and writing.  I do this for now to make development and
     // XXX tuning a bit easier.  Constantly manually setting these values to 
     // XXX turn the servo on and write the gain values get's to be a pain.
     pwm_enable();
     registers_write_enable();
-
-    // Wait until initial position value is ready.
-    while (!adc_position_value_is_ready());
-
-    // Initialize the seek module with the current position of the servo.  If 
-    // PWM is enabled this will have the servo hold the current position.
-    seek_init(adc_get_position_value());
 
     // This is the main processing loop for the servo.  It basically looks
     // for new position, power or TWI commands to be processed.
@@ -233,8 +273,10 @@ int main (void)
             // Get the new position value.
             position = (int16_t) adc_get_position_value();
 
-            // Update the seek position.
-            seek_update();
+#if CURVE_MOTION_ENABLED
+            // Give the motion curve a chance to update the seek position and velocity.
+            motion_next(10);
+#endif
 
 #if ESTIMATOR_ENABLED
             // Estimate velocity.
@@ -281,7 +323,24 @@ int main (void)
 #if MAIN_MOTION_TEST_ENABLED
         // This code is in place for having the servo drive itself between 
         // two positions to aid in the servo tuning process.  This code 
-        // should normally be disabled.
+        // should normally be disabled in config.h.
+#if CURVE_MOTION_ENABLED
+        if (motion_time_left() == 0)
+        {
+            registers_write_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO, 2000);
+            registers_write_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO, 0x0100);
+            motion_append();
+            registers_write_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO, 1000);
+            registers_write_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO, 0x0300);
+            motion_append();
+            registers_write_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO, 2000);
+            registers_write_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO, 0x0300);
+            motion_append();
+            registers_write_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO, 1000);
+            registers_write_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO, 0x0100);
+            motion_append();
+        }
+#else
         {
             // Get the timer.
             uint16_t timer = timer_get();
@@ -299,6 +358,7 @@ int main (void)
                 registers_write_word(REG_SEEK_HI, REG_SEEK_LO, 0x0300);
             }
         }
+#endif
 #endif
     }
 

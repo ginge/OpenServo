@@ -27,17 +27,22 @@
 #ifndef _OS_TWI_H_
 #define _OS_TWI_H_ 1
 
-#define TWI_CMD_RESET               0x80        // Reset command
-#define TWI_CMD_CHECKED_TXN         0x81        // Read/Write registers with simple checksum
-#define TWI_CMD_PWM_ENABLE          0x82        // Enable PWM to motors
-#define TWI_CMD_PWM_DISABLE         0x83        // Disable PWM to servo motors
-#define TWI_CMD_WRITE_ENABLE        0x84        // Enable write of safe read/write registers
-#define TWI_CMD_WRITE_DISABLE       0x85        // Disable write of safe read/write registers
-#define TWI_CMD_REGISTERS_SAVE      0x86        // Save safe read/write registers fo EEPROM
-#define TWI_CMD_REGISTERS_RESTORE   0x87        // Restore safe read/write registers from EEPROM
-#define TWI_CMD_REGISTERS_DEFAULT   0x88        // Restore safe read/write registers to defaults
-#define TWI_CMD_EEPROM_ERASE        0x89        // Erase the EEPROM.
-#define TWI_CMD_VOLTAGE_READ        0x90        // Starts a ADC on the supply voltage channel
+#define TWI_CMD_RESET                   0x80        // Reset command
+#define TWI_CMD_CHECKED_TXN             0x81        // Read/Write registers with simple checksum
+#define TWI_CMD_PWM_ENABLE              0x82        // Enable PWM to motors
+#define TWI_CMD_PWM_DISABLE             0x83        // Disable PWM to servo motors
+#define TWI_CMD_WRITE_ENABLE            0x84        // Enable write of safe read/write registers
+#define TWI_CMD_WRITE_DISABLE           0x85        // Disable write of safe read/write registers
+#define TWI_CMD_REGISTERS_SAVE          0x86        // Save safe read/write registers fo EEPROM
+#define TWI_CMD_REGISTERS_RESTORE       0x87        // Restore safe read/write registers from EEPROM
+#define TWI_CMD_REGISTERS_DEFAULT       0x88        // Restore safe read/write registers to defaults
+#define TWI_CMD_EEPROM_ERASE            0x89        // Erase the EEPROM.
+#define TWI_CMD_VOLTAGE_READ            0x90        // Starts a ADC on the supply voltage channel
+#define TWI_CMD_CURVE_MOTION_ENABLE     0x91        // Enable curve motion processing.
+#define TWI_CMD_CURVE_MOTION_DISABLE    0x92        // Disable curve motion processing.
+#define TWI_CMD_CURVE_MOTION_RESET      0x93        // Reset the curve motion buffer.
+#define TWI_CMD_CURVE_MOTION_APPEND     0x94        // Append curve motion data.
+
 
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
 

@@ -42,18 +42,39 @@
 #define MAX_OUTPUT              (255)
 #define MIN_OUTPUT              (-MAX_OUTPUT)
 
-// Defines for maximum and minimum integral error.  These values
-// are used to keep the integral error from winding up or down 
-// to unreasonable values.
-#define MAX_INTEGRAL_ERROR  (4000)
-#define MIN_INTEGRAL_ERROR  (-4000)
-
-// Borrow a reserved register.
-#define REG_PID_OFFSET          REG_RESERVED_2D
-
 // Values preserved across multiple PID iterations.
-static int16_t integral_error = 0;
-static int16_t previous_position = 0;
+static int16_t previous_seek;
+static int16_t previous_position;
+
+//
+// Digital Lowpass Filter Implementation
+//
+// See: A Simple Software Lowpass Filter Suits Embedded-system Applications
+// http://www.edn.com/article/CA6335310.html
+//
+// k    Bandwidth (Normalized to 1Hz)   Rise Time (samples)
+// 1    0.1197                          3
+// 2    0.0466                          8
+// 3    0.0217                          16
+// 4    0.0104                          34
+// 5    0.0051                          69
+// 6    0.0026                          140
+// 7    0.0012                          280
+// 8    0.0007                          561
+//
+
+#define FILTER_SHIFT 1
+
+static int32_t filter_reg = 0;
+
+static int16_t filter_update(int16_t input)
+{
+    // Update the filter with the current input.
+    filter_reg = filter_reg - (filter_reg >> FILTER_SHIFT) + input;
+
+    // Scale output for unity gain.
+    return (int16_t) (filter_reg >> FILTER_SHIFT);
+}
 
 static int16_t gain_multiply(int16_t error, uint16_t gain)
 // Multiplies the PID error value by the PID gain value.
@@ -65,8 +86,8 @@ static int16_t gain_multiply(int16_t error, uint16_t gain)
     // Multiply the error times the gain.
     result = (int32_t) error * (int32_t) gain;
 
-    // Divide result by 256 to account for fixed point gain.
-    result /= 256;
+    // Shift by 8 to account for fixed point gain.
+    result >>= 8;
 
     // Perform bounds checking against reasonable miniums and maximums.
     // We keep the individual results between -10000 and 10000 so that
@@ -83,7 +104,7 @@ void pid_init(void)
 // Initialize the PID algorithm module.
 {
     // Initialize preserved values.
-    integral_error = 0;
+    previous_seek = 0;
     previous_position = 0;
 }
 
@@ -92,16 +113,13 @@ void pid_registers_defaults(void)
 // Initialize the PID algorithm related register values.  This is done 
 // here to keep the PID related code in a single file.  
 {
-    // Default deadband.
-    registers_write_byte(REG_DEADBAND, 0x02);
+    // Default offset value.
+    registers_write_byte(REG_PID_OFFSET, 0x30);
 
     // Default gain values.
     registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, DEFAULT_PID_PGAIN);
     registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, DEFAULT_PID_DGAIN);
     registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, DEFAULT_PID_IGAIN);
-
-    // Default offset value.
-    registers_write_byte(REG_PID_OFFSET, 0x60);
 
     // Default position limits.
     registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, DEFAULT_MIN_SEEK);
@@ -113,150 +131,88 @@ void pid_registers_defaults(void)
 
 
 int16_t pid_position_to_pwm(int16_t current_position)
-// This function takes the current servo position as input and outputs a pwm
-// value for the servo motors.  The current position value must be within the
-// range 0 and 1023. The output will be within the range of -255 and 255 with
-// values less than zero indicating clockwise rotation and values more than
-// zero indicating counter-clockwise rotation.
+// This is a modified pid algorithm by which the seek position and seek
+// velocity are assumed to be a moving target.  The algorithm attempts to
+// output a pwm value that will achieve a predicted position and velocity.
 {
     int16_t output;
-    int16_t deadband;
-    int16_t output_range;
-    int16_t output_offset;
-    int16_t command_position;
+    int16_t output_minimum;
+    int16_t current_velocity;
+    int16_t filtered_position;
+    int16_t seek_position;
+    int16_t seek_velocity;
     int16_t minimum_position;
     int16_t maximum_position;
-    int16_t derivative_error;
-    int16_t proportional_error;
-    uint16_t integral_gain;
-    uint16_t derivative_gain;
-    uint16_t proportional_gain;
+    int16_t p_component;
+    int16_t d_component;
+    uint16_t d_gain;
+    uint16_t p_gain;
 
-    // Initialize the output.
-    output = 0;
+    // Filter the current position thru a digital low-pass filter.
+    filtered_position = filter_update(current_position);
 
-    // Get the command position to where the servo is moving to from the registers.
-    command_position = (int16_t) registers_read_word(REG_SEEK_HI, REG_SEEK_LO);
+    // Use the filtered position to determine velocity.
+    current_velocity = filtered_position - previous_position;
+    previous_position = filtered_position;
+
+    // Get the seek position and velocity.
+    seek_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
+    seek_velocity = (int16_t) registers_read_word(REG_SEEK_VELOCITY_HI, REG_SEEK_VELOCITY_LO);
+
+    // Get the minimum and maximum position.
     minimum_position = (int16_t) registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
     maximum_position = (int16_t) registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
-
-    // Get the deadband value and divide by two for calculations below.
-    deadband = (int16_t) (registers_read_byte(REG_DEADBAND) / 2);
 
     // Are we reversing the seek sense?
     if (registers_read_byte(REG_REVERSE_SEEK) != 0)
     {
-        // Yes. Update the system registers with an adjusted reverse sense
-        // position. With reverse sense, the position value to grows from
-        // a low value to high value in the clockwise direction.
+        // Yes. Update the position and velocity using reverse sense.
         registers_write_word(REG_POSITION_HI, REG_POSITION_LO, (uint16_t) (MAX_POSITION - current_position));
+        registers_write_word(REG_VELOCITY_HI, REG_VELOCITY_LO, (uint16_t) -current_velocity);
 
-        // Adjust command position for the reverse sense.
-        command_position = MAX_POSITION - command_position;
+        // Reverse sense the seek and other position values.
+        seek_position = MAX_POSITION - seek_position;
         minimum_position = MAX_POSITION - minimum_position;
         maximum_position = MAX_POSITION - maximum_position;
     }
     else
     {
-        // No. Update the system registers with a non-reverse sense position.
-        // Normal position value grows from a low value to high value in the
-        // counter-clockwise direction.
+        // No. Update the position and velocity registers without change.
         registers_write_word(REG_POSITION_HI, REG_POSITION_LO, (uint16_t) current_position);
+        registers_write_word(REG_VELOCITY_HI, REG_VELOCITY_LO, (uint16_t) current_velocity);
     }
 
-    // Sanity check the command position. We do this because this value is
-    // passed from the outside to the servo and it could be an invalid value.
-    if (command_position < minimum_position) command_position = minimum_position;
-    if (command_position > maximum_position) command_position = maximum_position;
+    // Use the filtered position when the seek position is not changing.
+    if (seek_position == previous_seek) current_position = filtered_position;
+    previous_seek = seek_position;
 
-    // Determine the proportional error as the difference between the
-    // command position and the current position.
-    proportional_error = command_position - current_position;
+    // Keep the seek position bound within the minimum and maximum position.
+    if (seek_position < minimum_position) seek_position = minimum_position;
+    if (seek_position > maximum_position) seek_position = maximum_position;
 
-    // Adjust proportional error due to deadband.  The potentiometer readings are a 
-    // bit noisy and there is typically one or two units of difference from reading 
-    // to reading when the servo is holding position.  Adding deadband decreases some 
-    // of the twitchiness in the servo caused by this noise.
-    if (proportional_error > deadband)
-    {
-        // Factor out deadband from the proportional error.
-        proportional_error -= deadband;
-    }
-    else if (proportional_error < -deadband)
-    {
-        // Factor out deadband from the proportional error.
-        proportional_error += deadband;
-    }
-    else
-    {
-        // Adjust to proportional error to zero within deadband.
-        proportional_error = 0;
+    // The proportional component to the PID is the position error.
+    p_component = seek_position - current_position;
 
-        // Adjust the current position to match the command position. This is to 
-        // minimize the chance the ADC noise would be interpretted as velocity.
-        current_position = command_position;
-    }
-
-    // Determine the derivative error as the difference between the 
-    // current position and the previous position.  This is value is
-    // essentially the velocity the servo is currently moving. Normally
-    // the derivative error is the change in proportional error, but we
-    // use velocity instead so a large change in the command position
-    // doesn't induce a large derivative error.
-    derivative_error = current_position - previous_position;
-
-    // Update the system registers with the velocity.  This value can be negative.
-    registers_write_word(REG_VELOCITY_HI, REG_VELOCITY_LO, (uint16_t) derivative_error);
-
-    // Update the previous position.
-    previous_position = current_position;
-
-    // Are we in an overshoot situation?  Overshoot is detected when the
-    // signs of the integral error and proportional error disagree.
-    if (((proportional_error > 0) && (integral_error < 0)) || 
-        ((proportional_error < 0) && (integral_error > 0)))
-    {
-        // Yes. Dampen the integral error.  The integral wants to integrate to 
-        // zero -- any positive error must be matched by an equal amount of 
-        // negative error.  Friction within the servo may not provide enough 
-        // dampening and the servo will overshoot and oscillate about the seek
-        // position. Overshoot is detected when the signs of the integral error
-        // and proportional error disagree and we can immediately dampen 
-        // the integral error to reduce oscillations around the seek point.
-        integral_error = 0;
-    }
+    // The derivative component to the PID is the velocity.
+    d_component = seek_velocity - current_velocity;
 
     // Get the proportional, derivative and integral gains.
-    proportional_gain = registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
-    derivative_gain = registers_read_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
-    integral_gain = registers_read_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO);
+    p_gain = registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
+    d_gain = registers_read_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
 
-    // Add the proportional and derivative components of the output.
-    // The derivative component is subtracted as it is meant to serve 
-    // as friction/drag within the system opposed to the proportional component.
-    output += gain_multiply(proportional_error, proportional_gain);
-    output -= gain_multiply(derivative_error, derivative_gain);
+    // Determine the proportional and derivative components of the pwm output.
+    output = gain_multiply(p_component, p_gain);
+    output += gain_multiply(d_component, d_gain);
 
-    // Get the PID offset.  This value offsets the output to compensate for 
+    // Get the PID offset.  This value offsets the output to compensate for
     // static friction and other drag within the servo.  If the offset is
     // not great enough to move the servo the output may not be of sufficient
     // strength to move the motor -- inducing motor vibrations and wasting power.
-    output_offset = (int16_t) registers_read_byte(REG_PID_OFFSET);
-
-    // This value determines the true range of the PID values to be the
-    // maximum PID value minus the PID offset.
-    output_range = MAX_OUTPUT - output_offset;
-
-    // Clear the integral error if output is already saturated.
-    if (output > output_range) integral_error = 0;
-    if (output < -output_range) integral_error = 0;
-
-    // Add the integral error to the PID output.
-    output += gain_multiply(integral_error, integral_gain);
+    output_minimum = (int16_t) registers_read_byte(REG_PID_OFFSET);
 
     // Apply the PID offset adjustment to compensate for static friction within the servo.
-    if (output > 0) output += output_offset;
-    if (output < 0) output -= output_offset;
+    if (output > 0) output += output_minimum;
+    else if (output < 0) output -= output_minimum;
 
     // Check for output saturation.
     if (output > MAX_OUTPUT)
@@ -268,15 +224,6 @@ int16_t pid_position_to_pwm(int16_t current_position)
     {
         // Can't go lower than the minimum output value.
         output = MIN_OUTPUT;
-    }
-    else
-    {
-        // Sum the proportional errors into the integral error.
-        integral_error += proportional_error;
-
-        // Prevent unreasonable integral wind-up.
-        if (integral_error > MAX_INTEGRAL_ERROR) integral_error = MAX_INTEGRAL_ERROR;
-        if (integral_error < MIN_INTEGRAL_ERROR) integral_error = MIN_INTEGRAL_ERROR;
     }
 
     // Return the PID output.

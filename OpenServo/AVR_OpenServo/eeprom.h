@@ -32,7 +32,7 @@
 // would cause the data stored in EEPROM to be incompatible from 
 // one version of the OpenServo firmware to the next version of 
 // the OpenServo firmware.
-#define EEPROM_VERSION      0x01
+#define EEPROM_VERSION      0x02
 
 uint8_t eeprom_erase(void);
 uint8_t eeprom_restore_registers(void);

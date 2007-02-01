@@ -83,7 +83,7 @@ int16_t regulator_position_to_pwm(int16_t current_position)
     int16_t current_error;
 
     // Get the command position to where the servo is moving to from the registers.
-    command_position = (int16_t) registers_read_word(REG_SEEK_HI, REG_SEEK_LO);
+    command_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
     
     // Get estimated velocity
     current_velocity = (int16_t) registers_read_word(REG_VELOCITY_HI, REG_VELOCITY_LO);

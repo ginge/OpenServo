@@ -90,7 +90,7 @@
 // indicating servo position and velocity at a particular time.
 // As of Jan. 27th, 2007 this feature is not yet fully implemented
 // and should remain disabled.
-#define CURVE_MOTION_ENABLED        0
+#define CURVE_MOTION_ENABLED        1
 
 // Enable (1) or disable (0) some test motion code within the
 // main.c module.  This test code can be enabled to test basic
@@ -151,7 +151,7 @@
 // Futaba S3003 hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
 #define DEFAULT_PID_DGAIN               0x0800
-#define DEFAULT_PID_IGAIN               0x0008
+#define DEFAULT_PID_IGAIN               0x0000
 
 // Futaba S3003 hardware default mininimum and maximum seek positions.
 #define DEFAULT_MIN_SEEK                0x0060
@@ -162,7 +162,7 @@
 // Hitec HS-311 hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
 #define DEFAULT_PID_DGAIN               0x0800
-#define DEFAULT_PID_IGAIN               0x0008
+#define DEFAULT_PID_IGAIN               0x0000
 
 // Hitec HS-311 hardware default mininimum and maximum seek positions.
 #define DEFAULT_MIN_SEEK                0x0060
@@ -173,7 +173,7 @@
 // Hitec HS-475HB hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
 #define DEFAULT_PID_DGAIN               0x0800
-#define DEFAULT_PID_IGAIN               0x0008
+#define DEFAULT_PID_IGAIN               0x0000
 
 // Hitec HS-475HB hardware default mininimum and maximum seek positions.
 #define DEFAULT_MIN_SEEK                0x0060

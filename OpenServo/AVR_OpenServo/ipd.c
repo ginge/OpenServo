@@ -43,8 +43,6 @@
 #define MIN_OUTPUT              (-MAX_OUTPUT)
 
 // Static structure for managing position and velocity values.
-static uint8_t velocity_index;
-static int16_t velocity_array[8];
 static int16_t previous_position;
 
 // The accumulator is a structure arranged so that both the most significant
@@ -111,14 +109,6 @@ static inline void integral_accumulator_reset(int16_t new_value)
 void ipd_init(void)
 // Initialize the PID algorithm module.
 {
-    uint8_t i;
-
-    // Initialize the velocity index.
-    velocity_index = 0;
-
-    // Initialize the velocity array.
-    for (i = 0; i < 8; ++i) velocity_array[i] = 0;
-
     // Initialize accumulator.
     integral_accumulator.big = 0;
 }
@@ -128,9 +118,6 @@ void ipd_registers_defaults(void)
 // Initialize the PID algorithm related register values.  This is done 
 // here to keep the PID related code in a single file.  
 {
-    // Default deadband.
-    registers_write_byte(REG_DEADBAND, 0x02);
-
     // Default gain values.
     registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, 0x0400);
     registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, 0x0300);
@@ -173,7 +160,6 @@ int16_t ipd_position_to_pwm(int16_t current_position)
 //
 //
 {
-    uint8_t i;
     int16_t deadband;
     int16_t command_position;
     int16_t maximum_position;
@@ -189,28 +175,18 @@ int16_t ipd_position_to_pwm(int16_t current_position)
     uint16_t integral_gain;
 
     // Determine the velocity as the difference between the current and previous position.
-    velocity_array[velocity_index] = current_position - previous_position;
-
-    // Increment the velocity index, but wrap if bounds exceeded necessary.
-    velocity_index += 1;
-    velocity_index &= 7;
-
-    // Reset the velocity value.
-    current_velocity = 0;
-
-    // Determine the sum of velocities across the positions.
-    for (i = 0; i < 8; ++i) current_velocity += velocity_array[i];
+    current_velocity = current_position - previous_position;
 
     // Update the previous position.
     previous_position = current_position;
 
     // Get the command position to where the servo is moving to from the registers.
-    command_position = (int16_t) registers_read_word(REG_SEEK_HI, REG_SEEK_LO);
+    command_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
     minimum_position = (int16_t) registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
     maximum_position = (int16_t) registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
-    // Get the deadband value and divide by two for calculations below.
-    deadband = (int16_t) (registers_read_byte(REG_DEADBAND) / 2);
+    // Set the deadband value and divide by two for calculations below.
+    deadband = 2;
 
     // Are we reversing the seek sense?
     if (registers_read_byte(REG_REVERSE_SEEK) != 0)
