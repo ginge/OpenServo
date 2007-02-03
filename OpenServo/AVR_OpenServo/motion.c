@@ -216,7 +216,7 @@ void motion_next(uint16_t delta)
     float fvelocity;
 
     // Determine if curve motion is disabled in the registers.
-    if (!(registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_PWM_ENABLED))) return;
+    if (!(registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_MOTION_ENABLED))) return;
 
     // Are we processing an empty curve?
     if (motion_tail == motion_head)
