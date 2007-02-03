@@ -40,6 +40,7 @@
 #include "power.h"
 #include "pwm.h"
 #include "seek.h"
+#include "pulsectl.h"
 #include "timer.h"
 #include "twi.h"
 #include "watchdog.h"
@@ -233,6 +234,10 @@ int main (void)
     // Initialize the power module.
     power_init();
 
+#if PULSE_CONTROL_ENABLED
+    pulse_control_init();
+#endif
+
     // Initialize the TWI slave module.
     twi_slave_init(registers_read_byte(REG_TWI_ADDRESS));
 
@@ -270,13 +275,18 @@ int main (void)
             int16_t pwm;
             int16_t position;
 
-            // Get the new position value.
-            position = (int16_t) adc_get_position_value();
+#if PULSE_CONTROL_ENABLED
+            // Give pulse control a chance to update the seek position.
+            pulse_control_update();
+#endif
 
 #if CURVE_MOTION_ENABLED
             // Give the motion curve a chance to update the seek position and velocity.
             motion_next(10);
 #endif
+
+            // Get the new position value.
+            position = (int16_t) adc_get_position_value();
 
 #if ESTIMATOR_ENABLED
             // Estimate velocity.

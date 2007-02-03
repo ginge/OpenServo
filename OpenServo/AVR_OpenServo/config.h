@@ -88,8 +88,6 @@
 // functions.  These functions allow the OpenServo to be controlled
 // by keypoints along a cubic Hermite curve with each keypoint
 // indicating servo position and velocity at a particular time.
-// As of Jan. 27th, 2007 this feature is not yet fully implemented
-// and should remain disabled.
 #define CURVE_MOTION_ENABLED        1
 
 // Enable (1) or disable (0) some test motion code within the
@@ -97,6 +95,12 @@
 // positioning of the OpenServo without a TWI master controlling
 // the OpenServo.  It should normally be disabled.
 #define MAIN_MOTION_TEST_ENABLED    0
+
+// Enable (1) or disable (0) standard servo pulse control signaling
+// of the seek position.  As of 2/2/07 this feature is still under
+// active development.  Please visit the OpenServo forums for the
+// current status of this feature.
+#define PULSE_CONTROL_ENABLED       0
 
 // Enable (1) or disable (0) the swapping of PWM output A and B.
 // This swapping must sometimes enabled depending on whether the
@@ -117,6 +121,9 @@
 #endif
 #if REGULATOR_MOTION_ENABLED && !ESTIMATOR_ENABLED
 #  error "Configuration settings for REGULATOR_MOTION_ENABLED requires ESTIMATOR_ENABLED."
+#endif
+#if CURVE_MOTION_ENABLED && PULSE_CONTROL_ENABLED
+#  warning "Conflicting configuration settings for CURVE_MOTION_ENABLED and PULSE_CONTROL_ENABLED"
 #endif
 
 // The known OpenServo hardware types are listed below.

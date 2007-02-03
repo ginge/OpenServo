@@ -41,7 +41,23 @@ static inline uint16_t timer_get(void)
     return registers_read_word(REG_TIMER_HI, REG_TIMER_LO);
 }
 
-static void inline timer_increment(void)
+static inline uint16_t timer_delta(uint16_t time_stamp)
+{
+    uint16_t delta_time;
+
+    // Get the current time.
+    uint16_t current_time = registers_read_word(REG_TIMER_HI, REG_TIMER_LO);
+
+    // Determine the time delta from the time stamp.
+    if (current_time > time_stamp)
+        delta_time = current_time - time_stamp;
+    else
+        delta_time = 0xffff - (time_stamp - current_time) + 1;
+
+    return delta_time;
+}
+
+static inline void timer_increment(void)
 {
     uint16_t value;
 
