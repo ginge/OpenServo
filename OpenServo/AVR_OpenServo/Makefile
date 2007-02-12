@@ -34,7 +34,7 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
 
 
 ## Objects that must be built in order to link
-OBJECTS = bootcrt.o main.o adc.o registers.o eeprom.o watchdog.o motion.o math.o ipd.o pid.o regulator.o power.o twi.o pwm.o estimator.o seek.o timer.o
+OBJECTS = bootcrt.o main.o adc.o registers.o eeprom.o watchdog.o motion.o math.o ipd.o pid.o regulator.o power.o twi.o pwm.o estimator.o seek.o timer.o curve.o
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS =
@@ -90,6 +90,9 @@ pwm.o: pwm.c
 
 estimator.o: estimator.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
+
+curve.o: curve.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c  $< 
 
 seek.o: seek.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
