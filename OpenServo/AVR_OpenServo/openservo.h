@@ -38,6 +38,9 @@
 #define SOFTWARE_VERSION_MAJOR          0
 #define SOFTWARE_VERSION_MINOR          2
 
+// The default TWI address. Change this if you want to change the TWI address of the servo
+#define REG_DEFAULT_TWI_ADDR		0x10
+
 //
 // Utility functions.
 //

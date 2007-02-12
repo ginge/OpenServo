@@ -71,7 +71,7 @@ void registers_defaults(void)
     // Initialize read/write protected registers to defaults.
 
     // Default TWI address.
-    registers_write_byte(REG_TWI_ADDRESS, 0x10);
+    registers_write_byte(REG_TWI_ADDRESS, REG_DEFAULT_TWI_ADDR);
 
 #if ESTIMATOR_ENABLED
     // Call the motion module to initialize the velocity estimator related 
