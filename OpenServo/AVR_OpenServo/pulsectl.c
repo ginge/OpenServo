@@ -98,8 +98,8 @@ void pulse_control_init(void)
 
 #if defined(__AVR_ATmega168__)
     // Set timer/counter2 control register A.
-    TCCR2A = (0<<COM2A1) | (0<<COM2A0) |                    // Disconnect OCOA.
-             (0<<COM2B1) | (0<<COM2B0) |                    // Disconnect OCOB.
+    TCCR2A = (0<<COM2A1) | (0<<COM2A0) |                    // Disconnect OC2A.
+             (0<<COM2B1) | (0<<COM2B0) |                    // Disconnect OC2B.
              (0<<WGM21) | (0<<WGM20);                       // Mode 0 - normal operation.
 
     // Configure PCINT3 to interrupt on change.
