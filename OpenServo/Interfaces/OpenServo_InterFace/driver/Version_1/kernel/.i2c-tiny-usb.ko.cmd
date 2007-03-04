@@ -1,0 +1,1 @@
+cmd_/home/baz/usbi2c/i2c_tiny_usb/kernel/i2c-tiny-usb.ko := ld -m elf_x86_64 -r -o /home/baz/usbi2c/i2c_tiny_usb/kernel/i2c-tiny-usb.ko /home/baz/usbi2c/i2c_tiny_usb/kernel/i2c-tiny-usb.o /home/baz/usbi2c/i2c_tiny_usb/kernel/i2c-tiny-usb.mod.o
