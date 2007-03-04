@@ -215,6 +215,19 @@ printf("initialised OK\n");
   	return 0;
  }
  
+EXPORT int OSIF_deinit(void)
+ {
+ #ifndef WIN
+  ret = usb_release_interface(handle, 0);
+  if (ret)
+    fprintf(stderr, "USB error: %s\n", usb_strerror());
+    
+   return 1;
+#endif
+
+  usb_close(handle);
+}
+
 EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char * data, size_t buflen )
 {
 	if (check_params( servo )<0)

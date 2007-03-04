@@ -23,6 +23,7 @@ int main ( int argc, char *argv[] ) {
 
 	/*Typedef the hello function*/
 	typedef void (*OSIF_initfunc   )();
+	typedef int  (*OSIF_deinitfunc )();
 	typedef int  (*OSIF_writefunc  )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
 	typedef int  (*OSIF_readfunc   )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
 	typedef int  (*OSIF_reflashfunc)(int adapter, int servo, int bootloader_addr, char *filename);
@@ -32,6 +33,7 @@ int main ( int argc, char *argv[] ) {
 
 		
   /*A pointer to a function*/
+  OSIF_deinitfunc OSIF_deinit;
   OSIF_initfunc OSIF_init;
   OSIF_writefunc OSIF_write;
   OSIF_readfunc OSIF_read;
@@ -47,6 +49,7 @@ int main ( int argc, char *argv[] ) {
 
   /*GetProcAddress*/
   OSIF_init    = (OSIF_initfunc)GetProcAddress(hdll, "OSIF_init");
+  OSIF_deinit  = (OSIF_deinitfunc)GetProcAddress(hdll, "OSIF_deinit");
 	OSIF_write   = (OSIF_writefunc)GetProcAddress(hdll, "OSIF_write");
 	OSIF_read    = (OSIF_readfunc)GetProcAddress(hdll, "OSIF_read");
 	OSIF_reflash = (OSIF_reflashfunc)GetProcAddress(hdll, "OSIF_reflash");
@@ -115,8 +118,9 @@ int main ( int argc, char *argv[] ) {
 		default:
 			break;
 	}
-		
- //Free the library:
+	//Free the USB
+	OSIF_deinit();
+  //Free the library:
 	int freeResult = FreeLibrary(hdll); 
 	return 0;
 }

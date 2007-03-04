@@ -22,6 +22,7 @@ EXPORT int OSIF_readbytes(int adapter, int servo, unsigned char addr, int length
 EXPORT int OSIF_write8(int adapter, int servo, unsigned char addr, int data);
 EXPORT int OSIF_write16(int adapter, int servo, unsigned char addr, int data); 		
 EXPORT int OSIF_init(void);
+EXPORT int OSIF_deinit(void);
 EXPORT int OSIF_read(int adapter, int servo, unsigned char addr, unsigned char * data, size_t buflen );
 EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char * data, size_t buflen );
 EXPORT int OSIF_scan(int adapter, int *devices, int *dev_count );
