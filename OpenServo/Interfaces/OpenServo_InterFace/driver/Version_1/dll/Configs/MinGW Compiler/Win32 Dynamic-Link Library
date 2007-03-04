@@ -1,0 +1,386 @@
+# -------------- MinGW configuration ---------------
+# --- general --------------------------------------
+# $P  - project name
+# $Pp - path to project directory
+# $Pn - project name
+# --- compile --------------------------------------
+# $I  - input full name
+# $Ip - input path
+# $In - input name
+# $Ie - input extension
+# $O  - output file
+# $Op - path to output file
+# $On - output filename (without path)
+# $Oe - output extension
+# $R  - release/debug setting for compiler
+# --- build ----------------------------------------
+# $T  - target full name
+# $Tp - target path
+# $Tn - target name
+# $O  - output file
+# $Op - path to output file
+# $On - output filename (without path)
+# $Oe - output extension
+# $R  - release/debug setting for linker
+
+[Settings]
+
+Target = 
+Category&77 = DEFAULT RUN CONFIGURATION
+Working Directory =.
+Command Line Arguments = 
+Category&00 = COMPILER OPTIONS
+Compiler = gcc|g++
+Generate Code = i386|i486|i586|i686|pentium|pentium-mmx|pentiumpro|pentium2|pentium3|pentium4|k6|k6-2|k6-3|athlon|athlon-tbird|athlon-4|athlon-xp|athlon-mp
+Optimization = def|O0|O1|O2|O3|Os
+Warnings = 
+Category&01 = C/C++ COMPILER OPTIONS
+Ansi Mode = no|yes
+Language Standard = no|c99|iso9899:1999|gnu89|gnu99
+NoAsm = no|yes
+NoBuiltIn = no|yes
+Hosted = no|yes
+FreeStanding = no|yes
+Traditional = no|yes
+TraditionalCpp = no|yes
+Conditional Mismatch = no|yes
+Unsigned char = no|yes
+Bitfileds = default|signed|unsigned
+Writable Strings = no|yes
+Single Precision = no|yes
+ShortWchar = no|yes
+Category&02 = C++ COMPILER OPTIONS
+MS Extensions = no|yes
+NoRTTI = no|yes
+NoNonAnsiBuiltins = no|yes
+NoOperatorNames = no|yes
+NoAccessControl = no|yes
+CheckNew = no|yes
+Conserve Space = no|yes
+NoConstStrings = no|yes
+DollarsInIdentifiers = default|no|yes
+NoElideConstructors = no|yes
+NoEnforceEHSpecs = no|yes
+ForScope = default|no|yes
+NoGNUkeywords = no|yes
+NoImplicitTemplates = no|yes
+NoImplicitInlineTemplates = no|yes
+NoImplementInlines = no|yes
+Permissive = no|yes
+Repo = no|yes
+Statistics = no|yes
+UseCXAtExit = no|yes
+VTableGC = no|yes
+NoWeak = no|yes
+NoStdInc = no|yes
+Template Depth = 
+Compiler Options = 
+Category&03 = C/C++ WARNINGS OPTIONS
+-fno-default-inline = no|yes
+-Wctor-dtor-privacy = no|yes
+-Wnon-virtual-dtor = no|yes
+-Wreorder = no|yes
+-Weffc++ = no|yes
+-Wno-deprecated = no|yes
+-Wno-non-template-friend = no|yes
+-Wold-style-cast = no|yes
+-Woverloaded-virtual = no|yes
+-Wno-pmf-conversions = no|yes
+-Wsign-promo = no|yes
+-Wsynth = no|yes
+Category&04 = OBJECTIVE C OPTIONS
+NXConstantString = 
+NextRuntime = no|yes
+GetDECL = no|yes
+-Wno-protocol = no|yes
+-Wselector = no|yes
+Category&05 = LINKER OPTIONS
+NoStartFiles = no|yes
+NoDefaultLibs = no|yes
+NoStdLib = no|yes
+Static = no|yes
+Shared = no|yes
+Linker Options =
+Libraries = 
+LibraryPath = 
+Excluded Files = Excludes
+Debugger=gdb
+External Dependencies=yes|no
+
+[SettingsInfo]
+Version = Provides a space for you to specify an version of compiler you want to use. 
+Target = Provides a space for you to specify an output file and location of the program that the linker creates.
+Working Directory = Provides a space for you to specify the directory in which executing occurs. If you do not specify a directory, executing occurs in the directory where the executable is located.
+Command Line Arguments = Provides a space for you to specify command-line arguments you want to pass to the program at startup.
+Libraries = Provides a space for you to specify an object file or standard library (either static or import) to pass to the linker. Separate file names with a space.
+Excluded Files = This will exclude the file(s) included in this UE project group from the build.
+Compiler Options = Provides a space for you to specify an additional compiler options.
+Linker Options = Provides a space for you to specify an additional linker options.
+Debugger=Provides a space for you to set the debugger you want to use to debug application.
+Ansi Mode = In C mode, support all ISO C89 programs.  In C++ mode, remove GNU extensions that conflict with ISO C++.
+Language Standard = Determine the language standard.
+NoAsm = Do not recognize `asm', `inline' or `typeof' as a keyword, so that code can use these words as identifiers.
+NoBuiltIn = Don't recognize built-in functions that do not begin with `__builtin_' as prefix.
+Hosted = Assert that compilation takes place in a hosted environment.
+FreeStanding = Assert that compilation takes place in a freestanding environment.
+Traditional = Attempt to support some aspects of traditional C compilers. * All `extern' declarations take effect globally * Keywords typeof, inline, signed, const and volatile are not recognized * Comparisons between pointers and integers are always allowed * Integer types 'unsigned short' and 'unsigned char' promote to 'unsigned int'.
+TraditionalCpp = Attempt to support some aspects of traditional C preprocessors.
+Conditional Mismatch = Allow conditional expressions with mismatched types in the second and third arguments.  The value of such an expression is void. This option is supported for C only.
+Unsigned char = Let the type `char' be unsigned, like `unsigned char'.
+Bitfileds = These option control whether a bit-fields are signed or unsigned. Default are signed, but when 'traditional' is used, bit-fields are unsigned.
+Writable Strings = Store string constants in the writable data segment and don't uniquize them.
+Single Precision = If you must use 'traditional', but want to use single precision operations when the operands are single precision, use this option.
+ShortWchar = Override the underlying type for 'wchar_t' to be 'short unsigned int' instead of the default for the target. This option is useful for building programs to run under WINE.
+NoAccessControl = Turn off all access checking.  This switch is mainly useful for working around bugs in the access control code.
+CheckNew = Check that the pointer returned by 'operator new' is non-null before attempting to modify the storage allocated.
+Conserve Space = Put uninitialized or runtime-initialized global variables into the common segment, as C does. This saves space in the executable. If you compile with this flag and your program mysteriously crashes after 'main()' has completed, you may have an object that is being destroyed twice because two definitions were merged.
+NoConstStrings = Give string constants type 'char *' instead of type 'const char*'.But you cannot actually modify the value of a string constant, unless you also use 'Writable Strings'.
+DollarsInIdentifiers = GNU C allows '$' by default on most target systems, but there are a few exceptions.
+NoElideConstructors = The C++ standard allows an implementation to omit creating a temporary which is only used to initialize another object of the same type.  Specifying this option disables that optimization, and forces G++ to call the copy constructor in all cases.
+NoEnforceEHSpecs = Don't check for violation of exception specifications at runtime. This option violates the C++ standard, but may be useful for reducing code size in production builds, much like defining 'NDEBUG'.  The compiler will still optimize based on the exception specifications.
+ForScope = If 'yes' is specified, the scope of variables declared in a for-init-statement is limited to the 'for' loop itself, as specified by the C++ standard.  If 'no' is specified, the scope of variables declared in a for-init-statement extends to the end of the enclosing scope, as was the case in old versions of G++, and other (traditional) implementations of C++.
+NoGNUkeywords = Do not recognize 'typeof' as a keyword, so that code can use this word as an identifier.  You can use the keyword '__typeof__' instead. 'Ansi' implies this.
+NoImplicitTemplates = Never emit code for non-inline templates which are instantiated implicitly (i.e. by use); only emit code for explicit instantiations.  *Note Template Instantiation::, for more information.
+NoImplicitInlineTemplates = Don't emit code for implicit instantiations of inline templates, either.  The default is to handle inlines differently so that compiles with and without optimization will need the same set of explicit instantiations.
+NoImplementInlines = To save space, do not emit out-of-line copies of inline functions controlled by '#pragma implementation'.  This will cause linker errors if these functions are not inlined everywhere they are called.
+MS Extensions = Disable pedantic warnings about constructs used in MFC, such as implicit int and getting a pointer to member function via non-standard syntax.
+NoNonAnsiBuiltins = Disable built-in declarations of functions that are not mandated by ANSI/ISO C. These include 'ffs', 'alloca', '_exit', 'index', 'bzero', 'conjf', and other related functions.
+NoOperatorNames = Do not treat the operator name keywords 'and', 'bitand', 'bitor', 'compl', 'not', 'or' and 'xor' as synonyms as keywords.
+Permissive = Downgrade messages about nonconformant code from errors to warnings.
+Repo = Enable automatic template instantiation at link time.  This option also implies 'NoInlineTemplates'. *Note Template Instantiation::, for more information.
+NoRTTI = Disable generation of information about every class with virtual functions for use by the C++ runtime type identification features. 'dynamic_cast' and 'typeid'.
+Statistics =  Emit statistics about front-end processing at the end of the compilation.  This information is generally only useful to the G++ development team.
+Template Depth = Set the maximum instantiation depth for template classes. A limit on the template instantiation depth is needed to detect endless recursions during template class instantiation. ANSI/ISO C++ conforming programs must not rely on a maximum depth greater than 17.
+UseCXAtExit = Register destructors for objects with static storage duration with the '__cxa_atexit' function rather than the 'atexit' function. This option is required for fully standards-compliant handling of static destructors, but will only work if your C library supports '__cxa_atexit'.
+VTableGC = Emit special relocations for vtables and virtual function references so that the linker can identify unused virtual functions and zero out vtable slots that refer to them.
+NoWeak = Do not use weak symbol support, even if it is provided by the linker. By default, G++ will use weak symbols if they are available. This option exists only for testing, and should not be used by end-users; it will result in inferior code and has no benefits.  This option may be removed in a future release of G++.
+NoStdInc = Do not search for header files in the standard directories specific to C++, but do still search the other standard directories. This option is used when building the C++ library.
+NXConstantString = Use CLASS-NAME as the name of the class to instantiate for each literal string specified with the syntax `@"..."'.  The default class name is 'NXConstantString'.
+NextRuntime = Generate output compatible with the NeXT runtime.  This is the default for NeXT-based systems, including Darwin and Mac OS X.
+Optimization = O1-Optimize, O2-Optimize even more, O3-Optimize yet more, O0-No optimize, Os-Optimize for size.
+NoStartFiles = Do not use the standard system startup files when linking.
+NoDefaultLibs = Do not use the standard system libraries when linking.
+NoStdLib = Do not use the standard system startup files or libraries when linking.
+Static = On systems that support dynamic linking, this prevents linking with the shared libraries.
+Shared = Produce a shared object which can then be linked with other objects to form an executable.
+External Dependencies=If you select "yes" option, UE Studio will generate in project group "External Dependencies" from included files.
+
+[SettingsReps]
+
+Generate Code = @-march=%s
+Floating Point = hardware=-mhard-float|software=-msoft-float
+Ansi Mode = no=|yes=-ansi
+Language Standard = no=|DEFAULT=@-std=%s
+NoAsm = no=|yes=-fno-asm
+NoBuiltIn = no=|yes=-fno-builtin
+Hosted = no=|yes=-fhosted
+FreeStanding = no=|yes=-ffreestanding
+Traditional = no=|yes=-traditional
+TraditionalCpp = no=|yes=-traditional-cpp
+Conditional Mismatch = no=|yes=-fcond-mismatch
+Unsigned char = no=|yes=-funsigned-char
+Bitfileds = default=|signed=-fsigned-bitfields|unsigned=-funsigned-bitfields
+Writable Strings = no=|yes=-fwritable-strings
+Single Precision = no=|yes=-fallow-single-precision
+ShortWchar = no=|yes=-fshort-wchar
+NoAccessControl = no=|yes=-fno-access-control
+CheckNew = no=|yes=-fcheck-new
+Conserve Space = no=|yes=-fconserve-space
+NoConstStrings = no=|yes=-fno-const-strings
+DollarsInIdentifiers = default=|no=-fnodollars-in-identifiers|yes=-fdollars-in-identifiers
+NoElideConstructors = no=|yes=-fno-elide-constructors
+NoEnforceEHSpecs = no=|yes=-fno-enforce-eh-specs
+ForScope = default=|no=-fno-for-scope|yes=-ffor-scope
+NoGNUkeywords = no=|yes=-fno-gnu-keywords
+NoImplicitTemplates = no=|yes=-fno-implicit-templates
+NoImplicitInlineTemplates = no=|yes=-fno-implicit-inline-templates
+NoImplementInlines = no=|yes=-fno-implement-inlines
+MS Extensions = no=|yes=-fms-extensions
+NoNonAnsiBuiltins = no=|yes=-fno-nonansi-builtins
+NoOperatorNames = no=|yes=-fno-operator-names
+Permissive = no=|yes=-fpermissive
+Repo = no=|yes=-frepo
+NoRTTI = no=|yes=-fno-rtti
+Statistics = no=|yes=-fstats
+Template Depth = @-ftemplate-depth-%s
+UseCXAtExit = no=|yes=-fuse-cxa-atexit
+VTableGC = no=|yes=-fvtable-gc
+NoWeak = no=|yes=-fno-weak
+NoStdInc = no=|yes=-nostdinc++
+-fno-default-inline = no=|yes=-fno-default-inline
+-Wctor-dtor-privacy = no=|yes=-Wctor-dtor-privacy
+-Wnon-virtual-dtor = no=|yes=-Wnon-virtual-dtor
+-Wreorder = no=|yes=-Wreorder
+-Weffc++ = no=|yes=-Weffc++
+-Wno-deprecated = no=|yes=-Wno-deprecated
+-Wno-non-template-friend = no=|yes=-Wno-non-template-friend
+-Wold-style-cast = no=|yes=-Wold-style-cast
+-Woverloaded-virtual = no=|yes=-Woverloaded-virtual
+-Wno-pmf-conversions = no=|yes=-Wno-pmf-conversions
+-Wsign-promo = no=|yes=-Wsign-promo
+-Wsynth = no=|yes=-Wsynth
+NXConstantString = @-fconstant-string-class=%s
+NextRuntime = no=|yes=-fnext-runtime
+GetDECL = no=|yes=-gen-decls
+-Wno-protocol = no=|yes=-Wno-protocol
+-Wselector = no=|yes=-Wselector
+Optimization = def=|O0=-O0|O1=-O1|O2=-O2|O3=-O3|Os=-Os|DEFAULT=@%s
+NoStartFiles = no=|yes=-nostartfiles
+NoDefaultLibs = no=|yes=-nodefaultlibs
+NoStdLib = no=|yes=-nostdlib
+Static = no=|yes=-static
+Shared = no=|yes=-shared
+LibraryPath = @-L %s
+External Dependencies=yes=1|no=0
+
+[Variables]
+
+CPATH =C:\MinGW
+CCPP   = -c $(Generate Code) $(Compiler Options) $(Warnings) -I $(INCLUDE) $(Ansi Mode) $(Language Standard) $(NoAsm) $(NoBuiltIn) $(Hosted) $(FreeStanding) $(Traditional) $(TraditionalCpp) $(Unsigned char) $(Bitfileds) $(Writable Strings) $(Single Precision) $(ShortWchar)
+COPT   = $(CCPP) $(Conditional Mismatch)
+COBJC  = $(CCPP) $(GetDECL) $(NextRuntime) $(NXConstantString) $(-Wno-protocol) $(-Wselector)
+CPWARN = $(-fno-default-inline) $(-Wctor-dtor-privacy) $(-Wnon-virtual-dtor) $(-Wreorder) $(-Weffc++) $(-Wno-deprecated) $(-Wno-non-template-friend) $(-Wold-style-cast) $(-Woverloaded-virtual) $(-Wno-pmf-conversions) $(-Wsign-promo) $(-Wsynth)
+CPPOPT = $(CCPP) $(MS Extensions) $(NoStdInc) $(NoWeak) $(VTableGC) $(UseCXAtExit) $(Template Depth) $(Statistics) $(NoRTTI) $(Repo) $(Permissive) $(NoOperatorNames) $(NoNonAnsiBuiltins) $(NoAccessControl) $(CheckNew) $(Conserve Space) $(NoConstStrings) $(DollarsInIdentifiers) $(NoElideConstructors) $(ForScope) $(NoGNUkeywords) $(NoImplicitTemplates) $(NoImplicitInlineTemplates) $(NoImplementInlines) $(CPWARN)
+DEFOPT = -c $(Generate Code) $(Compiler Options)
+LOPT   = -mwindows $(Linker Options) $(LibraryPath) $(NoStartFiles) $(NoDefaultLibs) $(NoStdLib) $(Static) $(Shared)
+
+[Environment]
+
+PATH = $(CPATH)\BIN;%PATH%
+INCLUDE = $(CPATH)\Include
+LIB = $(CPATH)\Lib
+
+[General]
+
+TargetExt = .DLL
+ReleaseOut = Release
+DebugOut = Debug
+UseFullPaths = 0
+UseDosNames = 0
+Excludes = $(Excluded Files)
+
+.ADS = .DEFAULT
+.ADB = .DEFAULT
+.C++ = .CPP
+.CXX = .CPP
+.CC = .CPP
+.CP = .CPP
+.I = .C
+.II = .CPP
+.MI = .M
+.S = .C
+.F = .DEFAULT
+.FOR = .DEFAULT
+.FPP = .DEFAULT
+.RES = .RC
+.NSM = .ASM
+GenerateEDGroup=$(External Dependencies)
+
+[MakeCommands]
+
+run = Execute Application
+debug =Start Debugger
+peview=PEview
+makef=Show Makefile
+
+[Execute Application]
+
+Title = Execute $(Command Line Arguments)
+Cmd0 = $(Command Line Arguments)
+Depends = $T
+ShowWindow = 1
+DisplayConsole = 1
+
+[Start Debugger]
+
+Cmd0 =$(Debugger) $T
+Depends =$T
+ShowWindow =1
+DisplayConsole = 1
+Title=Debug $T
+
+[FileGroups]
+
+FGO = .o;
+FGL = .a;
+
+[GroupFormats]
+
+FGO = %s
+FGL = %s
+
+[Build]
+
+Out = $T
+Depends = $FGO
+ReleaseFlag = -s
+DebugFlag =
+Cmd0 = dllwrap $(LOPT) $R -o $T $FGO $FGL -k --export-all --output-def $Tn.def --implib $Tn.a 
+
+[.C]
+
+Out = $In.o
+ReleaseFlag = $(Optimization)
+DebugFlag = -ggdb -O0
+Cmd0 = $(Compiler) $(COPT) $R -o $O $I
+
+IncFiles = 1
+CaseSensitive = 1
+IncDirs = .;$(INCLUDE);
+IncKeyWords = #include;
+Comments = /*.*/.//.eol.
+
+[.CPP]
+
+Out = $In.o
+ReleaseFlag = $(Optimization)
+DebugFlag = -ggdb -O0
+Cmd0 = $(Compiler) $(CPPOPT) $R -o $O $I
+
+IncFiles = 1
+CaseSensitive = 1
+IncDirs = .;$(INCLUDE);
+IncKeyWords = #include;
+Comments = /*.*/.//.eol.
+
+[.M]
+
+Out = $In.o
+ReleaseFlag = $(Optimization)
+DebugFlag = -ggdb -O0
+Cmd0 = $(Compiler) $(COBJC) $R -o $O $I
+
+[.DEFAULT]
+
+Out = $In.o
+ReleaseFlag = $(Optimization)
+DebugFlag = -ggdb -O0
+Cmd0 = $(Compiler) $(DEFOPT) $R -o $O $I
+
+[.ASM]
+
+Out = $In.o
+Cmd0 = nasm -f win32 -i $Ip -o $O $I
+
+[.RC]
+
+Out = $In.o
+Cmd0 = windres -o $O --include-dir $Ip $I
+IncFiles = 1
+CaseSensitive = 1
+IncDirs = .;$(INCLUDE);
+IncKeyWords = #include;
+Comments = /*.*/.//.eol.
+
+[PEview]
+Title=Show PE Information
+Depends=$T
+Cmd0=uetools -pe $T
+ShowWindow=1
+DisplayConsole=0
+
+[Show Makefile]
+Title=Show makefile
+Cmd0=uestudio makefile
+ShowWindow=1
+DisplayConsole=0
