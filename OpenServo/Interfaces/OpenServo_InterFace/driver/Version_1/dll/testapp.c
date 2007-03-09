@@ -67,7 +67,7 @@ int main ( int argc, char *argv[] ) {
 	{
 		case 'f':		//flash
 			if (argc < 4) break;
-			if (!OSIF_reflash(0, atoi(argv[2]), 0x7F, argv[3]))
+			if (!OSIF_reflash(0, parse_option(argv[2]), 0x7F, argv[3]))
 				printf( "Reflashing OpenServo failed\n" );
 			else
 				printf( "Reflashing OpenServo complete\n" );
@@ -80,14 +80,14 @@ int main ( int argc, char *argv[] ) {
 			{
 				//print what we got
 				int n;
-		    char tmpbuf[255];
-		    char newbuf[255];
-		    newbuf[0] ='\0';
-		    for (n=0;n<parse_option( argv[4]);n++)
-		    {
-		    	sprintf( tmpbuf, "0x%02x ", buf[n]);
-		    	strcat(newbuf, tmpbuf);
-		    }
+				char tmpbuf[255];
+				char newbuf[255];
+				newbuf[0] ='\0';
+				for (n=0;n<parse_option( argv[4]);n++)
+				{
+					sprintf( tmpbuf, "0x%02x ", buf[n]);
+					strcat(newbuf, tmpbuf);
+				}
 				printf( newbuf);
 				printf("\n");
 			} 
@@ -112,6 +112,7 @@ int main ( int argc, char *argv[] ) {
 				printf("probe found device\n");
 			break;
 		case 'c':		//send a command
+
 			OSIF_command(0, parse_option( argv[2]), parse_option( argv[2]) );
 			break;
 
@@ -120,7 +121,7 @@ int main ( int argc, char *argv[] ) {
 	}
 	//Free the USB
 	OSIF_deinit();
-  //Free the library:
+	//Free the library:
 	int freeResult = FreeLibrary(hdll); 
 	return 0;
 }
@@ -149,51 +150,51 @@ int parse_option( char *arg )
 	{
 		arg+=2;
 
-    byte = 0;
+		byte = 0;
 
-    if (( *arg >= 'A' ) && ( *arg <= 'F' ))
-    {
-      byte = *arg - 'A' + 10;
-    }
-    else if (( *arg>= 'a' ) && ( *arg <= 'f' ))
-    {
-      byte = *arg - 'a' + 10;
-    }
-    else if (( *arg >= '0' ) && ( *arg <= '9' ))
-    {
-      byte = *arg - '0';
-    }
-    else
-    {
-      printf( "Not a hex digit, found '%c'\n", *arg );
-      return -1;
-    }
-    arg++;
+		if (( *arg >= 'A' ) && ( *arg <= 'F' ))
+		{
+			byte = *arg - 'A' + 10;
+		}
+		else if (( *arg>= 'a' ) && ( *arg <= 'f' ))
+		{
+			byte = *arg - 'a' + 10;
+		}
+		else if (( *arg >= '0' ) && ( *arg <= '9' ))
+		{
+			byte = *arg - '0';
+		}
+		else
+		{
+			printf( "Not a hex digit, found '%c'\n", *arg );
+			return -1;
+		}
+		arg++;
+	
+		if ( *arg == '\0' )
+		{
+			return byte;
+		}
 
-    if ( *arg == '\0' )
-    {
-      return byte; //break;
-    }
-
-    byte <<= 4;
-    if (( *arg >= 'A' ) && ( *arg <= 'F' ))
-    {
-      byte |= *arg - 'A' + 10;
-    }
-    else if (( *arg >= 'a' ) && ( *arg <= 'f' ))
-    {
-      byte |= *arg - 'a' + 10;
-    }
-    else if (( *arg >= '0' ) && ( *arg <= '9' ))
-    {
-      byte |= *arg - '0';
-    }
-    else
-    {
-      printf(  "Not a hex digit, found '%c'\n", *arg );
-      return -1;
-    }
-    arg++;
+		byte <<= 4;
+		if (( *arg >= 'A' ) && ( *arg <= 'F' ))
+		{
+			byte |= *arg - 'A' + 10;
+		}
+		else if (( *arg >= 'a' ) && ( *arg <= 'f' ))
+		{
+			byte |= *arg - 'a' + 10;
+		}
+		else if (( *arg >= '0' ) && ( *arg <= '9' ))
+		{
+			byte |= *arg - '0';
+		 }
+		else
+		{
+			printf(  "Not a hex digit, found '%c'\n", *arg );
+			return -1;
+		}
+		arg++;
 	} 
 	else 
 	{
