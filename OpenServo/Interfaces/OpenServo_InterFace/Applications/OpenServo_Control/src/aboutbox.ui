@@ -1,0 +1,211 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>aboutBoxWidget</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>aboutBoxWidget</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>250</width>
+            <height>300</height>
+        </rect>
+    </property>
+    <property name="sizePolicy">
+        <sizepolicy>
+            <hsizetype>5</hsizetype>
+            <vsizetype>5</vsizetype>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+    </property>
+    <property name="minimumSize">
+        <size>
+            <width>250</width>
+            <height>300</height>
+        </size>
+    </property>
+    <property name="maximumSize">
+        <size>
+            <width>250</width>
+            <height>300</height>
+        </size>
+    </property>
+    <property name="caption">
+        <string>About</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLabel" row="0" column="0">
+            <property name="name">
+                <cstring>textLabel2</cstring>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>7</hsizetype>
+                    <vsizetype>0</vsizetype>
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="maximumSize">
+                <size>
+                    <width>32767</width>
+                    <height>20</height>
+                </size>
+            </property>
+            <property name="text">
+                <string>&lt;h3&gt;OpenServo Test application&lt;/h3&gt;</string>
+            </property>
+        </widget>
+        <widget class="QLabel" row="1" column="0">
+            <property name="name">
+                <cstring>textLabel3</cstring>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>7</hsizetype>
+                    <vsizetype>0</vsizetype>
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="maximumSize">
+                <size>
+                    <width>32767</width>
+                    <height>20</height>
+                </size>
+            </property>
+            <property name="text">
+                <string>Visit and contrubute to &lt;a href="http://www.openservo.com/forums/"&gt;OpenServo Project&lt;/a&gt;</string>
+            </property>
+        </widget>
+        <widget class="QPushButton" row="5" column="0">
+            <property name="name">
+                <cstring>closeBtn</cstring>
+            </property>
+            <property name="text">
+                <string>C&amp;lose</string>
+            </property>
+            <property name="accel">
+                <string>Alt+L</string>
+            </property>
+        </widget>
+        <widget class="QFrame" row="4" column="0">
+            <property name="name">
+                <cstring>frame4</cstring>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>5</hsizetype>
+                    <vsizetype>0</vsizetype>
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="minimumSize">
+                <size>
+                    <width>0</width>
+                    <height>80</height>
+                </size>
+            </property>
+            <property name="frameShape">
+                <enum>StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Raised</enum>
+            </property>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel5</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>30</y>
+                        <width>210</width>
+                        <height>18</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&lt;a href="mailto:Barry.Carter@headfuzz.co.uk"&gt;Barry.Carter@headfuzz.co.uk&lt;/a&gt;</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel6</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>50</y>
+                        <width>200</width>
+                        <height>18</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&lt;a href="http://www.openservo.com/"&gt;www.headfuzz.co.uk&lt;/a&gt;</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel4</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>190</width>
+                        <height>16</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Copyright 2007 Barry Carter</string>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QLabel" row="3" column="0">
+            <property name="name">
+                <cstring>textLabel8</cstring>
+            </property>
+            <property name="text">
+                <string>&lt;p align="center"&gt;This may require root access under *NIX systems. Be sure to install the underlying OSIF_xxx library for your OS&lt;/p&gt;</string>
+            </property>
+        </widget>
+        <widget class="QLabel" row="2" column="0">
+            <property name="name">
+                <cstring>textLabel7</cstring>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>7</hsizetype>
+                    <vsizetype>0</vsizetype>
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="maximumSize">
+                <size>
+                    <width>32767</width>
+                    <height>20</height>
+                </size>
+            </property>
+            <property name="text">
+                <string>&lt;a href="http://www.openservo.com/"&gt;www.OpenServo.com&lt;/a&gt;</string>
+            </property>
+        </widget>
+    </grid>
+</widget>
+<connections>
+    <connection>
+        <sender>closeBtn</sender>
+        <signal>clicked()</signal>
+        <receiver>aboutBoxWidget</receiver>
+        <slot>accept()</slot>
+    </connection>
+</connections>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>
