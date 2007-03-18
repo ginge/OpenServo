@@ -22,7 +22,7 @@ int main ( int argc, char *argv[] ) {
 	HANDLE hdll;
 
 	/*Typedef the hello function*/
-	typedef void (*OSIF_initfunc   )();
+	typedef int  (*OSIF_initfunc   )();
 	typedef int  (*OSIF_deinitfunc )();
 	typedef int  (*OSIF_writefunc  )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
 	typedef int  (*OSIF_readfunc   )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
@@ -58,22 +58,27 @@ int main ( int argc, char *argv[] ) {
 	OSIF_command = (OSIF_commandfunc)GetProcAddress(hdll, "OSIF_command");
 	
   /*Call the function*/
-	OSIF_init();
+	if (OSIF_init() <0 )
+	{
+		printf("Failed to open OSIF device. Check cables\n");
+		exit(1);
+	}
 
 	int devices[128];
 	int dev_count;
+	bool failcmd = false;
 	
 	switch ( argv[1][0] )
 	{
 		case 'f':		//flash
-			if (argc < 4) break;
+			if (argc < 4) { failcmd = true; break; }
 			if (!OSIF_reflash(0, parse_option(argv[2]), 0x7F, argv[3]))
 				printf( "Reflashing OpenServo failed\n" );
 			else
 				printf( "Reflashing OpenServo complete\n" );
 			break;
 		case 'r':		//read n bytes
-			if (argc < 5) break;
+			if (argc < 5) { failcmd = true; break; }
 					
 			unsigned char buf[255];
 		  if (OSIF_read(0,parse_option( argv[2]),parse_option( argv[3]),buf,parse_option( argv[4]))>0)
@@ -93,7 +98,7 @@ int main ( int argc, char *argv[] ) {
 			} 
 			break;
 		case 'w':		//write
-			if (argc < 4) break;
+			if (argc < 4) { failcmd = true; break; }
 			char outdata[127];
 			//get the command line data and compile into a character array 
 			parse_data( argv, 4, argc - 5,&outdata );
@@ -108,16 +113,21 @@ int main ( int argc, char *argv[] ) {
 				printf( "device at 0x%02x\n", devices[n]);
 			break;
 		case 'p':		//probe to see if the servo exists at address
+			if (argc < 3) { failcmd = true; break; }
 			if (OSIF_probe(0, parse_option( argv[2])))
 				printf("probe found device\n");
 			break;
 		case 'c':		//send a command
-
-			OSIF_command(0, parse_option( argv[2]), parse_option( argv[2]) );
+			if (argc < 4) { failcmd = true; break; }
+			OSIF_command(0, parse_option( argv[2]), parse_option( argv[3]) );
 			break;
 
 		default:
 			break;
+	}
+	if (failcmd)
+	{
+		printf( "Command line error. Check and try again\n" );
 	}
 	//Free the USB
 	OSIF_deinit();

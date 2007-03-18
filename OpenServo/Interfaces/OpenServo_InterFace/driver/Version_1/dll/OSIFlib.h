@@ -1,7 +1,6 @@
 #ifndef OSIF_LIB_H
 #define OSIF_LIB_H     //stop recursion
-
-#include "usb.h"    
+ 
 #include "OSIFflash.h"
 
 #include <stddef.h>
@@ -13,8 +12,8 @@
 #define USB_CTRL_OUT   (USB_TYPE_CLASS)
 
 /* the vendor and product id was donated by ftdi ... many thanks!*/
-#define I2C_TINY_USB_VID  0x0403
-#define I2C_TINY_USB_PID  0xc631
+#define OSIF_USB_VID  0x0403
+#define OSIF_USB_PID  0xc631
 
 #define I2C_M_RD		0x01
 
@@ -30,19 +29,27 @@
 #define STATUS_IDLE          0
 #define STATUS_ADDRESS_ACK   1
 #define STATUS_ADDRESS_NAK   2
-usb_dev_handle *handle;
 
 struct usb_bus      *bus;
 struct usb_device   *dev;
 
-int i2c_tiny_usb_write(int request, int value, int index);
-int i2c_tiny_usb_read(unsigned char cmd, void *data, int len);
-void i2c_tiny_usb_get_func(void);
-void i2c_tiny_usb_set(unsigned char cmd, int value);
-int i2c_tiny_usb_get_status(void);
-int i2c_read_with_cmd(unsigned char addr, char cmd, int length);
-int i2c_write_byte(unsigned char addr, char data);
-int i2c_write_cmd_and_byte(unsigned char addr, char cmd, char data);
-int i2c_write_cmd_and_word(unsigned char addr, char cmd, int data);
+typedef struct adap_t
+{
+	usb_dev_handle *adapter_handle;
+	int adapter_number;
+	char adapter_name[255];
+} adapter_t;
+
+adapter_t adapters[127];
+int adapter_count;
+
+int OSIF_USB_write(usb_dev_handle *handle, int request, int value, int index);
+int OSIF_USB_read(usb_dev_handle *handle, unsigned char cmd, void *data, int len);
+void OSIF_USB_get_func(usb_dev_handle *handle );
+void OSIF_USB_set(usb_dev_handle *handle, unsigned char cmd, int value);
+int OSIF_USB_get_status(usb_dev_handle *handle);
 		
+int write_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t len);
+int read_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t buflen);
+usb_dev_handle *get_adapter_handle(int adapter_no);
 #endif

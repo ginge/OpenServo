@@ -6,8 +6,8 @@
 #include <string.h>
 
 
-/* write a set of bytes to the i2c_tiny_usb device */
-int i2c_tiny_usb_write(int request, int value, int index) {
+/* write a set of bytes to the OSIF_usb device */
+int OSIF_USB_write(usb_dev_handle *handle, int request, int value, int index) {
   if(usb_control_msg(handle, USB_CTRL_OUT, request, 
 		      value, index, NULL, 0, 1000) < 0) {
     fprintf(stderr, "USB error: %s\n", usb_strerror());
@@ -16,8 +16,8 @@ int i2c_tiny_usb_write(int request, int value, int index) {
   return 1;
 }
 
-/* read a set of bytes from the i2c_tiny_usb device */
- int i2c_tiny_usb_read(unsigned char cmd, void *data, int len) {
+/* read a set of bytes from the OSIF_usb device */
+ int OSIF_USB_read(usb_dev_handle *handle, unsigned char cmd, void *data, int len) {
   int                 nBytes;
 
   /* send control request and accept return value */
@@ -34,15 +34,15 @@ int i2c_tiny_usb_write(int request, int value, int index) {
 }
 
 /* get i2c usb interface firmware version */
- void i2c_tiny_usb_get_func(void) {
+ void OSIF_USB_get_func(usb_dev_handle *handle) {
   unsigned long func;
   
-  if(i2c_tiny_usb_read(CMD_GET_FUNC, &func, sizeof(func)) == 0)
+  if(OSIF_USB_read( handle, CMD_GET_FUNC, &func, sizeof(func)) == 0)
     printf("Functionality = %lx\n", func);
 }
 
 /* set a value in the I2C_USB interface */
- void i2c_tiny_usb_set(unsigned char cmd, int value) {
+ void OSIF_USB_set(usb_dev_handle *handle, unsigned char cmd, int value) {
   if(usb_control_msg(handle, 
 	     USB_TYPE_VENDOR, cmd, value, 0, 
 	     NULL, 0, 1000) < 0) {
@@ -50,12 +50,12 @@ int i2c_tiny_usb_write(int request, int value, int index) {
   }
 }
 
-/* get the current transaction status from the i2c_tiny_usb interface */
- int i2c_tiny_usb_get_status(void) {
+/* get the current transaction status from the OSIF_usb interface */
+ int OSIF_USB_get_status(usb_dev_handle *handle) {
   int i;
   unsigned char status;
   
-  if((i=i2c_tiny_usb_read(CMD_GET_STATUS, &status, sizeof(status))) < 0) {
+  if((i=OSIF_USB_read(handle, CMD_GET_STATUS, &status, sizeof(status))) < 0) {
     fprintf(stderr, "Error reading status\n");
     return i;
   }
@@ -64,10 +64,12 @@ int i2c_tiny_usb_write(int request, int value, int index) {
 }
 
 /* write command and read an 8 or 16 bit value from the given chip */
-EXPORT int OSIF_readbytes(int adapter, int servo, unsigned char data, int length) 
+EXPORT int OSIF_readbytes(int adapter, int servo, unsigned char data, size_t length) 
 {
   unsigned char result[2];
-
+	usb_dev_handle *handle;
+handle = get_adapter_handle(adapter);;
+	
   if((length < 0) || (length > sizeof(result))) {
     fprintf(stderr, "request exceeds %d bytes\n", sizeof(result));
     return -1;
@@ -83,7 +85,7 @@ EXPORT int OSIF_readbytes(int adapter, int servo, unsigned char data, int length
     return -1;
   } 
 
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "write command status failed\n");
     return -1;
   }
@@ -97,7 +99,7 @@ EXPORT int OSIF_readbytes(int adapter, int servo, unsigned char data, int length
     return -1;
   } 
 
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "read data status failed\n");
     return -1;
   }
@@ -115,7 +117,9 @@ EXPORT int OSIF_readbytes(int adapter, int servo, unsigned char data, int length
 EXPORT int OSIF_write8(int adapter, int servo, unsigned char addr, int data)
 {
   char msg[2];
-
+	usb_dev_handle *handle;
+handle = get_adapter_handle(adapter);;
+	
   msg[0] = addr;
   msg[1] = data;
 
@@ -128,7 +132,7 @@ EXPORT int OSIF_write8(int adapter, int servo, unsigned char addr, int data)
     return -1;
   } 
 
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "write command status failed\n");
     return -1;
   }
@@ -140,7 +144,9 @@ EXPORT int OSIF_write8(int adapter, int servo, unsigned char addr, int data)
 EXPORT int OSIF_write16(int adapter, int servo, unsigned char addr, int data) 
 {
   char msg[3];
-
+	usb_dev_handle *handle;
+handle = get_adapter_handle(adapter);;
+	
   msg[0] = addr;
   msg[1] = data >> 8;
   msg[2] = data & 0xff;
@@ -154,7 +160,7 @@ EXPORT int OSIF_write16(int adapter, int servo, unsigned char addr, int data)
     return -1;
   } 
 
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "write command status failed\n");
     return -1;
   }
@@ -164,33 +170,43 @@ EXPORT int OSIF_write16(int adapter, int servo, unsigned char addr, int data)
 
 EXPORT int OSIF_init(void)
 {
-
-handle = NULL;
-
+	
 #ifndef WIN
   int ret;
 #endif
-
+	
+	usb_dev_handle *handle;
+	
   usb_init();
   
   usb_find_busses();
   usb_find_devices();
+  adapter_count = -1;
   
   for(bus = usb_get_busses(); bus; bus = bus->next) {
     for(dev = bus->devices; dev; dev = dev->next) {
-      if((dev->descriptor.idVendor == I2C_TINY_USB_VID) && 
-	 (dev->descriptor.idProduct == I2C_TINY_USB_PID)) {
+      if((dev->descriptor.idVendor == OSIF_USB_VID) && 
+	 (dev->descriptor.idProduct == OSIF_USB_PID)) {
 		
-	/* open device */
-	if(!(handle = usb_open(dev))) 
-		return -1;
+				/* open device */
+				if(!(handle = usb_open(dev))) 
+				{
+					printf("Could not open OSIF device\n");
+					return -1;
+				}
+				adapter_count++;
+				adapters[adapter_count].adapter_number = adapter_count;
+				adapters[adapter_count].adapter_handle = handle;
+				sprintf( adapters[adapter_count].adapter_name, "OSIF_%d", OSIF_USB_PID );
+				printf("adapter init handle %d %d\n", adapters[adapter_count].adapter_handle, handle);
 
-	break;
+				break;
       }
     }
   }
   
   if(!handle) {
+    adapter_count = -1;
     return -1;
   }
 
@@ -200,36 +216,50 @@ handle = NULL;
   if (ret != 0) {
     fprintf(stderr, "USB error: %s\n", usb_strerror());
 
-    exit(1);
+    //exit(1);
   }
 #endif
   
   /* do some testing */
-  i2c_tiny_usb_get_func();
+  OSIF_USB_get_func(handle);
 
   /* try to set i2c clock to 100kHz (10us), will actually result in ~50kHz */
   /* since the software generated i2c clock isn't too exact. in fact setting */
   /* it to 10us doesn't do anything at all since this already is the default */
-  i2c_tiny_usb_set(CMD_SET_DELAY, 10);
+  OSIF_USB_set(handle, CMD_SET_DELAY, 10);
 printf("initialised OK\n");
   	return 0;
  }
  
 EXPORT int OSIF_deinit(void)
  {
- #ifndef WIN
-  ret = usb_release_interface(handle, 0);
-  if (ret)
-    fprintf(stderr, "USB error: %s\n", usb_strerror());
-    
-   return 1;
+ 	usb_dev_handle *handle;
+ 	
+ 	//for each interface, disable
+	int n; 	
+ 	for (n=0;n<=adapter_count;n++)
+ 	{
+ 				handle = adapters[n].adapter_handle;
+
+#ifndef WIN
+	  int ret;
+	  ret = usb_release_interface(handle, 0);
+	  if (ret)
+	    fprintf(stderr, "USB error: %s\n", usb_strerror());
+	    
+	   //return -1;
 #endif
 
-  usb_close(handle);
+  	usb_close(handle);
+  }
+  return 1;
 }
 
 EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char * data, size_t buflen )
 {
+	usb_dev_handle *handle;
+handle = get_adapter_handle(adapter);
+	
 	if (check_params( servo )<0)
 	{
 		printf("Data outside bounds. Use 0 -> 127 range\n");
@@ -242,24 +272,23 @@ EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char 
 		return -1;
 		
   msg[0] = addr;
-
+  char newbuf[255];
+  char tmpbuf[255];
+  
+  
 	int n=0;
+	sprintf(newbuf, "data ");
 	for (n=0; n<buflen;n++)
 	{
 		msg[n+1]=data[n];
+    sprintf( tmpbuf, "0x%02x ", data[n]);
+		strcat(newbuf, tmpbuf);	
 	}
-	printf("adapter %d, servo %d, addr %d, data %x, buflen %d, msg %s\n",adapter,servo,addr,data,buflen,msg);
+	printf("adapter %d, servo %d, addr %d, %s, buflen %d, msg %s\n",adapter,servo,addr,newbuf, buflen,msg);
 
-  /* write one byte register address to chip */
-  if(usb_control_msg(handle, USB_CTRL_OUT, 
-		     CMD_I2C_IO + CMD_I2C_BEGIN + CMD_I2C_END,
-		     0, servo, msg, buflen, 
-		     1000) < 1) {
-    fprintf(stderr, "USB error: %s\n", usb_strerror());
-    return -1;
-  } 
+  if (write_data( handle, servo, msg, buflen+1 ) <0 ) { return -1; }
 
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "write command status failed\n");
     return -1;
   }
@@ -271,38 +300,25 @@ EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char 
 /* write command and read an an arbitary length value from the given chip */
 EXPORT int OSIF_read(int adapter, int servo, unsigned char addr, unsigned char * data, size_t buflen )
 {
+	usb_dev_handle *handle;
+handle = get_adapter_handle(adapter);
+	
  	if (check_params( servo )<0)
 	{
 		printf("Data outside bounds. Use 0 -> 127 range\n");
 		return -1;
 	}
 
-  /* write one byte register address to chip */
-  if(usb_control_msg(handle, USB_CTRL_OUT, 
-		     CMD_I2C_IO + CMD_I2C_BEGIN
-		     + ((!buflen)?CMD_I2C_END:0),
-		     0, servo, &addr, 1, 
-		     1000) < 1) {
-    fprintf(stderr, "USB error: %s\n", usb_strerror());
-    return -1;
-  } 
-
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if (write_data( handle, servo, &addr, 1 ) <0 ) { return -1; }
+  	
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "write command status failed\n");
     return -1;
   }
 
-
-  if(usb_control_msg(handle, 
-		     USB_CTRL_IN, 
-		     CMD_I2C_IO + CMD_I2C_END,
-		     I2C_M_RD, servo, data, buflen, 
-		     1000) < 1) {
-    fprintf(stderr, "USB error: %s\n", usb_strerror());
-    return -1;
-  } 
-
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if (read_data( handle, servo, data, buflen ) <0 ) { return -1; }
+  	
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "read data status failed\n");
     return -1;
   }
@@ -312,6 +328,9 @@ EXPORT int OSIF_read(int adapter, int servo, unsigned char addr, unsigned char *
 
 EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
 {
+	usb_dev_handle *handle;
+
+handle = get_adapter_handle(adapter);
 	
   int i;
 	*dev_count = 0;
@@ -323,17 +342,9 @@ EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
     char addr;
     addr=0x00;
 
-	  /* write one byte register address to chip */
-	  if(usb_control_msg(handle, USB_CTRL_OUT, 
-			     CMD_I2C_IO + CMD_I2C_BEGIN
-			     + CMD_I2C_END,
-			     0, i, &addr, 1, 
-			     1000) < 1) {
-	    fprintf(stderr, "USB error: %s\n", usb_strerror());
-	    return -1;
-	  }
-	  
-		if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+	  if (write_data( handle, i, &addr, 1 ) <0 ) { return -1; }
+	  	
+		if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
   		;//
   	}
 	  else
@@ -353,23 +364,18 @@ EXPORT bool OSIF_probe(int adapter, int servo )
   char addr;
   addr=0x00;
 
+	usb_dev_handle *handle;
+handle = get_adapter_handle(adapter);
+	
 	if (check_params( servo )<0)
 	{
 		printf("Data outside bounds. Use 0 -> 127 range\n");
 		return -1;
 	}
 
-  /* write one byte register address to chip */
-  if(usb_control_msg(handle, USB_CTRL_OUT, 
-		     CMD_I2C_IO + CMD_I2C_BEGIN
-		     + CMD_I2C_END,
-		     0, servo, &addr, 1, 
-		     1000) < 1) {
-    fprintf(stderr, "USB error: %s\n", usb_strerror());
-    return false;
-  }
+  if (write_data( handle, servo, &addr, 1 ) <0 ) { return false; }
   
-	if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+	if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
 		;//
 	}
   else
@@ -386,27 +392,45 @@ EXPORT bool OSIF_probe(int adapter, int servo )
  */
 EXPORT int OSIF_command(int adapter, int servo, unsigned char command)
 {
+	usb_dev_handle *handle;
+handle = get_adapter_handle(adapter);
+	
 	if (check_params( servo )<0)
 	{
 		printf("Data outside bounds. Use 0 -> 127 range\n");
 		return -1;
 	}
-  /* write one byte register address to chip */
-  if(usb_control_msg(handle, USB_CTRL_OUT, 
-		     CMD_I2C_IO + CMD_I2C_BEGIN + CMD_I2C_END,
-		     0, servo, &command, 1, 
-		     1000) < 1) {
-    fprintf(stderr, "USB error: %s\n", usb_strerror());
-    return -1;
-  } 
 
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+	if (write_data( handle, servo, &command, 1 ) <0 ) { return -1; }
+	
+	if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "write command status failed\n");
     return -1;
   }
-	
 	printf( "Send command\n" );
 	return 0;
+}
+usb_dev_handle * get_adapter_handle(int adapter_no )
+{
+	if (adapter_no > adapter_count )
+	{
+		return NULL;
+	}
+
+  return adapters[adapter_no].adapter_handle;
+  
+}
+
+EXPORT int OSIF_get_adapter_count(void)
+{
+	
+	printf( "adapter count %d\n", adapter_count);
+	return adapter_count;		
+}
+
+EXPORT int OSIF_get_adapter_name(int adapter, char* name)
+{
+		strcpy( name, adapters[adapter].adapter_name );
 }
 
 int check_params( int val )
