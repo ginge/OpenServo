@@ -128,7 +128,7 @@ static void pwm_dir_a(uint8_t pwm_width)
         // Set clock select bits to start timer.
         TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
                  (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
-                 (0<<CS22) | (0<<CS21) | (1<<CS20);             // No prescaling.
+                 (0<<CS12) | (0<<CS11) | (1<<CS10);             // No prescaling.
 #endif // __AVR_ATmega8 || __AVR_ATmega168__
 
         // Restore interrupts.
@@ -197,7 +197,7 @@ static void pwm_dir_b(uint8_t pwm_width)
         // Set clock select bits to start timer.
         TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
                  (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
-                 (0<<CS22) | (0<<CS21) | (1<<CS20);             // No prescaling.
+                 (0<<CS12) | (0<<CS11) | (1<<CS10);             // No prescaling.
 #endif // __AVR_ATmega8 || __AVR_ATmega168__
 
         // Restore interrupts.
@@ -338,11 +338,11 @@ void pwm_stop(void)
     OCR1B = 0;
 
     // Disable timer/counter1.
+    TCCR1A = 0;
+    TCCR1B = 0;
 #if defined(__AVR_ATmega168__)
     TCCR1C = 0;
 #endif
-    TCCR1B = 0;
-    TCCR1A = 0;
 #endif // __AVR_ATmega8 || __AVR_ATmega168__
 
     // Set the saved pwm values to zero.
