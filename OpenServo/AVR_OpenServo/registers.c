@@ -97,3 +97,43 @@ void registers_defaults(void)
 #endif
 }
 
+
+uint16_t registers_read_word(uint8_t address_hi, uint8_t address_lo)
+// Read a 16-bit word from the registers.
+// Interrupts are disabled during the read.
+{
+    uint8_t sreg;
+    uint16_t value;
+
+
+    // Clear interrupts.
+    asm volatile ("in %0,__SREG__\n\tcli\n\t" : "=&r" (sreg));
+
+    // Read the registers.
+    value = (registers[address_hi] << 8) | registers[address_lo];
+
+    // Restore status.
+    asm volatile ("out __SREG__,%0\n\t" : : "r" (sreg));
+
+    return value;
+}
+
+
+void registers_write_word(uint8_t address_hi, uint8_t address_lo, uint16_t value)
+// Write a 16-bit word to the registers.
+// Interrupts are disabled during the write.
+{
+    uint8_t sreg;
+
+    // Clear interrupts.
+    asm volatile ("in %0,__SREG__\n\tcli\n\t" : "=&r" (sreg));
+
+    // Write the registers.
+    registers[address_hi] = value >> 8;
+    registers[address_lo] = value;
+
+    // Restore status.
+    asm volatile ("out __SREG__,%0\n\t" : : "r" (sreg));
+}
+
+

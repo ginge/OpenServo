@@ -190,6 +190,8 @@ extern uint8_t registers[REGISTER_COUNT];
 
 void registers_init(void);
 void registers_defaults(void);
+uint16_t registers_read_word(uint8_t address_hi, uint8_t address_lo);
+void registers_write_word(uint8_t address_hi, uint8_t address_lo, uint16_t value);
 
 // Register in-line functions.
 
@@ -204,44 +206,6 @@ inline static uint8_t registers_read_byte(uint8_t address)
 inline static void registers_write_byte(uint8_t address, uint8_t value)
 {
     registers[address] = value;
-}
-
-
-// Read a 16-bit word from the registers.
-// Interrupts are disabled during the read.
-inline static uint16_t registers_read_word(uint8_t address_hi, uint8_t address_lo)
-{
-    uint16_t value;
-
-    asm volatile (
-        "in __tmp_reg__,__SREG__\n\t"
-        "cli\n\t"
-        "mov %A0,%2\n\t"
-        "mov %B0,%1\n\t"
-        "out __SREG__,__tmp_reg__\n\t"
-        : "=r" ((uint16_t) (value)) \
-        : "r" ((uint8_t) (registers[address_hi])),
-          "r" ((uint8_t) (registers[address_lo]))
-    );
-
-    return value;
-}
-
-
-// Write a 16-bit word to the registers.
-// Interrupts are disabled during the write.
-inline static void registers_write_word(uint8_t address_hi, uint8_t address_lo, uint16_t value)
-{
-    asm volatile (
-        "in __tmp_reg__,__SREG__\n\t"
-        "cli\n\t"
-        "mov %0,%B2\n\t"
-        "mov %1,%A2\n\t"
-        "out __SREG__,__tmp_reg__\n\t"
-        : "=&r" ((uint8_t) (registers[address_hi])),
-          "=r" ((uint8_t) (registers[address_lo]))
-        : "r" ((uint16_t) (value))
-    );
 }
 
 
