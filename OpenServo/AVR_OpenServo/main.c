@@ -53,16 +53,16 @@ static void config_pin_defaults(void)
 {
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
     // Configure unused port B pins as inputs and enable internal pull-up resistor.
-    DDRB = (0<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) |
-           (0<<PORTB3) | (1<<PORTB2) | (1<<PORTB1) | (0<<PORTB0);
-    PORTB = (1<<DDB7) | (1<<DDB6) | (0<<DDB5) | (1<<DDB4) |
-            (1<<DDB3) | (0<<DDB2) | (0<<DDB1) | (1<<DDB0);
+    DDRB = (0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) |
+           (0<<DDB3) | (1<<DDB2) | (1<<DDB1) | (0<<DDB0);
+    PORTB = (1<<PORTB7) | (1<<PORTB6) | (1<<PORTB5) | (1<<PORTB4) |
+            (1<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (1<<PORTB0);
 
     // Configure unused port C pins as inputs and enable internal pull-up resistor.
-    DDRC = (0<<PORTC6) | (0<<PORTC5) | (0<<PORTC4) |
-           (0<<PORTC3) | (0<<PORTC2) | (0<<PORTC1) | (0<<PORTC0);
-    PORTC = (1<<DDC6) | (0<<DDC5) | (0<<DDC4) |
-            (1<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
+    DDRC = (0<<DDC6) | (0<<DDC5) | (0<<DDC4) |
+           (0<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
+    PORTC = (1<<PORTC6) | (1<<PORTC5) | (1<<PORTC4) |
+            (1<<PORTC3) | (1<<PORTC2) | (1<<PORTC1) | (1<<PORTC0);
 
     // Configure port D pins as inputs and enable internal pull-up resistor.
     DDRD = (0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) |
