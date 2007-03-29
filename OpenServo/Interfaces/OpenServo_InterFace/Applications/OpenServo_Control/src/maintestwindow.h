@@ -102,7 +102,11 @@ private:
 	int adapters[128];
 	int adapterCount;
 
-	void * libhandle;// handle to the shared lib when opened
+#ifdef Q_WS_WIN
+	HINSTANCE hdll; //Windows handle
+#else
+	void * libhandle; // handle to the shared lib when opened
+#endif
 
 	int devices[128];
 	int devCount;

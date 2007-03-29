@@ -21,7 +21,11 @@
 #include "registers.h"
 #include "aboutbox.h"
 
+#ifdef Q_WS_WIN
+#include <windows.h>
+#else
 #include <dlfcn.h>
+#endif
 
 #include <qstring.h>
 #include <qlabel.h>
@@ -54,7 +58,29 @@ mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
 	bckSetupIOut = setupIOut;
 	bckSetupDOut = setupDOut;
 
-	void * libhandle; // handle to the shared lib when opened
+#ifdef Q_WS_WIN
+
+
+	/*LoadLibrary*/
+	WCHAR libname[20] = {'O','S','I','F','d','l','l','.','d','l','l'};
+	
+	hdll = LoadLibraryW(libname);
+
+	if (!hdll) { printf("Error loading dll\n"); exit(0); }
+
+	/*GetProcAddress*/
+	OSIF_init    = (OSIF_initfunc)GetProcAddress(hdll, "OSIF_init");
+	OSIF_deinit  = (OSIF_deinitfunc)GetProcAddress(hdll, "OSIF_deinit");
+	OSIF_write   = (OSIF_writefunc)GetProcAddress(hdll, "OSIF_write");
+	OSIF_read    = (OSIF_readfunc)GetProcAddress(hdll, "OSIF_read");
+	OSIF_reflash = (OSIF_reflashfunc)GetProcAddress(hdll, "OSIF_reflash");
+	OSIF_scan    = (OSIF_scanfunc)GetProcAddress(hdll, "OSIF_scan");
+	OSIF_probe   = (OSIF_probefunc)GetProcAddress(hdll, "OSIF_probe");
+	OSIF_command = (OSIF_commandfunc)GetProcAddress(hdll, "OSIF_command");
+	OSIF_get_adapter_name  = (OSIF_get_adapter_namefunc)GetProcAddress(hdll, "OSIF_get_adapter_name");
+	OSIF_get_adapter_count = (OSIF_get_adapter_countfunc)GetProcAddress(hdll, "OSIF_get_adapter_count");
+
+#else
 
 	libhandle = dlopen ( "libOSIFlib.so.1", RTLD_LAZY ); // open the shared lib
 
@@ -84,6 +110,8 @@ mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
 		sprintf(buf,"fail 2: %s", dlerror() );
 		logPrint( buf );
 	} 
+
+#endif
 	if (OSIF_init() < 0)
 	{
 		logPrint("Error initialising USB");
@@ -113,7 +141,7 @@ mainTestWindow::~mainTestWindow()
 void mainTestWindow::scanBus()
 {
 	int n;
-	char name[255];
+	char devname[255];
 	QListViewItem *listItem;
 	char logbuf[255];
 
@@ -133,6 +161,7 @@ void mainTestWindow::scanBus()
 		}
 	}
 	adapterList->clear();
+
 	servoList->clear();
 
 	if (OSIFinit == false )
@@ -147,10 +176,10 @@ void mainTestWindow::scanBus()
 	{
 		for (n=0;n<=adapterCount;n++)
 		{
-			OSIF_get_adapter_name(n, &name[0]);
-			sprintf( logbuf, "Found adapter %s", name);
+			OSIF_get_adapter_name(n, &devname[0]);
+			sprintf( logbuf, "Found adapter %s", devname);
 			logPrint(logbuf);
-			listItem = new QListViewItem( adapterList, QString(name) );
+			listItem = new QListViewItem( adapterList, QString(devname) );
 		}
 		//select last one in the list
 		adapterList->setSelected(listItem, true);
@@ -159,9 +188,9 @@ void mainTestWindow::scanBus()
 	{
 		return;
 	}
-
-	OSIF_scan( adapter, &devices[0], &devCount );
-
+	logPrint("Scanning first adapter");
+	adapter = 0;
+	OSIF_scan( 0, devices, &devCount );
 
 	//stop the timer to make sure we dont trounce data.
 
