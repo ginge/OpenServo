@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
+    Copyright (c) 2007 Michael P. Thompson <mpthompson@gmail.com>
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -34,19 +34,20 @@
 // are shown below.
 
 //  ATmega8 Flash/EEPROM Map
+//  ========================
 //
 //  Page size = 64 bytes
 //
 //  Page     Address    Type
-//  --------------------------
+//  ---------------------------------------------
 //   00     0000-003F   Flash
-//   ..
+//   ...
 //   6F     1BC0-1BFF   Flash
-//   70     1C00-1C3F   Flash (R/O - Bootloader)
-//   ..
-//   7F     1FC0-1FFF   Flash (R/O - Bootloader)
+//   70     1C00-1C3F   Flash (bootloader)
+//   ...
+//   7F     1FC0-1FFF   Flash (bootloader)
 //   80     2000-203F   EEPROM
-//   ..
+//   ...
 //   87     21C0-21FF   EEPROM
 
 #ifdef __AVR_ATmega8__
@@ -66,6 +67,7 @@
 #endif
 
 //  ATmega168 Flash/EEPROM Map
+//  ==========================
 //
 //  Page size = 128 bytes
 //
@@ -73,10 +75,10 @@
 //  ---------------------------------------------
 //   00     0000-007F   Flash
 //   ...
-//   6F     3B80-1BFF   Flash
-//   70     3C00-3C7F   Flash (bootloader)
+//   77     3B80-3BFF   Flash
+//   78     3C00-3C7F   Flash (bootloader)
 //   ...
-//   7F     1FC0-1FFF   Flash (bootloader)
+//   7F     3FC0-3FFF   Flash (bootloader)
 //   80     4000-407F   EEPROM
 //   ...
 //   83     4180-41FF   EEPROM

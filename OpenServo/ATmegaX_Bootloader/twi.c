@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
+    Copyright (c) 2007 Michael P. Thompson <mpthompson@gmail.com>
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -41,7 +41,7 @@
 static uint8_t twi_write_state;
 static uint16_t twi_address;
 
-BOOTLOADER_SECTION void twi_init(void)
+void twi_init(void)
 // Initialise TWI hardware for slave mode.
 {
     // Initialize the TWI state information.
@@ -65,7 +65,7 @@ BOOTLOADER_SECTION void twi_init(void)
 }
 
 
-BOOTLOADER_SECTION void twi_deinit(void)
+void twi_deinit(void)
 // De-initialise TWI hardware.
 {
     // Reset the TWI registers.
@@ -75,7 +75,7 @@ BOOTLOADER_SECTION void twi_deinit(void)
 }
 
 
-BOOTLOADER_SECTION void twi_check_conditions(void)
+void twi_check_conditions(void)
 // Checks for TWI interrupt conditions.
 {
     // Check for TWI interrupt condition.
@@ -88,7 +88,7 @@ BOOTLOADER_SECTION void twi_check_conditions(void)
 }
 
 
-BOOTLOADER_SECTION void twi_handle_interrupt_condition(void)
+void twi_handle_interrupt_condition(void)
 {
     switch (TWSR)
     {

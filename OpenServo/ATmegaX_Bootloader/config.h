@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
+    Copyright (c) 2007 Michael P. Thompson <mpthompson@gmail.com>
 
     Permission is hereby granted, free of charge, to any person 
     obtaining a copy of this software and associated documentation 

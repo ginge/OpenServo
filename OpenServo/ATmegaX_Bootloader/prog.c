@@ -73,7 +73,7 @@ static uint8_t prog_buffer[PROG_PAGE_SIZE];
 #define RESET_VECTOR_SIZE       (0x0004)
 #endif
 
-BOOTLOADER_SECTION static void prog_flash_page_write(uint16_t address)
+static void prog_flash_page_write(uint16_t address)
 // Write the Flash data at the indicated address from the program buffer.
 {
     uint16_t i;
@@ -163,7 +163,7 @@ BOOTLOADER_SECTION static void prog_flash_page_write(uint16_t address)
 }
 
 
-BOOTLOADER_SECTION static void prog_flash_page_read(uint16_t address)
+static void prog_flash_page_read(uint16_t address)
 // Read the Flash data at the indicated address into the program buffer.
 {
     uint8_t i;
@@ -214,7 +214,7 @@ BOOTLOADER_SECTION static void prog_flash_page_read(uint16_t address)
 }
 
 
-BOOTLOADER_SECTION static void prog_eeprom_page_write(uint16_t address)
+static void prog_eeprom_page_write(uint16_t address)
 // Read the EEPROM data at the indicated address into the program buffer.
 {
     // Use assembly to write to the EEPROM.
@@ -248,7 +248,7 @@ BOOTLOADER_SECTION static void prog_eeprom_page_write(uint16_t address)
 }
 
 
-BOOTLOADER_SECTION static void prog_eeprom_page_read(uint16_t address)
+static void prog_eeprom_page_read(uint16_t address)
 // Read the EEPROM data at the indicated address into the program buffer.
 {
     // Use assembly to read from the EEPROM.
@@ -280,7 +280,7 @@ BOOTLOADER_SECTION static void prog_eeprom_page_read(uint16_t address)
 }
 
 
-BOOTLOADER_SECTION void prog_init(void)
+void prog_init(void)
 // Initialize programming.
 {
     // Set the default program buffer address.
@@ -292,7 +292,7 @@ BOOTLOADER_SECTION void prog_init(void)
 }
 
 
-BOOTLOADER_SECTION void prog_buffer_set_address(uint16_t address)
+void prog_buffer_set_address(uint16_t address)
 // Set the address to be programmed.
 {
     uint8_t i;
@@ -336,7 +336,7 @@ BOOTLOADER_SECTION void prog_buffer_set_address(uint16_t address)
 }
 
 
-BOOTLOADER_SECTION uint8_t prog_buffer_get_byte(void)
+uint8_t prog_buffer_get_byte(void)
 // Get the byte at the current address.
 {
     uint8_t databyte;
@@ -354,16 +354,11 @@ BOOTLOADER_SECTION uint8_t prog_buffer_get_byte(void)
 }
 
 
-BOOTLOADER_SECTION void prog_buffer_set_byte(uint8_t databyte)
+void prog_buffer_set_byte(uint8_t databyte)
 // Set the byte at the current address.
 {
-    // Protect the bootloader by protecting the reset vector from being
-    // overwritten. The reset vector is the first four bytes of the first page.
-    if ((prog_page_address != 0x0000) || (prog_byte_address > RESET_VECTOR_SIZE))
-    {
-        // Set the byte within the programming buffer.
-        prog_buffer[prog_byte_address] = databyte;
-    }
+    // Set the byte within the programming buffer.
+    prog_buffer[prog_byte_address] = databyte;
 
     // Increment the byte address within the page.
     ++prog_byte_address;
@@ -377,7 +372,7 @@ BOOTLOADER_SECTION void prog_buffer_set_byte(uint8_t databyte)
 }
 
 
-BOOTLOADER_SECTION void prog_buffer_update(void)
+void prog_buffer_update(void)
 // If the programming buffer was updated it should now be written to Flash.
 {
     // Was the programming buffer updated?
