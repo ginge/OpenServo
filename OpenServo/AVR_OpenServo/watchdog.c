@@ -57,7 +57,7 @@ void watchdog_init(void)
     WDTCR = 0x00;
 #endif
 
-#if defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Clear WDRF in MCUSR.
     MCUSR &= ~(1<<WDRF);
 
@@ -91,7 +91,7 @@ void watchdog_hard_reset(void)
             (0<<WDP2) | (0<<WDP1) | (0<<WDP0);               // Minimum prescaling - 16mS.
 #endif
 
-#if defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Enable the watchdog.
     WDTCSR = (1<<WDIF) |                                     // Reset any interrupt.
              (0<<WDIE) |                                     // Disable interrupt.

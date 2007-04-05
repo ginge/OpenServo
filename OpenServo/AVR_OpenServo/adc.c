@@ -164,7 +164,7 @@ void adc_init(void)
     TCNT0 = 256 - CRVALUE;
 #endif // __AVR_ATmega8____
 
-#if defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Make sure ports PC0 (ADC0), PC1 (ADC1) and PC2 (ADC2) are set low.
     PORTC &= ~((1<<PC0) | (1<<PC1) | (1<<PC2));
 
@@ -185,7 +185,7 @@ void adc_init(void)
              (1<<ADATE) |                                   // Start auto triggering.
              (1<<ADIE) |                                    // Activate ADC conversion complete interrupt.
              ADPS;											// Prescale -- see above.
-#endif // __AVR_ATmega168____
+#endif // __AVR_ATmega88__ || __AVR_ATmega168__
 
 #if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
     // Set timer/counter0 control register A.
@@ -205,7 +205,7 @@ void adc_init(void)
 
     // Set the compare match A value which initiates an ADC sample.
     OCR0A = CRVALUE;
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85__
 
 #if defined(__AVR_ATmega8__)
     // Set timer/counter0 control register.
@@ -218,7 +218,7 @@ void adc_init(void)
     TIMSK |= (1<<TOIE0);                                    // Interrupt on overflow.
 #endif // __AVR_ATmega8____
 
-#if defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Set timer/counter0 control register A.
     TCCR0A = (0<<COM0A1) | (0<<COM0A0) |                    // Disconnect OCOA.
              (0<<COM0B1) | (0<<COM0B0) |                    // Disconnect OCOB.
@@ -236,11 +236,11 @@ void adc_init(void)
 
     // Set the compare match A value which initiates an ADC sample.
     OCR0A = CRVALUE;
-#endif // __AVR_ATmega168____
+#endif // __AVR_ATmega88__ || __AVR_ATmega168__
 }
 
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
 
 SIGNAL(SIG_OUTPUT_COMPARE0A)
 // Handles timer/counter0 compare match A.
@@ -249,7 +249,7 @@ SIGNAL(SIG_OUTPUT_COMPARE0A)
     if (adc_channel == ADC_CHANNEL_POSITION) timer_increment();
 }
 
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85__ || __AVR_ATmega168__
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85__ || __AVR_ATmega88__ || __AVR_ATmega168__
 
 #if defined(__AVR_ATmega8__)
 
@@ -306,7 +306,7 @@ SIGNAL(SIG_ADC)
             ADCSRA |= (1<<ADSC);                                    
 #endif
 
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
             // Set the ADC multiplexer selection register.
             ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
                     (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (0<<MUX0) | // Select ADC0 (PC0) as analog input.
@@ -341,7 +341,7 @@ SIGNAL(SIG_ADC)
             break;
 #endif         
             
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
 
             if (adc_voltage_needed)
             {

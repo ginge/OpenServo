@@ -445,7 +445,7 @@ twi_slave_init(uint8_t slave_address)
     USICR |= (1<<USISIE);
 #endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
 
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Set own TWI slave address.
     TWAR = slave_address << 1;
 
@@ -460,7 +460,7 @@ twi_slave_init(uint8_t slave_address)
            (1<<TWINT) |                                 // Clear the TWI interrupt.
            (1<<TWEA) |                                  // Acknowledge the data.
            (0<<TWWC);                                   //
-#endif // __AVR_ATmega8__ || __AVR_ATmega168____
+#endif // __AVR_ATmega8__ || __AVR_ATmega88__ || __AVR_ATmega168__
 }
 
 
@@ -658,7 +658,7 @@ SIGNAL(SIG_USI_OVERFLOW)
 #endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
 
 
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
 
 #if defined(__AVR_ATmega8__)
 #define SIG_TWI                 SIG_2WIRE_SERIAL
@@ -786,5 +786,5 @@ SIGNAL(SIG_TWI)
     }
 }
 
-#endif // __AVR_ATmega8__ || __AVR_ATmega168____
+#endif // __AVR_ATmega8__ || __AVR_ATmega88__ || __AVR_ATmega168__
 

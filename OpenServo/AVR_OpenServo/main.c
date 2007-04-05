@@ -51,7 +51,7 @@ static void config_pin_defaults(void)
 // AVR MCU pins have a defined level.  We do this by configuring unused pins
 // as inputs and enabling the internal pull-ups.
 {
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Configure unused port B pins as inputs and enable internal pull-up resistor.
     DDRB = (0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) |
            (0<<DDB3) | (1<<DDB2) | (1<<DDB1) | (0<<DDB0);
