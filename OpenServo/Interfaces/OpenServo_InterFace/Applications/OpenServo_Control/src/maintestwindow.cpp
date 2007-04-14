@@ -73,6 +73,7 @@ mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
 	OSIF_deinit  = (OSIF_deinitfunc)GetProcAddress(hdll, "OSIF_deinit");
 	OSIF_write   = (OSIF_writefunc)GetProcAddress(hdll, "OSIF_write");
 	OSIF_read    = (OSIF_readfunc)GetProcAddress(hdll, "OSIF_read");
+	OSIF_readonly= (OSIF_readonlyfunc)GetProcAddress(hdll, "OSIF_readonly");
 	OSIF_reflash = (OSIF_reflashfunc)GetProcAddress(hdll, "OSIF_reflash");
 	OSIF_scan    = (OSIF_scanfunc)GetProcAddress(hdll, "OSIF_scan");
 	OSIF_probe   = (OSIF_probefunc)GetProcAddress(hdll, "OSIF_probe");
@@ -88,7 +89,7 @@ mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
 	if ( libhandle == NULL ) 
 	{
 		fprintf ( stderr, "fail 1: %s\n", dlerror() );
-		//return
+		return;
 	} 
 
 	/*GetProcAddress*/
@@ -147,13 +148,14 @@ void mainTestWindow::scanBus()
 
 	//check to see if the bus is initialised. If so deinitialise and rescan all busses.
 	//thisis the only way to detect for new adapters on the bus.
-	//if (OSIFinit)
+	if (OSIFinit)
 	{
 		OSIF_deinit();
 		if (OSIF_init()<0)
 		{
 			logPrint("Error: No compatible adapters found");
 			OSIFinit =false;
+			return;
 		}
 		else
 		{ 
@@ -161,8 +163,6 @@ void mainTestWindow::scanBus()
 		}
 	}
 	adapterList->clear();
-
-	servoList->clear();
 
 	if (OSIFinit == false )
 	{
@@ -186,21 +186,47 @@ void mainTestWindow::scanBus()
 	}
 	else
 	{
+		logPrint( "No adapters found, but got this far regardless. Something went horribly wrong.");
 		return;
 	}
 	logPrint("Scanning first adapter");
+	//set the default adapter to 0. Stop crashes in win32
 	adapter = 0;
-	OSIF_scan( 0, devices, &devCount );
 
-	//stop the timer to make sure we dont trounce data.
+}
+
+void mainTestWindow::scanDevices(int adapterScan)
+{
+	int n;
+	OSIF_scan( adapterScan, devices, &devCount );
+	QListViewItem *listItem;
+	char logbuf[255];
+	unsigned char buf[2];
+	servoList->clear();
+
+	//stop the time to make sure we dont trounce data.
 
 	liveData->setChecked( false );
 
 	for( n = 0; n< devCount; n++)
 	{
-		sprintf( logbuf, "device at 0x%02x", devices[n]);
-		logPrint( logbuf );
-        	listItem = new QListViewItem( servoList, QString().sprintf("0x%-2x", devices[n]) );
+		//check to see if it is an openservo
+		if (readData(adapterScan,devices[n],0x00,buf,1)>0)
+		{
+			if (buf[0] == 0x01)
+			{
+				sprintf( logbuf, "OpenServo at 0x%02x", devices[n]);
+				logPrint( logbuf );
+				listItem = new QListViewItem( servoList, QString().sprintf("0x%-2x", devices[n]) );
+			}
+			else	//not an OpenServo. Add to other list
+			{
+				sprintf( logbuf, "I2C device at 0x%02x", devices[n]);
+				logPrint( logbuf );
+				listItem = new QListViewItem( otherDevList, QString().sprintf("0x%-2x", devices[n]) );
+			}
+			
+		}
 	}
 	if (n>0)
 	{
@@ -219,8 +245,9 @@ void mainTestWindow::scanBus()
 		liveData->setEnabled(false);
 		timerIntervalBox->setEnabled(false);
 	}
-}
 
+
+}
 
 void mainTestWindow::writeServo()
 {
@@ -230,6 +257,18 @@ void mainTestWindow::writeServo()
 	//write the position regardless
 	writeData(adapter, servo, REG_SEEK_POSITION_HI, (char*)setPos->text().ascii(), 2);
 
+	//enable writing
+	unsigned char msg[2];
+
+	msg[0] = 0x00;
+
+	//write
+	if (OSIF_command(adapter,servo,TWI_CMD_WRITE_ENABLE) < 0)
+	{
+		logPrint("I2C write enable failed");
+		return;
+	}
+	logPrint("Enable configuration write OK");
 
 	//send P
 	setupPOut = setupP->text().toInt(&ok, 0);
@@ -268,6 +307,19 @@ void mainTestWindow::writeServo()
 		writeData(adapter, servo, REG_MAX_SEEK_HI, (char*)setupSMax->text().ascii(), 2);
 		bckSetupSMaxOut = setupSMaxOut;
 	}
+
+	setupAddrOut = setupAddr->text().toInt(&ok, 0);
+	if ( setupAddrOut != servo )
+	{
+		writeData(adapter, servo, REG_TWI_ADDRESS, (char*)setupAddr->text().ascii(), 1);
+	}
+
+	if (OSIF_command(adapter,servo,TWI_CMD_WRITE_DISABLE) < 0)
+	{
+		logPrint("I2C write flash disable failed");
+		return;
+	}
+	logPrint("Disable configuration write OK");
 
 	if (!readTimer->isActive())
 	{
@@ -333,6 +385,7 @@ void mainTestWindow::readPids()
 	setupSMin->setText( QString().sprintf("0x%02x%02x",buf[6],buf[7] ));
 	setupSMax->setText( QString().sprintf("0x%02x%02x",buf[8],buf[9] ));
 	//update log view with raw data
+	setupAddr->setText( QString().sprintf("0x%02x",servo ));
 }
 
 
@@ -344,8 +397,14 @@ int mainTestWindow::writeData( int adapter, int servo, int addr, char *val, size
 	unsigned char outData[2];
 	char logbuf[255];
 
-	outData[0] = (byteData >>8)&0x00FF;
-	outData[1] = (byteData)&0x00FF;
+	if (len == 2) {
+		outData[0] = (byteData >>8)&0x00FF;
+		outData[1] = (byteData)&0x00FF;
+	}
+	else
+	{
+		outData[0] = byteData;
+	}
 
 	sprintf(logbuf, "Hex Out: 0x%02x  0x%02x", outData[0], outData[1]);
 	logPrint( logbuf );
@@ -364,6 +423,18 @@ int mainTestWindow::readData(int adapter, int servo, int addr, unsigned char *bu
 {
 
 	if (OSIF_read(adapter,servo,addr,buf,len) < 0)
+	{
+		logPrint("I2C read failed");
+		return -1;
+	}
+	logPrint("Read data OK");
+	return 1;
+}
+
+int mainTestWindow::readDataOnly(int adapter, int servo, unsigned char *buf, size_t len)
+{
+
+	if (OSIF_readonly(adapter,servo,buf,len) < 0)
 	{
 		logPrint("I2C read failed");
 		return -1;
@@ -410,7 +481,7 @@ void mainTestWindow::commandReboot()
 
 	msg[0] = 0x00;
 	//write
-	if (OSIF_write(adapter,servo,TWI_CMD_RESET,msg,1) < 0)
+	if (OSIF_command(adapter,servo,TWI_CMD_RESET) < 0)
 	{
 		logPrint("I2C Write reboot failed");
 		return;
@@ -421,7 +492,7 @@ void mainTestWindow::commandReboot()
 
 void mainTestWindow::commandFlash()
 {
-	int servo;
+
 	bool wasActive = false;
 
 	if ( readTimer->isActive() )
@@ -601,8 +672,28 @@ void mainTestWindow::genericReadData()
 	unsigned char buf[255];
 	QString data;
 	bool ok;
-	//Read from I2C
-	if (readData(adapter,genericDevice->text().toInt(&ok, 0),genericRegister->text().toInt(&ok, 0),buf,genericLen->text().toInt(&ok, 0))>0)
+	bool gotdata = false;
+
+	if (adapterCount < 0 )
+	{
+		logPrint( "No initialised adapters!" );
+	}
+	//Read from I2C Check to see of the regiter address box is filled. If it is then do this else...
+	if ( genericRegister->text() != "" )
+	{
+		if (readData(adapter,genericDevice->text().toInt(&ok, 0),genericRegister->text().toInt(&ok, 0),buf,genericLen->text().toInt(&ok, 0))>0)
+		{
+			gotdata = true;
+		}
+	}
+	else
+	{
+		if (readDataOnly(adapter,genericDevice->text().toInt(&ok, 0),buf,genericLen->text().toInt(&ok, 0))>0)
+		{
+			gotdata = true;
+		}
+	}
+	if (gotdata == true)
 	{
 		//print what we got
 		int n;
@@ -619,11 +710,12 @@ void mainTestWindow::genericReadData()
 		}
 		logPrint( newbuf );
 
+		genericDataRead->setText(data);
 	} 
-	genericDataRead->setText(data);
-	//parse into form
-	//genericReadData->setText( QString("%1").arg(hexarrToInt( &buf[16] ) ) );
-	//update log view with raw data
+	else //error!
+	{
+		genericDataRead->setText("Error!");
+	}
 }
 
 
@@ -635,7 +727,7 @@ void mainTestWindow::genericWriteData()
 	int byteData;
 	int i,n,j;
 	//make sure we are initialised
-	if ( OSIFinit == false )
+	if ( OSIFinit == false || adapterCount < 0 )
 	{
 		logPrint("Error, no adpapters found");
 		return;
@@ -691,7 +783,7 @@ void mainTestWindow::servoSelectChange(QListViewItem *selItem)
 void mainTestWindow::adapterSelectChange(QListViewItem *listItem)
 {
 	QListViewItem *listViewItem;
-	int row;
+	int row=0;
 	QListViewItemIterator it(adapterList);
 	char logbuf[255];
 
@@ -705,6 +797,7 @@ void mainTestWindow::adapterSelectChange(QListViewItem *listItem)
 	adapter = row;
 	sprintf( logbuf, "Selected Adapter %s", listItem->text(0).ascii());
 	logPrint(logbuf);
+	scanDevices(adapter);
 }
 
 void mainTestWindow::logPrint( char *logData)
@@ -713,10 +806,12 @@ void mainTestWindow::logPrint( char *logData)
 	loggingData.append(QString("\n"));
 	logBox->setText(loggingData);
 	printf("%s\n", logData);
+	logBox->scrollToBottom();
 }
 
 void mainTestWindow::logBoxClear(int,int)
 {
+	loggingData="";
 	logBox->clear();
 }
 
