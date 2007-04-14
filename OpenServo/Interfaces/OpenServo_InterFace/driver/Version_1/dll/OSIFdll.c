@@ -326,6 +326,29 @@ handle = get_adapter_handle(adapter);
   return 1;  
 }
 
+/* do only a read from the OSIF */
+EXPORT int OSIF_readonly(int adapter, int servo, unsigned char * data, size_t buflen )
+{
+  usb_dev_handle *handle;
+  handle = get_adapter_handle(adapter);
+
+  if (check_params( servo )<0)
+  {
+    printf("Data outside bounds. Use 0 -> 127 range\n");
+    return -1;
+  }
+
+  if (read_data( handle, servo, data, buflen ) <0 ) { return -1; }
+
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
+    fprintf(stderr, "read data status failed\n");
+    return -1;
+  }
+
+  return 1;  
+}
+
+
 EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
 {
 	usb_dev_handle *handle;

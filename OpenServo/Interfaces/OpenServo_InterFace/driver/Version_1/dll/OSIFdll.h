@@ -2,6 +2,7 @@
 #ifndef OSIF_DLL_H
 #define OSIF_DLL_H     //stop recursion
 
+//you must define these. They are in the Makefile
 //#define WIN
 //#define BUILD_DLL
 //#define BUILD_STATIC_LINKER
@@ -28,6 +29,7 @@
 #include "OSIFlib.h"
 
 EXPORT int OSIF_readbytes(int adapter, int servo, unsigned char addr, size_t length);
+EXPORT int OSIF_readonly(int adapter, int servo, unsigned char * data, size_t buflen );
 EXPORT int OSIF_write8(int adapter, int servo, unsigned char addr, int data);
 EXPORT int OSIF_write16(int adapter, int servo, unsigned char addr, int data); 		
 EXPORT int OSIF_init(void);
