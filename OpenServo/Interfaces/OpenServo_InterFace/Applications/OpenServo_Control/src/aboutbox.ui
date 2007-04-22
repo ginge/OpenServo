@@ -163,7 +163,7 @@
                     </rect>
                 </property>
                 <property name="text">
-                    <string>Copyright 2007 Barry Carter</string>
+                    <string>v0.6.2 Copyright 2007 Barry Carter</string>
                 </property>
             </widget>
         </widget>
@@ -172,7 +172,7 @@
                 <cstring>textLabel8</cstring>
             </property>
             <property name="text">
-                <string>&lt;p align="center"&gt;This may require root access under *NIX systems. Be sure to install the underlying OSIF_xxx library for your OS&lt;/p&gt;</string>
+                <string>&lt;p align="center"&gt;This may require root access under *NIX systems. Be sure to install the underlying OSIF_xxx library for your OS in a directory in the Path. Windows user put dll in same dir as application.&lt;/p&gt;</string>
             </property>
         </widget>
         <widget class="QLabel" row="2" column="0">

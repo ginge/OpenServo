@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form implementation generated from reading ui file 'mainwin.ui'
 **
-** Created: Sun Apr 1 02:28:38 2007
+** Created: Fri Apr 20 01:09:27 2007
 **      by: The User Interface Compiler ($Id$)
 **
 ** WARNING! All changes made in this file will be lost!

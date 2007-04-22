@@ -9,7 +9,7 @@
             <x>0</x>
             <y>0</y>
             <width>610</width>
-            <height>323</height>
+            <height>345</height>
         </rect>
     </property>
     <property name="caption">
@@ -678,7 +678,7 @@
                         </property>
                         <widget class="QLayoutWidget" row="0" column="0">
                             <property name="name">
-                                <cstring>layout2</cstring>
+                                <cstring>layout9</cstring>
                             </property>
                             <grid>
                                 <property name="name">
@@ -690,81 +690,273 @@
                                 <property name="spacing">
                                     <number>0</number>
                                 </property>
-                                <widget class="QLabel" row="1" column="0" rowspan="2" colspan="1">
-                                    <property name="name">
-                                        <cstring>textLabel1_2</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>I</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLineEdit" row="2" column="3">
-                                    <property name="name">
-                                        <cstring>setupSMin</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>0x0000</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLabel" row="0" column="2" rowspan="2" colspan="1">
+                                <widget class="QLabel" row="0" column="3" rowspan="1" colspan="2">
                                     <property name="name">
                                         <cstring>textLabel1_4</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>33</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>33</width>
+                                            <height>32767</height>
+                                        </size>
                                     </property>
                                     <property name="text">
                                         <string>SMax</string>
                                     </property>
                                 </widget>
-                                <widget class="QLineEdit" row="0" column="3" rowspan="2" colspan="1">
-                                    <property name="name">
-                                        <cstring>setupSMax</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>0x0000</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLabel" row="0" column="0">
-                                    <property name="name">
-                                        <cstring>textLabel1</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>P</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLineEdit" row="3" column="1">
-                                    <property name="name">
-                                        <cstring>setupD</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>0x0000</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLabel" row="2" column="2">
+                                <widget class="QLabel" row="1" column="3">
                                     <property name="name">
                                         <cstring>textLabel1_4_2</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>33</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>33</width>
+                                            <height>32767</height>
+                                        </size>
                                     </property>
                                     <property name="text">
                                         <string>SMin</string>
                                     </property>
                                 </widget>
-                                <widget class="QLineEdit" row="0" column="1">
+                                <widget class="QLineEdit" row="2" column="2">
                                     <property name="name">
-                                        <cstring>setupP</cstring>
+                                        <cstring>setupD</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
                                     </property>
                                     <property name="text">
                                         <string>0x0000</string>
                                     </property>
                                 </widget>
-                                <widget class="QLabel" row="3" column="0">
+                                <widget class="QLabel" row="2" column="3">
+                                    <property name="name">
+                                        <cstring>textLabel1_4_2_2</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>4</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>33</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>33</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>Addr</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLineEdit" row="1" column="5">
+                                    <property name="name">
+                                        <cstring>setupSMin</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>0x0000</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel" row="1" column="0">
+                                    <property name="name">
+                                        <cstring>textLabel1_2</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>16</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>15</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>I</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLineEdit" row="1" column="1" rowspan="1" colspan="2">
+                                    <property name="name">
+                                        <cstring>setupI</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>0x0000</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLineEdit" row="0" column="2">
+                                    <property name="name">
+                                        <cstring>setupP</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>0x0000</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel" row="0" column="0" rowspan="1" colspan="2">
+                                    <property name="name">
+                                        <cstring>textLabel1</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>16</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>15</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>P</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLineEdit" row="2" column="4" rowspan="1" colspan="2">
+                                    <property name="name">
+                                        <cstring>setupAddr</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>0x00</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel" row="2" column="0" rowspan="1" colspan="2">
                                     <property name="name">
                                         <cstring>textLabel1_3</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>16</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>15</width>
+                                            <height>32767</height>
+                                        </size>
                                     </property>
                                     <property name="text">
                                         <string>D</string>
                                     </property>
                                 </widget>
-                                <widget class="QLineEdit" row="2" column="1">
+                                <widget class="QLineEdit" row="0" column="5">
                                     <property name="name">
-                                        <cstring>setupI</cstring>
+                                        <cstring>setupSMax</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
                                     </property>
                                     <property name="text">
                                         <string>0x0000</string>
@@ -1049,6 +1241,9 @@
                     <height>20</height>
                 </size>
             </property>
+            <property name="dragAutoScroll">
+                <bool>true</bool>
+            </property>
             <property name="textFormat">
                 <enum>LogText</enum>
             </property>
@@ -1060,6 +1255,9 @@
             </property>
             <property name="readOnly">
                 <bool>true</bool>
+            </property>
+            <property name="autoFormatting">
+                <set>AutoAll</set>
             </property>
             <property name="toolTip" stdset="0">
                 <string>Log output. Double click to clear</string>
@@ -1229,41 +1427,7 @@
                 <property name="name">
                     <cstring>unnamed</cstring>
                 </property>
-                <widget class="QListView" row="0" column="0">
-                    <column>
-                        <property name="text">
-                            <string>Adapter(s)</string>
-                        </property>
-                        <property name="clickable">
-                            <bool>true</bool>
-                        </property>
-                        <property name="resizable">
-                            <bool>true</bool>
-                        </property>
-                    </column>
-                    <property name="name">
-                        <cstring>adapterList</cstring>
-                    </property>
-                    <property name="minimumSize">
-                        <size>
-                            <width>0</width>
-                            <height>70</height>
-                        </size>
-                    </property>
-                    <property name="maximumSize">
-                        <size>
-                            <width>65</width>
-                            <height>70</height>
-                        </size>
-                    </property>
-                    <property name="vScrollBarMode">
-                        <enum>Auto</enum>
-                    </property>
-                    <property name="hScrollBarMode">
-                        <enum>AlwaysOff</enum>
-                    </property>
-                </widget>
-                <widget class="QPushButton" row="2" column="0">
+                <widget class="QPushButton" row="3" column="0">
                     <property name="name">
                         <cstring>scanBusBtn</cstring>
                     </property>
@@ -1283,6 +1447,40 @@
                         <bool>true</bool>
                     </property>
                 </widget>
+                <widget class="QListView" row="2" column="0">
+                    <column>
+                        <property name="text">
+                            <string>Other</string>
+                        </property>
+                        <property name="clickable">
+                            <bool>false</bool>
+                        </property>
+                        <property name="resizable">
+                            <bool>false</bool>
+                        </property>
+                    </column>
+                    <property name="name">
+                        <cstring>otherDevList</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>0</width>
+                            <height>60</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>65</width>
+                            <height>60</height>
+                        </size>
+                    </property>
+                    <property name="vScrollBarMode">
+                        <enum>Auto</enum>
+                    </property>
+                    <property name="hScrollBarMode">
+                        <enum>AlwaysOff</enum>
+                    </property>
+                </widget>
                 <widget class="QListView" row="1" column="0">
                     <column>
                         <property name="text">
@@ -1292,7 +1490,7 @@
                             <bool>true</bool>
                         </property>
                         <property name="resizable">
-                            <bool>true</bool>
+                            <bool>false</bool>
                         </property>
                     </column>
                     <property name="name">
@@ -1309,6 +1507,40 @@
                             <width>65</width>
                             <height>32767</height>
                         </size>
+                    </property>
+                </widget>
+                <widget class="QListView" row="0" column="0">
+                    <column>
+                        <property name="text">
+                            <string>Adapter(s)</string>
+                        </property>
+                        <property name="clickable">
+                            <bool>true</bool>
+                        </property>
+                        <property name="resizable">
+                            <bool>false</bool>
+                        </property>
+                    </column>
+                    <property name="name">
+                        <cstring>adapterList</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>0</width>
+                            <height>60</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>65</width>
+                            <height>60</height>
+                        </size>
+                    </property>
+                    <property name="vScrollBarMode">
+                        <enum>Auto</enum>
+                    </property>
+                    <property name="hScrollBarMode">
+                        <enum>AlwaysOff</enum>
                     </property>
                 </widget>
             </grid>
@@ -1437,6 +1669,39 @@
         <slot>aboutClicked()</slot>
     </connection>
 </connections>
+<tabstops>
+    <tabstop>setPos</tabstop>
+    <tabstop>writeBtn</tabstop>
+    <tabstop>readBtn</tabstop>
+    <tabstop>cmdReboot</tabstop>
+    <tabstop>cmdPWM</tabstop>
+    <tabstop>cmdSave</tabstop>
+    <tabstop>cmdRestore</tabstop>
+    <tabstop>cmdDefault</tabstop>
+    <tabstop>cmdFlash</tabstop>
+    <tabstop>fileLoad</tabstop>
+    <tabstop>voltageRequest</tabstop>
+    <tabstop>setupP</tabstop>
+    <tabstop>setupI</tabstop>
+    <tabstop>setupD</tabstop>
+    <tabstop>setupSMax</tabstop>
+    <tabstop>setupSMin</tabstop>
+    <tabstop>setupAddr</tabstop>
+    <tabstop>genericDevice</tabstop>
+    <tabstop>genericRegister</tabstop>
+    <tabstop>genericData</tabstop>
+    <tabstop>genericWrite</tabstop>
+    <tabstop>genericLen</tabstop>
+    <tabstop>genericRead</tabstop>
+    <tabstop>liveData</tabstop>
+    <tabstop>timerIntervalBox</tabstop>
+    <tabstop>adapterList</tabstop>
+    <tabstop>servoList</tabstop>
+    <tabstop>scanBusBtn</tabstop>
+    <tabstop>logBox</tabstop>
+    <tabstop>btnAbout</tabstop>
+    <tabstop>buttonCancel</tabstop>
+</tabstops>
 <slots>
     <slot>readServo()</slot>
     <slot>writeServo()</slot>

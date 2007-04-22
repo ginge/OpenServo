@@ -202,8 +202,9 @@ void mainTestWindow::scanDevices(int adapterScan)
 	QListViewItem *listItem;
 	char logbuf[255];
 	unsigned char buf[2];
-	servoList->clear();
 
+	servoList->clear();
+	otherDevList->clear();
 	//stop the time to make sure we dont trounce data.
 
 	liveData->setChecked( false );
@@ -393,6 +394,10 @@ int mainTestWindow::writeData( int adapter, int servo, int addr, char *val, size
 {
 	int byteData;
 	//check validity of options
+	if (!OSIFinit || adapterCount <0)
+	{
+		logPrint("No adapters!");
+	}
 	byteData = parseOption(val);
 	unsigned char outData[2];
 	char logbuf[255];
@@ -501,7 +506,7 @@ void mainTestWindow::commandFlash()
 		readTimer->stop();
 	}
 
-	if (OSIF_reflash(0, servo, 0x7F, (char*)fileToFlash.ascii())<0)
+	if (OSIF_reflash(adapter, servo, 0x7F, (char*)fileToFlash.ascii())<0)
 	{
 		logPrint("Flash failed!");
 		return;
@@ -674,21 +679,21 @@ void mainTestWindow::genericReadData()
 	bool ok;
 	bool gotdata = false;
 
-	if (adapterCount < 0 )
+	if (adapterCount < 0 || !OSIFinit)
 	{
 		logPrint( "No initialised adapters!" );
 	}
 	//Read from I2C Check to see of the regiter address box is filled. If it is then do this else...
-	if ( genericRegister->text() != "" )
+	if ( genericRegister->text().isEmpty() ||  genericRegister->text().isNull() )
 	{
-		if (readData(adapter,genericDevice->text().toInt(&ok, 0),genericRegister->text().toInt(&ok, 0),buf,genericLen->text().toInt(&ok, 0))>0)
+		if (readDataOnly(adapter,genericDevice->text().toInt(&ok, 0),buf,genericLen->text().toInt(&ok, 0))>0)
 		{
 			gotdata = true;
 		}
 	}
 	else
 	{
-		if (readDataOnly(adapter,genericDevice->text().toInt(&ok, 0),buf,genericLen->text().toInt(&ok, 0))>0)
+		if (readData(adapter,genericDevice->text().toInt(&ok, 0),genericRegister->text().toInt(&ok, 0),buf,genericLen->text().toInt(&ok, 0))>0)
 		{
 			gotdata = true;
 		}
