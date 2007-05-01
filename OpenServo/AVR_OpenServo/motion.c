@@ -143,7 +143,7 @@ void motion_registers_reset(void)
 {
     // Set the default position, velocity and delta data.
     registers_write_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO, 0);
-    registers_write_word(REG_CURVE_IN_VELOCITY_HI, REG_CURVE_IN_VELOCITY_HI, 0);
+    registers_write_word(REG_CURVE_IN_VELOCITY_HI, REG_CURVE_IN_VELOCITY_LO, 0);
     registers_write_word(REG_CURVE_OUT_VELOCITY_HI, REG_CURVE_OUT_VELOCITY_LO, 0);
     registers_write_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO, 0);
 
@@ -173,7 +173,7 @@ uint8_t motion_append(void)
 
     // Get the position, velocity and time delta values from the registers.
     position = (int16_t) registers_read_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO);
-    in_velocity = (int16_t) registers_read_word(REG_CURVE_IN_VELOCITY_HI, REG_CURVE_IN_VELOCITY_HI);
+    in_velocity = (int16_t) registers_read_word(REG_CURVE_IN_VELOCITY_HI, REG_CURVE_IN_VELOCITY_LO);
     out_velocity = (int16_t) registers_read_word(REG_CURVE_OUT_VELOCITY_HI, REG_CURVE_OUT_VELOCITY_LO);
     delta = (uint16_t) registers_read_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO);
 
