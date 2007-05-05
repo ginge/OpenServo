@@ -1,0 +1,1340 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>BezierWidgetBase</class>
+<widget class="QWidget">
+    <property name="name">
+        <cstring>bezierwidgetbase</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>910</width>
+            <height>540</height>
+        </rect>
+    </property>
+    <property name="sizePolicy">
+        <sizepolicy>
+            <hsizetype>1</hsizetype>
+            <vsizetype>1</vsizetype>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+    </property>
+    <property name="minimumSize">
+        <size>
+            <width>910</width>
+            <height>540</height>
+        </size>
+    </property>
+    <property name="caption">
+        <string>bezierwidgetbase</string>
+    </property>
+    <property name="icon">
+        <pixmap>image0</pixmap>
+    </property>
+    <property name="mouseTracking">
+        <bool>true</bool>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLayoutWidget" row="0" column="0">
+            <property name="name">
+                <cstring>layout15</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer5_2</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>170</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel3</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>500</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>32767</width>
+                            <height>15</height>
+                        </size>
+                    </property>
+                    <property name="text">
+                        <string>&lt;b&gt;&lt;a href="www.openservo.com"&gt;OpenServo&lt;/a&gt; Motion Profile Editor&lt;/b&gt; - &amp;copy; Barry Carter 2007</string>
+                    </property>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer5</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>220</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+            </hbox>
+        </widget>
+        <widget class="QLayoutWidget" row="2" column="0">
+            <property name="name">
+                <cstring>layout13</cstring>
+            </property>
+            <vbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="Qbezier">
+                    <property name="name">
+                        <cstring>qbezier</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>1</hsizetype>
+                            <vsizetype>1</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>0</width>
+                            <height>220</height>
+                        </size>
+                    </property>
+                    <property name="mouseTracking">
+                        <bool>true</bool>
+                    </property>
+                </widget>
+                <widget class="QScrollBar">
+                    <property name="name">
+                        <cstring>bezierScroll</cstring>
+                    </property>
+                    <property name="maxValue">
+                        <number>0</number>
+                    </property>
+                    <property name="lineStep">
+                        <number>1</number>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                </widget>
+            </vbox>
+        </widget>
+        <widget class="QLayoutWidget" row="1" column="0">
+            <property name="name">
+                <cstring>layout24</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QGroupBox">
+                    <property name="name">
+                        <cstring>groupBox1</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="title">
+                        <string>Grid size</string>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_2</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>20</y>
+                                <width>59</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Time(ms)</string>
+                        </property>
+                    </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>ChkEnableScroll</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>80</y>
+                                <width>101</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Scrollbars</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>GridScale</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>false</bool>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>80</x>
+                                <y>50</y>
+                                <width>50</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>1.0</string>
+                        </property>
+                    </widget>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_2_3</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>false</bool>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>50</y>
+                                <width>50</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Scale</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>FormGridWidth</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>80</x>
+                                <y>20</y>
+                                <width>50</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>4500</string>
+                        </property>
+                    </widget>
+                </widget>
+                <widget class="QGroupBox">
+                    <property name="name">
+                        <cstring>groupBox1_2</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="title">
+                        <string>Servo Parameters</string>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_3</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>20</y>
+                                <width>66</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Max pos</string>
+                        </property>
+                    </widget>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_2_2</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>50</y>
+                                <width>50</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Min Pos</string>
+                        </property>
+                    </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>ReverseSeek</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>80</y>
+                                <width>101</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Reverse see&amp;k</string>
+                        </property>
+                        <property name="accel">
+                            <string>Alt+K</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>FormMinPos</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>70</x>
+                                <y>50</y>
+                                <width>50</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>100</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>FormMaxPos</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>70</x>
+                                <y>20</y>
+                                <width>50</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>980</string>
+                        </property>
+                    </widget>
+                </widget>
+                <widget class="QGroupBox">
+                    <property name="name">
+                        <cstring>groupBox7</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>5</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>478</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="title">
+                        <string>OpenServo Register Output (dec / hex)</string>
+                    </property>
+                    <grid>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QSplitter" row="0" column="0" rowspan="2" colspan="1">
+                            <property name="name">
+                                <cstring>splitter1</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                            <widget class="QListView">
+                                <column>
+                                    <property name="text">
+                                        <string>Td</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Pos</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Tin</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Tout</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <property name="name">
+                                    <cstring>listRegOut</cstring>
+                                </property>
+                                <property name="maximumSize">
+                                    <size>
+                                        <width>500</width>
+                                        <height>32767</height>
+                                    </size>
+                                </property>
+                                <property name="resizeMode">
+                                    <enum>AllColumns</enum>
+                                </property>
+                            </widget>
+                            <widget class="QListView">
+                                <column>
+                                    <property name="text">
+                                        <string>Td</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Pos</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Tin</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Tout</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <property name="name">
+                                    <cstring>listRegOutHex</cstring>
+                                </property>
+                                <property name="resizeMode">
+                                    <enum>AllColumns</enum>
+                                </property>
+                            </widget>
+                        </widget>
+                        <widget class="QPushButton" row="1" column="1">
+                            <property name="name">
+                                <cstring>btnOSSend</cstring>
+                            </property>
+                            <property name="maximumSize">
+                                <size>
+                                    <width>60</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property name="text">
+                                <string>Se&amp;nd</string>
+                            </property>
+                        </widget>
+                        <widget class="QListView" row="0" column="1">
+                            <column>
+                                <property name="text">
+                                    <string>sv</string>
+                                </property>
+                                <property name="clickable">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="resizable">
+                                    <bool>true</bool>
+                                </property>
+                            </column>
+                            <property name="name">
+                                <cstring>servoList</cstring>
+                            </property>
+                            <property name="sizePolicy">
+                                <sizepolicy>
+                                    <hsizetype>5</hsizetype>
+                                    <vsizetype>5</vsizetype>
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>60</width>
+                                    <height>60</height>
+                                </size>
+                            </property>
+                            <property name="maximumSize">
+                                <size>
+                                    <width>60</width>
+                                    <height>66</height>
+                                </size>
+                            </property>
+                            <property name="vScrollBarMode">
+                                <enum>AlwaysOn</enum>
+                            </property>
+                            <property name="hScrollBarMode">
+                                <enum>AlwaysOff</enum>
+                            </property>
+                        </widget>
+                    </grid>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer3_2</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>16</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QServo">
+                    <property name="name">
+                        <cstring>ServoSim</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>110</width>
+                            <height>110</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>110</width>
+                            <height>110</height>
+                        </size>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QLayoutWidget" row="3" column="0">
+            <property name="name">
+                <cstring>layout11</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLayoutWidget">
+                    <property name="name">
+                        <cstring>layout19</cstring>
+                    </property>
+                    <hbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>layout18</cstring>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>textLabel2_2</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>Mouse XY</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>label</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string></string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>layout17</cstring>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>textLabel2</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>Time Pos</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>FormTimePos</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string></string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>layout16</cstring>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>textLabel2_3</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>pos</string>
+                                    </property>
+                                    <property name="alignment">
+                                        <set>AlignCenter</set>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>FormMotorPos</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string></string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>layout15</cstring>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>textLabel2_3_2</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>speed</string>
+                                    </property>
+                                    <property name="alignment">
+                                        <set>AlignCenter</set>
+                                    </property>
+                                </widget>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>FormMotorSpeed</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>75</width>
+                                            <height>16</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string></string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                    </hbox>
+                </widget>
+                <widget class="QLayoutWidget">
+                    <property name="name">
+                        <cstring>layout10</cstring>
+                    </property>
+                    <grid>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QLabel" row="0" column="1">
+                            <property name="name">
+                                <cstring>textLabel2_4</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Pos</string>
+                            </property>
+                        </widget>
+                        <widget class="QLabel" row="1" column="1">
+                            <property name="name">
+                                <cstring>textLabel2_4_2</cstring>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>40</width>
+                                    <height>0</height>
+                                </size>
+                            </property>
+                            <property name="maximumSize">
+                                <size>
+                                    <width>40</width>
+                                    <height>32767</height>
+                                </size>
+                            </property>
+                            <property name="text">
+                                <string>Current</string>
+                            </property>
+                        </widget>
+                        <widget class="QLabel" row="1" column="0">
+                            <property name="name">
+                                <cstring>textLabel1_4</cstring>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>15</width>
+                                    <height>15</height>
+                                </size>
+                            </property>
+                            <property name="maximumSize">
+                                <size>
+                                    <width>15</width>
+                                    <height>15</height>
+                                </size>
+                            </property>
+                            <property name="paletteBackgroundColor">
+                                <color>
+                                    <red>0</red>
+                                    <green>170</green>
+                                    <blue>0</blue>
+                                </color>
+                            </property>
+                            <property name="text">
+                                <string></string>
+                            </property>
+                        </widget>
+                        <widget class="QLabel" row="0" column="0">
+                            <property name="name">
+                                <cstring>textLabel1</cstring>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>15</width>
+                                    <height>15</height>
+                                </size>
+                            </property>
+                            <property name="maximumSize">
+                                <size>
+                                    <width>15</width>
+                                    <height>15</height>
+                                </size>
+                            </property>
+                            <property name="paletteBackgroundColor">
+                                <color>
+                                    <red>255</red>
+                                    <green>0</green>
+                                    <blue>0</blue>
+                                </color>
+                            </property>
+                            <property name="text">
+                                <string></string>
+                            </property>
+                        </widget>
+                    </grid>
+                </widget>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer8</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>30</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                </spacer>
+                <widget class="QGroupBox">
+                    <property name="name">
+                        <cstring>groupBox4</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>10</width>
+                            <height>45</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>32767</width>
+                            <height>100</height>
+                        </size>
+                    </property>
+                    <property name="title">
+                        <string>Key frame</string>
+                    </property>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>FormGridDel</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>70</x>
+                                <y>20</y>
+                                <width>50</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Del</string>
+                        </property>
+                        <property name="accel">
+                            <string></string>
+                        </property>
+                    </widget>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>FormGridAdd</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>20</y>
+                                <width>50</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>&amp;Add</string>
+                        </property>
+                        <property name="accel">
+                            <string>Alt+A</string>
+                        </property>
+                    </widget>
+                </widget>
+                <widget class="QGroupBox">
+                    <property name="name">
+                        <cstring>groupBox5</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>10</width>
+                            <height>45</height>
+                        </size>
+                    </property>
+                    <property name="title">
+                        <string>Simulation Control</string>
+                    </property>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>FormBtnSimStart</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>11</x>
+                                <y>20</y>
+                                <width>61</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>&amp;Start</string>
+                        </property>
+                        <property name="accel">
+                            <string>Alt+S</string>
+                        </property>
+                    </widget>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>FormBtnSimPause</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>193</x>
+                                <y>20</y>
+                                <width>66</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Pa&amp;use</string>
+                        </property>
+                        <property name="accel">
+                            <string>Alt+U</string>
+                        </property>
+                    </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>ServoSimLoop</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>76</x>
+                                <y>20</y>
+                                <width>50</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>&amp;Loop</string>
+                        </property>
+                        <property name="accel">
+                            <string>Alt+L</string>
+                        </property>
+                    </widget>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>FormBtnSimStop</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>128</x>
+                                <y>20</y>
+                                <width>59</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>St&amp;op</string>
+                        </property>
+                        <property name="accel">
+                            <string>Alt+O</string>
+                        </property>
+                    </widget>
+                </widget>
+                <widget class="QGroupBox">
+                    <property name="name">
+                        <cstring>groupBox6</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>10</width>
+                            <height>45</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>55</width>
+                            <height>32767</height>
+                        </size>
+                    </property>
+                    <property name="title">
+                        <string>Info</string>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>lblDebug</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>21</y>
+                                <width>40</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>:</string>
+                        </property>
+                    </widget>
+                </widget>
+            </hbox>
+        </widget>
+    </grid>
+</widget>
+<customwidgets>
+    <customwidget>
+        <class>Qbezier</class>
+        <header location="local">qbezier.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>1</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image1</pixmap>
+        <signal>setXY(int x, int y)</signal>
+        <signal>calcparams()</signal>
+        <signal>setInfo(QString &amp;string)</signal>
+        <slot access="public" specifier="">slot()</slot>
+    </customwidget>
+    <customwidget>
+        <class>QServo</class>
+        <header location="local">qservo.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image1</pixmap>
+    </customwidget>
+</customwidgets>
+<images>
+    <image name="image0">
+        <data format="PNG" length="3704">89504e470d0a1a0a0000000d494844520000006e0000006e0806000000c65b26fb00000e3f49444154789ced9d7d5094d7bdc73fcf82f2b22c28e202025157480cbeb428a6372a0e4aaa37b9d2c9d8d8dcf656e3a48993e61f6fda99d6ccf46aaca69ac4e626938ce3d5444df5a6c9b41abd6a5a1c35f125e605ac127c418b288105597c01761710d8fddd3f161465d77dd07dd87d76f8ccfc6617f69cb3bf3ddfe777cef39cf39cf3282242b8b16bc306a9d8b307b9781165d02094d1a399b268117985854ab07d0b18221236d6d4d424abe6cd9393b1b122709b152526ca9b2fbc20ededed126c3f036141772050d6dede2ecbf2f2c47987603dad5651e40ff3e70f08174af6dac285d2a0283e45ebb6d35151b279f972dd8ba788e8bf8ffb64e346c978e925729d4e00f6262672293d1d575a1a0091b5b558aaabf9d76bd700d89194c4a84f3e61d2f4e9faedf3827de4dcaf757474c8eadc5c1190cac84859919f2fa74f9e943b292d2e961579795215192902b2b2a040d751177407eed7b6ac5923551111f25d4484bcf1e28be276bb7b89d68dcbe592d5bff885d41a0c72c86894437bf6e856bca03b703fe676bb65cda449d209f2bb1933c4e572f914ad9b8e8e0ef9ddd4a9e20659ade3a8d3751ff78fe262699a3913b7dbcdb02347f8fee4c9aaf27d75e408ae8202ce0c1fced367cf121f1fafbbbece106c07ee87a35bb732dde9a43c3d9d893939aaf3e53efa2865e9e9ccaead65df9fffaca187daa16be13a4e9d6210406a2a0683fa9f121919892b25859140d5fefd5ab9a729ba15eedab56b9278fe3c0062b3f529afdbed4669680040292f4774d85fe856b8a20f3f648ed50a80a5ba9a73e5e5aaf396959632b6a60680ef575672a2b858131fb544b7c2593fff9c115def0b9c4e3efef5af55e7ddb97429796d6d00e4b5b47074eb560d3cd4165d0ae776bb45e9116151c053070ff2a7356bfce67dff9557f8d9e79f7bfa466010d07eea94267e6a4ab0af47eec5fe51522207a2a3e5ce71c82fe3e2e4d5279f145b7d7dafebb7bada5a59555828c54663af7ceb3332c46eb7ebea9a2e32d807cebd50535e4e765753d7937f713898b473271f1e3f8ed362b9355669b51277e102bfa9a9b919693d496b6ca4aeae8eacac2c8d3d0f1cba14aebeb2927c1f9f0d061655574375b5eaf2cc0e07369d09a7cb3ece5e5f8f2980e5258b60bb702180256a8f2e85531c0ed569cfa84863066c172fdeb33fc14097c289ddae3aed1bc0793f696280d62b57eec7a57e4797c2a98db80ea008d8a926711fa23814d0a5706a2b79375007fc4d45dabe447128a04be1d456f2a75daf47814a3f69fbd26f8602ba134e44c4a0a2923bb9255c272a9acb01e1b4c56eb713efe5e2fb4ef6e26926bbf9d457c22ea4eb4623bda03be1dc6eb767a0ca0f7beff8fb085075b70c3a9bd9d19d706a70d13bc2da815d41f0452bc252b8bd80d5cbfffd35977a226c85f3c621bc0baa47c24e3837be23ab8df0692ec34eb84f811a3f9f87036127dc1e3f9f7f065cee0f473426ac84bb5b33d94d0bf07ffde08bd68495707f07d44c9ffa3a79d11361259cbf66b29b8340dfeec40c3dc24638417d2439f0cc1ce8195dde73e28d46e069a002cf4c40e91d9f8fc633d3dd8dfadb674393b0116e28f07ad7fb6b4056d76b372f03cff7b7531a12364d654f12817febf17702f054907cd18ab0140e606e8ff753f144643811b6c28de9f13e39685e6847d80af720b73a70f3dd12ea94b015cec4ad481b1e4c47344293b34aa7d329369b0ddbe5cbd82a2bb96eb5e276b90252766b5b1ba71d0ed42cda8ee87a2d07b6f8497bbaa1812dab57dff734b8212282a16969982d16cc292998cd668c4663c0d798dfd3e2fdcece4e39f6d9671cdfbe1dae5f471c0e7038501c0ec46e27aea505b3d389b9b99964b79b445055d181663eb01ff81898dd4fdf29782e43ea0d066cf1f1d88c461cb1b12826131217077171287171307428937ffc63a6ce9c496464649fab47b570f5f5f552b4752bb62fbe20a2bc9ca995954c696f0fe9b6f65960335002a8db8fa1ff7003c5830773cc62c135762ce669d398b36001c9c9c9aa44bcab70a5c5c57270d3265ca74f93f2cf7f32fbf2655d75f42fe3b905fd0a3024c8bef8c306ec4b49e172561611e3c631ebd967f9de9429be45f4b668aeaca4445e2f2c947d0909d2e96753b350b6b740cc21e0475fad13645f4282bc5e58286525255e175cde167176bb5dd63df71c130f1ce0f1ab577101a5060365c9c9b4262511d3d0c0049b8defb9dd373bfe50e623601510ea0b854b6262284e4d85f474888ac25d53c328ab95279a9bf9fbb0617c5b50c08befbd87c964ba1581dd0a969796caca9c9c9bfb3d9e8c8d9557e7ce95a3070e88c3e110111187c32147f7ef97958f3f2e276362827e64fab3fd208f86801fbeac0964eda449b2ef2f7f91cececedb963e9f3e79527e3f6b969c1f3c589c202b7372a4bcb4f466f42122947efdb5ac1b39f266813b468c90bd9b37f75a47dd935d1b37ca5f535383fee3ef6687416684801fdecc09b262ee5c696b6bbb6b3dbffbdbdfcaa9a82811907523474ae9d75f8b88406b6babacecda3650f06c1db869d9b2bb16d6cd86975f96ca8888a057822ffb12645608f8e1cd5e9b30419a9b9b55d5f3f23973e44657be95b9b9d2dada2abcb3648934f628f08d1933eeba75604fdc6eb7ac9d362de895e0cb8e83cc0e013feeb45a908fd6ad5355c72222b556ab7c9c942402d208f2ce922562682b2b23a147471935762c8aa2ee7a50511462c78d0b70571d38a208cd09c763c38631fd473f529d3e75c408ae8e1a0578a6a8dacaca3018acb7eeedad02d2a64ce99313c953a684eced6e46427330f63bb399b4aead3cd4223dd21bac560c929474f31f8940636d6d9f0a6caeabbb2d624389384253b8618d8d343636f6298fd2638dba242561108b85eee15f13d072dedf52f7db693d7b96983ee5e83fa209cda6f207972f537ce890eaf42d2d2d445fba0478562289c5027556abbc939979b3e35c9f9525b53535aa3acd9aaa2a596fb104bdb3f7653740fe3d04fcf066cb556e452c22f2c7e79e9386ae7cef64664a9dd5eab998dbbd79b314252488e0196ef9fd0f7fe8b730b7db2dff357366c80f892d0c011fbc594d4484acfbd5affcd6f3811d3be46f43878a80142524c86ecff5358878c4dbbe6e9d7c9091210272293252563ef6985caca8f05a58e5f9f3b27ce64cb9d4b5157c28dbe210f0c1971d8f8d95570b0ba5ce6aed55c76d6d6df2f62f7f297f359b45403ec8c890ed9e4b0844ee18ab3c7dfcb8ec5cbc98674e9c204d843f6564d0f4c82344592ca4e7e45073e204372e5c20e19b6f585853139439b6beb204783bd84edc854e60eb030fe0ccca2262d428888ac275e912eeca4afea3bc9c5645e1839c1c9edcb081719327f71eabecb6f6f676797fc50a599b9d2db6ae23a313e4bbaed7601fa57db5df84800ff7623690b5d9d9f2fe8a155e1fe4e4733eaeb5b5553e5cb306fb975f623c778e82ea6a2c3ed28632af74991ea854140e6464e07ce8214c8f3ecacf962e252626c66bc3a66a06dce974cac11d3ba82c2a823367985851c174bbddebde8fa1c61a6069b09df0410770d464e2dbcc4cc8cec632670eb3e6cd53758fca3ddd7372eadb6fe58b6ddbe83c7306e5fa7514bb1d83c3c170a793e1cdcda4b4b5618690b8307f0bf8cf207d77139e99edcbd1d134c4c7d36034e28e8b434c2664e85022b3b399f6f39f337ee244edee39f187cbe5922b57ae60b3d9b0555763aba8a0b1b616c56e479c4e94007dcf8df676bedbb58bacd65655e90f033354a43b336408d97d183ff485280a8ad188984c0c193102736626e68c0ccc663349494944444404e69ceece4e2fd4edfaf5ebb22925457527bf4565ba37c78fef750210ca168a437901255487e3ee97b0172e31d80e6844d80b372cd80e6844d80bf760b01dd088b017ce186c073422ec850b570684d32903c2e99401e174ca80703a6540389d32209c4e19104ea70c08a7530684d32903c2e914dd0967301840e56aa23ea145991aa23be14c2613cdd1d1012f5731ea6b385a77c2298aa2b8e3e2025fb016656a88ee8403504c817cb4ad071910ae1fd0a092b53818b44497c269121d0311a73d818e8e5620a6c7ca5c3da04be1021d7136c03c7a7440cbd41a5d0a674a4e2690cf10ae5714cc63c6f84f1842e852b8648bc5ef933a04cf83dbcf00feb638b5c5c5614e4d0d886ffd4528ae6df74bfad8b154454733c6cb436ecf4647b37bda344c132660993e9dc84183387cf8308eb367c93f7c985c2f4f1fb60e1942bece840bfa3df0f7622e974bd68e1bd77b9d4066a67cf4d65be28bdd5bb6c8bb0f3fdc2bdf1bf9f9ba5a37a0dbb50306834191b1636ffbdfa7494958de7e9ba7972cf1996fee33cf90bf6d1bdb7a6cf6d2010c1e3f5e2b57354397c201a4e5e7d3bd954e2370eea9a7c87be209bff9c64d9ac48de79fa7cae0f9e947626399be6081768e6a45b043fe5eedead5abb2292d4d04648fc924153e7688f0467373b36ceadab2f18fe3c7776f3a17f4dfd417d36dc42526262ad71ef4ac0cb89896c6983e9cce9b4c269c1919008867d3397dcde9a0e3a61260d0f8f17400867b98e631444753058c7cecb180fbd51fe85ab8e90b1670d46824b1ba9a868606d5f93a3a3a305455b16fc40866fff4a71a7aa81dba162e2737976f1e7a886957af52b4658bea7c07b66fe707b5b55c7df861e2e3e375d74c82ce8553144549f9c94f9088085ad6afa7a6aaca6f9ec6c646ceac5a857df060a6bef4523f78a911c13e3bba5febe8e890d5b9b9e20259f9c82372aeaccce7d964f5a54bb26cc60c6903595950a0bb33c99e16740702613b366c9062a35104e47f5353e5bf172f96af0e1d12a7d3296d6d6d5272ec98bcbb64896c7ce00171816c4f4a92e3478e0c08170af6dac285d2a0282278f6a92c3118e4bdb434f99f8c0cf92a32525aba86b74e4745c9e6e5cb752d5a5809d7dede2ecbf2f26e3ef0c29bd52a8afc61fe7cdd8b1656c289084d4d4db26ade3c39191bdb4bb4a2c44479f38517bcee44a7470bd89650a1c4ae0d1ba462cf1ee4e24594418350468f66caa245e41516eaf2d4df1bff0fd014beed67d7a55f0000000049454e44ae426082</data>
+    </image>
+    <image name="image1">
+        <data format="PNG" length="1125">89504e470d0a1a0a0000000d4948445200000016000000160806000000c4b46c3b0000042c49444154388db5954f6c14551cc73fefcd7476b65bdaae4bb78bb5502a14d404e4801c88182d1c4c2c693da847400f9c24c68b878684238660e2b1e01f12c19493012ef2478c814412d354a46017a8a564bb6da5bbedccee767776e63d0ffb073751d483bfe49799974c3eeffb7ebf37df9fd05a530b2184040cc0042420aaf9a4d0d554800f045a6b256ae0e1e1e1d6bebebe838ee31c48a7d39b5cd7fd075e251cc7617272f2ded8d8d819cff33e0316819259537aead4a9839d5dd6d1784f91f55b0a94830242088404d304292bef68a89f520802a598fecddaa04f1a876f5c250c7c0a64cdeac686e33807e23d45e6b297c8b877f1831542614550b6599835c83c2a81b6786a75134faf2f1169f12997350881d9021d0903e06de0745d3160a6d3e94dbd5b0a64dcbb94b5831d0e3375ab892b1772dcf9790528543f8dd0d367b36768153b5e31503a0f1aecb004580b44ffac58baae8b1714f0833c7638cc8dab303a320f4822ab4c7a37c69196203de3319d5ce1c4d13c733331dedc67a129a154fd128401ab0616d55a130ac3d42d93d1913940d13fd0c9ee0183685c60da01c5421bd72f7a8c8efccef9afd374267ad93d642365be0636a0d28ec7600941d9e6f23917f0e97f23ce5bef35d19ec863da0ed9059b2be70bec196c66dfa10ec0e49b338f7017258651bf95021035c595429bb0903248fe52a2b5b595dd7b4d945cc2340cdca536be389ee3f67886c5798f773fe8e0dac508c989659277a2180da4ca4ff07821058b8b251445d63d6b13ed1098a6417e39cac85197dbe31962ab9bd9f1f22a226d45366f6d0620fdb08c900d281af6110284b20085b414861d905d88f2e52739ee8cbb8022143259d3dd84691730aa2d52da441a8de0c6958068870022a41e9629ad3473fd3b8fdbe319dadb9b4924da994d2d716c7896fbe35152f78b48245d6b2da4507faf582be8eaf159b721cc837b05ae7debb1f79d08cb8b515edad942a22bc4b1c33eb3d34b1c797f06af90a72d16e2f96d9a74aa11dca8586b222d01af0fb60070f6c402d72f15d97f28c6f6d7027a5f5ce6c3233dc4e2ede496b278be4fff608cee8d3e1add806aeca51094cbb06397c1ecc328e746537c7e3ccdb5cb1136bf60635882d4d41c6ec6836ab37efa214f72208ed9f4d7cdd38ee310280542e38b1c43fb6de26b3672e1ec3cc99bcb246f66a938a3241ab3e91f7c861fbf77710b1e5e49915bae974203ba0e9e9c9cbc373d6d6d305a040a89c2a77f50b27d5782bbbf7acccf28349235dd16cf6dd374f7295e1de8a45c02d37499182b01cc0201a085d61a2144d8b2ac8fb6ed340e77240c4261890e04c250185262546d534a032154b59e0ad394e41c98182bf268ce6721ed9f064e0253356f6da2e24c1f030f783c15fe6da680af8021602bd051532ca9b8521488559f61aa86c29343578fbf0264a94c906c7d3409214c20043457a116ff6de6795578012889ff6b98fe016ea0ce1c6a2573410000000049454e44ae426082</data>
+    </image>
+</images>
+<connections>
+    <connection>
+        <sender>FormGridWidth</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>gridTimeChange(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>FormMaxPos</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>servoMaxPosChange(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>FormMinPos</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>servoMinPosChange(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>FormBtnSimStart</sender>
+        <signal>clicked()</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>BtnSimStart()</slot>
+    </connection>
+    <connection>
+        <sender>FormBtnSimStop</sender>
+        <signal>clicked()</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>BtnSimStop()</slot>
+    </connection>
+    <connection>
+        <sender>FormBtnSimPause</sender>
+        <signal>clicked()</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>BtnSimPause()</slot>
+    </connection>
+    <connection>
+        <sender>FormGridAdd</sender>
+        <signal>clicked()</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>BtnGridAdd()</slot>
+    </connection>
+    <connection>
+        <sender>FormGridDel</sender>
+        <signal>clicked()</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>BtnGridDel()</slot>
+    </connection>
+    <connection>
+        <sender>bezierScroll</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>FormBezierScroll(int)</slot>
+    </connection>
+    <connection>
+        <sender>qbezier</sender>
+        <signal>setXY(int,int)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>setLabelXY(int,int)</slot>
+    </connection>
+    <connection>
+        <sender>qbezier</sender>
+        <signal>calcparams()</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>UpdateRegisters()</slot>
+    </connection>
+    <connection>
+        <sender>ChkEnableScroll</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>enableScroll(bool)</slot>
+    </connection>
+    <connection>
+        <sender>qbezier</sender>
+        <signal>setInfo(QString&amp;)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>infoUpdate(QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>btnOSSend</sender>
+        <signal>clicked()</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>BtnOSsendCurve()</slot>
+    </connection>
+    <connection>
+        <sender>servoList</sender>
+        <signal>selectionChanged(QListViewItem*)</signal>
+        <receiver>bezierwidgetbase</receiver>
+        <slot>servoChanged(QListViewItem*)</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>FormGridWidth</tabstop>
+    <tabstop>FormBtnSimStart</tabstop>
+    <tabstop>ChkEnableScroll</tabstop>
+    <tabstop>GridScale</tabstop>
+    <tabstop>ReverseSeek</tabstop>
+    <tabstop>FormMinPos</tabstop>
+    <tabstop>FormMaxPos</tabstop>
+    <tabstop>listRegOut</tabstop>
+    <tabstop>FormGridAdd</tabstop>
+    <tabstop>FormGridDel</tabstop>
+    <tabstop>FormBtnSimStop</tabstop>
+    <tabstop>FormBtnSimPause</tabstop>
+</tabstops>
+<slots>
+    <slot>setLabel(int x, int y)</slot>
+    <slot>button_clicked()</slot>
+    <slot>doresize(int w, int h)</slot>
+    <slot>mouseMove(int x, int y)</slot>
+    <slot>mousePress(QMouseEvent *e)</slot>
+    <slot>mouseRelease(QMouseEvent *e)</slot>
+    <slot>gridTimeChange(const QString &amp;String)</slot>
+    <slot>servoMaxPosChange(const QString &amp;String)</slot>
+    <slot>servoMinPosChange(const QString &amp;string)</slot>
+    <slot>BtnSimStart()</slot>
+    <slot>BtnSimStop()</slot>
+    <slot>BtnSimPause()</slot>
+    <slot>setLabelXY(int x, int y)</slot>
+    <slot>BtnGridDel()</slot>
+    <slot>FormBezierScroll(int val)</slot>
+    <slot>repaintbezier(QPaintEvent *e)</slot>
+    <slot>BtnGridAdd()</slot>
+    <slot>UpdateRegisters()</slot>
+    <slot>enableScroll(bool val)</slot>
+    <slot>infoUpdate(QString&amp;)</slot>
+    <slot>BtnOSsendCurve()</slot>
+    <slot>servoChanged(QListViewItem*)</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+<includehints>
+    <includehint>qbezier.h</includehint>
+    <includehint>qservo.h</includehint>
+</includehints>
+</UI>
