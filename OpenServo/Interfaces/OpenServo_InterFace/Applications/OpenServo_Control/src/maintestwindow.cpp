@@ -45,7 +45,7 @@ mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
 {
 	bool ok;
 	servoPWMenabled = true;
-	logPrint("Welcome to OpenServo test application v0.2");
+	logPrint("Welcome to OpenServo test application v0.61");
 	//initialise the variables
 	setPosOut = setPos->text().toInt(&ok, 0);
 	setupPOut = setupP->text().toInt(&ok, 0);
@@ -116,6 +116,7 @@ mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
 	if (OSIF_init() < 0)
 	{
 		logPrint("Error initialising USB");
+		OSIFinit = false;
 		//do some more stuff disable buttons 
 	}
 	else { logPrint("OSIF initiased! Now run a bus scan...");OSIFinit = true; }
@@ -124,7 +125,7 @@ mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
 	connect( readTimer, SIGNAL(timeout()), SLOT(readServo()) );
 	readInterval = timerIntervalBox->text().toInt();
 
-	servo = 0x10;
+	servo = -1;
 
 	adapterCount = -1;
 	adapterList->setSorting(-1);
@@ -148,9 +149,11 @@ void mainTestWindow::scanBus()
 
 	//check to see if the bus is initialised. If so deinitialise and rescan all busses.
 	//thisis the only way to detect for new adapters on the bus.
-	if (OSIFinit)
+//	if (OSIFinit)
 	{
+		logPrint( "Starting deinit()\n");
 		OSIF_deinit();
+		logPrint( "Starting init()\n");
 		if (OSIF_init()<0)
 		{
 			logPrint("Error: No compatible adapters found");
@@ -159,6 +162,7 @@ void mainTestWindow::scanBus()
 		}
 		else
 		{ 
+			logPrint("scanbus: found adapter\n");
 			OSIFinit =true;
 		}
 	}
@@ -167,10 +171,14 @@ void mainTestWindow::scanBus()
 	if (OSIFinit == false )
 	{
 		//error no adapters
+		logPrint("failed init\n");
 		return;
 	}
 	//get list of adapters
+	logPrint( "Starting get_adapter_count()\n");
 	adapterCount = OSIF_get_adapter_count();
+	sprintf(logbuf, "scanbus: found %d adapters\n", adapterCount);
+	logPrint(logbuf);
 
 	if (adapterCount >=0)
 	{
@@ -198,10 +206,17 @@ void mainTestWindow::scanBus()
 void mainTestWindow::scanDevices(int adapterScan)
 {
 	int n;
-	OSIF_scan( adapterScan, devices, &devCount );
 	QListViewItem *listItem;
 	char logbuf[255];
 	unsigned char buf[2];
+	int servoCount=0;
+
+	logPrint( "Starting scan\n" );
+
+	OSIF_scan( adapterScan, devices, &devCount );
+
+	sprintf( logbuf, "The scan returned %d device(s)\n", devCount );
+	logPrint( logbuf );
 
 	servoList->clear();
 	otherDevList->clear();
@@ -211,6 +226,8 @@ void mainTestWindow::scanDevices(int adapterScan)
 
 	for( n = 0; n< devCount; n++)
 	{
+		sprintf( logbuf, "Scanning adapter %d of %d\n", n+1, devCount );
+		logPrint( logbuf );
 		//check to see if it is an openservo
 		if (readData(adapterScan,devices[n],0x00,buf,1)>0)
 		{
@@ -218,6 +235,9 @@ void mainTestWindow::scanDevices(int adapterScan)
 			{
 				sprintf( logbuf, "OpenServo at 0x%02x", devices[n]);
 				logPrint( logbuf );
+
+				servoCount++;
+
 				listItem = new QListViewItem( servoList, QString().sprintf("0x%-2x", devices[n]) );
 			}
 			else	//not an OpenServo. Add to other list
@@ -229,7 +249,10 @@ void mainTestWindow::scanDevices(int adapterScan)
 			
 		}
 	}
-	if (n>0)
+	sprintf( logbuf, "Found %d OpenServo devices\n", servoCount );
+	logPrint( logbuf );
+
+	if (servoCount>0)
 	{
 		//highlight that last item in the list
 		servoList->setSelected(listItem, true);
@@ -245,6 +268,7 @@ void mainTestWindow::scanDevices(int adapterScan)
 		writeBtn->setEnabled(false);
 		liveData->setEnabled(false);
 		timerIntervalBox->setEnabled(false);
+		servo = -1;
 	}
 
 
@@ -253,6 +277,13 @@ void mainTestWindow::scanDevices(int adapterScan)
 void mainTestWindow::writeServo()
 {
 	bool ok;
+
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
 
 	setPosOut = setPos->text().toInt(&ok, 0);
 	//write the position regardless
@@ -263,13 +294,25 @@ void mainTestWindow::writeServo()
 
 	msg[0] = 0x00;
 
-	//write
-	if (OSIF_command(adapter,servo,TWI_CMD_WRITE_ENABLE) < 0)
+	bool enabledWrite = false;
+
+	printf( "P %d %d, I %d %d, D %d %d, Max %d %d, Min %d %d, Addr %d %d\n",setupPOut, bckSetupPOut, setupIOut, bckSetupIOut, setupDOut, bckSetupDOut, setupSMaxOut , bckSetupSMaxOut, setupSMinOut, bckSetupSMinOut, setupAddrOut, bckSetupAddrOut);
+	// Have any variables changed?
+	if (( setupPOut != bckSetupPOut ) ||
+	    ( setupIOut != bckSetupIOut ) ||
+	    ( setupDOut != bckSetupDOut ) ||
+	    ( setupSMinOut != bckSetupSMinOut ) ||
+	    ( setupSMaxOut != bckSetupSMaxOut ) ||
+	    ( setupAddrOut != bckSetupAddrOut ))
 	{
-		logPrint("I2C write enable failed");
-		return;
+		if (OSIF_command(adapter,servo,TWI_CMD_WRITE_ENABLE) < 0)
+		{
+			logPrint("I2C write enable failed");
+			return;
+		}
+		logPrint("Enable configuration write OK");
+		enabledWrite = true;
 	}
-	logPrint("Enable configuration write OK");
 
 	//send P
 	setupPOut = setupP->text().toInt(&ok, 0);
@@ -310,21 +353,20 @@ void mainTestWindow::writeServo()
 	}
 
 	setupAddrOut = setupAddr->text().toInt(&ok, 0);
-	if ( setupAddrOut != servo )
+	if ( setupAddrOut != bckSetupAddrOut )
 	{
 		writeData(adapter, servo, REG_TWI_ADDRESS, (char*)setupAddr->text().ascii(), 1);
+		bckSetupAddrOut = setupAddrOut;
 	}
 
-	if (OSIF_command(adapter,servo,TWI_CMD_WRITE_DISABLE) < 0)
+	if (enabledWrite)
 	{
-		logPrint("I2C write flash disable failed");
-		return;
-	}
-	logPrint("Disable configuration write OK");
-
-	if (!readTimer->isActive())
-	{
-		readServo();	
+		if (OSIF_command(adapter,servo,TWI_CMD_WRITE_DISABLE) < 0)
+		{
+			logPrint("I2C write flash disable failed");
+			return;
+		}
+		logPrint("Disable configuration write OK");
 	}
 }
 
@@ -333,6 +375,13 @@ void mainTestWindow::readServo()
 {
 	int addr = 0x08;
 	unsigned char buf[255];
+
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
 
 	//Read from I2C
 	if (readData(adapter,servo,addr,buf,14)>0)
@@ -363,6 +412,13 @@ void mainTestWindow::readPids()
 	int addr = REG_PID_PGAIN_HI;
 	unsigned char buf[255];
 
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
+
 	//Read from I2C
 	if (readData(adapter,servo,addr,buf,10)>0)
 	{
@@ -387,6 +443,14 @@ void mainTestWindow::readPids()
 	setupSMax->setText( QString().sprintf("0x%02x%02x",buf[8],buf[9] ));
 	//update log view with raw data
 	setupAddr->setText( QString().sprintf("0x%02x",servo ));
+
+	bckSetupPOut = hexarrToInt(&buf[0]);
+	bckSetupDOut = hexarrToInt(&buf[2]);
+	bckSetupIOut = hexarrToInt(&buf[4]);
+	bckSetupSMinOut = hexarrToInt(&buf[6]);
+	bckSetupSMaxOut = hexarrToInt(&buf[8]);
+	bckSetupAddrOut = servo;
+
 }
 
 
@@ -394,9 +458,10 @@ int mainTestWindow::writeData( int adapter, int servo, int addr, char *val, size
 {
 	int byteData;
 	//check validity of options
-	if (!OSIFinit || adapterCount <0)
+	if (!OSIFinit || adapterCount <0 || servo <0)
 	{
-		logPrint("No adapters!");
+		logPrint("No adapters or devices!");
+		return -1;
 	}
 	byteData = parseOption(val);
 	unsigned char outData[2];
@@ -426,6 +491,12 @@ int mainTestWindow::writeData( int adapter, int servo, int addr, char *val, size
 
 int mainTestWindow::readData(int adapter, int servo, int addr, unsigned char *buf, size_t len)
 {
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return -1;
+	}
 
 	if (OSIF_read(adapter,servo,addr,buf,len) < 0)
 	{
@@ -438,6 +509,12 @@ int mainTestWindow::readData(int adapter, int servo, int addr, unsigned char *bu
 
 int mainTestWindow::readDataOnly(int adapter, int servo, unsigned char *buf, size_t len)
 {
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return -1;
+	}
 
 	if (OSIF_readonly(adapter,servo,buf,len) < 0)
 	{
@@ -484,6 +561,13 @@ void mainTestWindow::commandReboot()
 {
 	unsigned char msg[2];
 
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
+
 	msg[0] = 0x00;
 	//write
 	if (OSIF_command(adapter,servo,TWI_CMD_RESET) < 0)
@@ -499,12 +583,29 @@ void mainTestWindow::commandFlash()
 {
 
 	bool wasActive = false;
+	bool fakeServo = false;
+
+	//check validity of options... don't verify the servo we might need to flash blind
+	if (!OSIFinit || adapterCount <0)
+	{
+		logPrint("No adapters!");
+		return;
+	}
+	// If the servo does not exist then send a fake servo number over. This wont matter.
+	if (servo <0)
+	{
+		servo = 0x10;
+		fakeServo = true;
+	}
 
 	if ( readTimer->isActive() )
 	{
 		wasActive = true;
 		readTimer->stop();
 	}
+
+	//send the reboot command first... the OSIF dll does this, but just to be sure
+	commandReboot();
 
 	if (OSIF_reflash(adapter, servo, 0x7F, (char*)fileToFlash.ascii())<0)
 	{
@@ -519,6 +620,12 @@ void mainTestWindow::commandFlash()
 	{
 		readTimer->start(readInterval);
 	}
+	// restore the invalid servo handle.
+	if (fakeServo)
+	{
+		servo = -1;
+		fakeServo = false;
+	}
 }
 
 
@@ -526,6 +633,13 @@ void mainTestWindow::commandDefault()
 {
 
 	unsigned char msg[2];
+
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
 
 	msg[0] = 0x00;
 
@@ -544,6 +658,13 @@ void mainTestWindow::commandRestore()
 {
 	unsigned char msg[2];
 
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
+
 	msg[0] = 0x00;
 
 	//write
@@ -561,6 +682,13 @@ void mainTestWindow::commandSave()
 {
 	unsigned char msg[2];
 
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
+
 	msg[0] = 0x00;
 
 	//write
@@ -577,6 +705,13 @@ void mainTestWindow::commandSave()
 void mainTestWindow::commandPWM()
 {
 	unsigned char msg[2];
+
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
 
 	msg[0] = 0x00;
 
@@ -633,6 +768,13 @@ void mainTestWindow::requestVoltage()
 {
 	unsigned char msg[2];
 
+	//check validity of options
+	if (!OSIFinit || adapterCount <0 || servo <0)
+	{
+		logPrint("No adapters or devices!");
+		return;
+	}
+
 	msg[0] = 0x00;
 
 	//write
@@ -682,6 +824,7 @@ void mainTestWindow::genericReadData()
 	if (adapterCount < 0 || !OSIFinit)
 	{
 		logPrint( "No initialised adapters!" );
+		return;
 	}
 	//Read from I2C Check to see of the regiter address box is filled. If it is then do this else...
 	if ( genericRegister->text().isEmpty() ||  genericRegister->text().isNull() )

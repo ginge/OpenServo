@@ -76,6 +76,7 @@ private:
 	int bckSetupDOut;
 	int bckSetupSMaxOut;
 	int bckSetupSMinOut;
+	int bckSetupAddrOut;
 
 	/*Typedef the functions*/
 	typedef int  (*OSIF_initfunc     )();
