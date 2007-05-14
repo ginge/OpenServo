@@ -77,7 +77,7 @@
 // may only be written to when write enabled.
 
 #define REG_TWI_ADDRESS             0x20
-#define REG_PID_OFFSET              0x21
+#define REG_PID_DEADBAND            0x21
 #define REG_PID_PGAIN_HI            0x22
 #define REG_PID_PGAIN_LO            0x23
 #define REG_PID_DGAIN_HI            0x24
@@ -85,13 +85,13 @@
 #define REG_PID_IGAIN_HI            0x26
 #define REG_PID_IGAIN_LO            0x27
 
-#define REG_MIN_SEEK_HI             0x28
-#define REG_MIN_SEEK_LO             0x29
-#define REG_MAX_SEEK_HI             0x2A
-#define REG_MAX_SEEK_LO             0x2B
-#define REG_REVERSE_SEEK            0x2C
-#define REG_RESERVED_2D             0x2D
-#define REG_RESERVED_2E             0x2E
+#define REG_PWM_FREQ_DIVIDER_HI     0x28
+#define REG_PWM_FREQ_DIVIDER_LO     0x29
+#define REG_MIN_SEEK_HI             0x2A
+#define REG_MIN_SEEK_LO             0x2B
+#define REG_MAX_SEEK_HI             0x2C
+#define REG_MAX_SEEK_LO             0x2D
+#define REG_REVERSE_SEEK            0x2E
 #define REG_RESERVED_2F             0x2F
 
 // Set additional safe read/write registers for

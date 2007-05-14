@@ -147,44 +147,60 @@
 #define DEFAULT_PID_PGAIN               0x0000
 #define DEFAULT_PID_DGAIN               0x0000
 #define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x00
 
 // Specify default mininimum and maximum seek positions.  The OpenServo will
 // not attempt to seek beyond these positions.
 #define DEFAULT_MIN_SEEK                0x0060
 #define DEFAULT_MAX_SEEK                0x03A0
 
+// Default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0010
+
 #elif (HARDWARE_TYPE == HARDWARE_TYPE_FUTABA_S3003)
 
 // Futaba S3003 hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
-#define DEFAULT_PID_DGAIN               0x0800
+#define DEFAULT_PID_DGAIN               0x1800
 #define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x01
 
 // Futaba S3003 hardware default mininimum and maximum seek positions.
 #define DEFAULT_MIN_SEEK                0x0060
 #define DEFAULT_MAX_SEEK                0x03A0
 
+// Futaba S3003 hardware default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0008
+
 #elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_311)
 
 // Hitec HS-311 hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
-#define DEFAULT_PID_DGAIN               0x0800
+#define DEFAULT_PID_DGAIN               0x1800
 #define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x01
 
 // Hitec HS-311 hardware default mininimum and maximum seek positions.
 #define DEFAULT_MIN_SEEK                0x0060
 #define DEFAULT_MAX_SEEK                0x03A0
 
+// Hitec HS-311 hardware default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0008
+
 #elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_475HB)
 
 // Hitec HS-475HB hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
-#define DEFAULT_PID_DGAIN               0x0800
+#define DEFAULT_PID_DGAIN               0x1800
 #define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x01
 
 // Hitec HS-475HB hardware default mininimum and maximum seek positions.
 #define DEFAULT_MIN_SEEK                0x0060
 #define DEFAULT_MAX_SEEK                0x03A0
+
+// Hitec HS-475HB hardware default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0008
 
 #endif
 

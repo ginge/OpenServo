@@ -33,6 +33,7 @@
 #include "estimator.h"
 #include "ipd.h"
 #include "pid.h"
+#include "pwm.h"
 #include "regulator.h"
 #include "registers.h"
 
@@ -73,6 +74,9 @@ void registers_defaults(void)
     // Default TWI address.
     registers_write_byte(REG_TWI_ADDRESS, REG_DEFAULT_TWI_ADDR);
 
+    // Call the PWM module to initialize the PWM related default values.
+    pwm_registers_defaults();
+
 #if ESTIMATOR_ENABLED
     // Call the motion module to initialize the velocity estimator related 
     // default values. This is done so the estimator related parameters can
@@ -81,18 +85,17 @@ void registers_defaults(void)
 #endif
 
 #if REGULATOR_MOTION_ENABLED
-    // Call the regulator algorithm module to initialize the regulator 
-    // related default values.
+    // Call the regulator module to initialize the regulator related default values.
     regulator_registers_defaults();
 #endif
 
 #if PID_MOTION_ENABLED
-    // Call the PID algorithm module to initialize the PID related default values.
+    // Call the PID module to initialize the PID related default values.
     pid_registers_defaults();
 #endif
 
 #if IPD_MOTION_ENABLED
-    // Call the IPD algorithm module to initialize the IPD related default values.
+    // Call the IPD module to initialize the IPD related default values.
     ipd_registers_defaults();
 #endif
 }

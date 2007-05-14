@@ -29,6 +29,7 @@
 
 #include "registers.h"
 
+void pwm_registers_defaults(void);
 void pwm_init(void);
 void pwm_update(uint16_t position, int16_t pwm);
 void pwm_stop(void);

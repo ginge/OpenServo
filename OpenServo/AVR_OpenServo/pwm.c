@@ -33,26 +33,10 @@
 #include "pwm.h"
 #include "registers.h"
 
-//
-// ATtiny45/85
-// ==============
-//
-// PWM output to the servo motor utilizes Timer/Counter1.  Output to the
-// motor is assigned as follows:
-//
-//  OC1A (PB1) - Servo PWM output direction A
-//  OC1B (PB4) - Servo PWM output direction B
-//
-//
-// ATmega8
-// =======
-//
-// PWM output to the servo motor utilizes Timer/Counter1 in 8-bit mode.  
-// Output to the motor is assigned as follows:
-//
-//  OC1A (PB1) - Servo PWM output direction A
-//  OC1B (PB2) - Servo PWM output direction B
-//
+#if !defined(__AVR_ATmega168__)
+#  error "This module is not being compiled for the AVR ATmega168 MCU."
+#endif
+
 //
 // ATmega168
 // =========
@@ -64,153 +48,152 @@
 //  OC1B (PB2) - Servo PWM output direction B
 //
 
-// Stored values for the PWM.
-volatile uint8_t pwm_dir_a_save;
-volatile uint8_t pwm_dir_b_save;
+// Determine the top value for timer/counter1 from the frequency divider.
+#define PWM_TOP_VALUE(div)      ((uint16_t) div << 4) - 1;
 
-static void pwm_dir_a(uint8_t pwm_width)
+// Determines the compare value associated with the duty cycle for timer/counter1.
+#define PWM_OCRN_VALUE(div,pwm) (uint16_t) (((uint32_t) pwm * (((uint32_t) div << 4) - 1)) / 255)
+
+// Flags that indicate PWM output in A and B direction.
+static uint8_t pwm_a;
+static uint8_t pwm_b;
+
+// Pwm frequency divider value.
+static uint16_t pwm_div;
+
+static void pwm_dir_a(uint8_t pwm_duty)
 // Send PWM signal for rotation with the indicated pwm ratio (0 - 255).
 // This function is meant to be called only by pwm_update.
 {
-    // Are we changing the pwm?
-    if (pwm_width != pwm_dir_a_save)
+    // Determine the duty cycle value for the timer.
+    uint16_t duty_cycle = PWM_OCRN_VALUE(pwm_div, pwm_duty);
+
+    // Disable interrupts.
+    cli();
+
+    // Do we need to reconfigure PWM output?
+    if (!pwm_a)
     {
-        // Disable interrupts.
-        cli();
+        // Yes. Make sure PB1 and PB2 are zero.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
 
-        // Store the new pwm.
-        pwm_dir_b_save = 0;
-        pwm_dir_a_save = pwm_width;
+        // Disable OC1B and enable OC1A output.
+        TCCR1A = (1<<COM1A1) | (0<<COM1A0) |
+                 (0<<COM1B1) | (0<<COM1B0) |
+                 (0<<WGM11) | (0<<WGM10);
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-        // Set PB4/OC1B to low.
-        PORTB &= ~(1<<PB4);
-
-        // Disable timer 1 pulse width modulator B.
-        GTCCR = (0<<PWM1B) |                                    // Disable timer 1B PWM.
-                (0<<COM1B1) | (0<<COM1B0) |                     // Disconnect timer 1B from outputs.
-                (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);            // Unused timer 1 features.
-
-        // Set the timer 1 output compare register C (OCR1C).  This values
-        // sets how many clock cycles compose an entire PWM cycle.
-        OCR1C = 0xFF;
-
-        // Set the timer 1 ouput compare register B (OCR1A).  The ratio of this value to
-        // 0xFF set in OCR1C determines the duty cycle of the PWM signal on OC1A/PB1.
-        OCR1A = pwm_width;
-
-        // Enable timer 1 pulse width modulator A.  This also configures OC1A/PB1
-        // to be set when timer counter 1 (TCNT1) equals 0x01 and cleared when timer
-        // counter 1 (TCNT1) equals value in output compare register A (OCR1A).
-        TCCR1 = (0<<CTC1) |                                     // Don't reset after compare match.
-                (1<<PWM1A) |                                    // Enable timer 1A PWM.
-                (1<<COM1A1) | (0<<COM1A0) |                     // OC1A cleared on compare match. Set on TCNT1=$01.
-                (0<<CS13) | (0<<CS12) | (1<<CS11) | (0<<CS10);  // Prescale divide by 2.
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
-
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
-        // Set PB2/OC1B to low.
-        PORTB &= ~(1<<PB2);
-
-        // Stop the timer counter.
-        TCCR1B = 0;
-
-        // Set the timer compare registers.  The ratio of this value to 0xFF
-        // determines the duty cycle of the PWM signal on OC1A and OC1B.
-        OCR1A = pwm_width;
-        OCR1B = 0;
-
-        // Disable timer 1 and enable timer 2.
-        TCCR1A = (1<<COM1A1) | (0<<COM1A0) |                    // Clear OC1A on compare match on up-count.
-                 (0<<COM1B1) | (0<<COM1B0) |                    // OC1B disconnected.
-                 (0<<WGM11) | (1<<WGM10);                       // Phase correct PWM 8-bit - waveform generation mode 1.
-
-        // Set clock select bits to start timer.
-        TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
-                 (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
-                 (0<<CS12) | (0<<CS11) | (1<<CS10);             // No prescaling.
-#endif // __AVR_ATmega8 || __AVR_ATmega88__ || __AVR_ATmega168__
-
-        // Restore interrupts.
-        sei();
+        // Reset the B direction flag.
+        pwm_b = 0;
     }
+
+    // Set the A direction flag.
+    pwm_a = pwm_duty;
+
+    // Update the PWM duty cycle.
+    OCR1A = duty_cycle;
+    OCR1B = 0;
+
+    // Restore interrupts.
+    sei();
+
+    // Save the pwm A and B duty values.
+    registers_write_byte(REG_PWM_DIRA, pwm_a);
+    registers_write_byte(REG_PWM_DIRB, pwm_b);
 }
 
 
-static void pwm_dir_b(uint8_t pwm_width)
+static void pwm_dir_b(uint8_t pwm_duty)
 // Send PWM signal for rotation with the indicated pwm ratio (0 - 255).
 // This function is meant to be called only by pwm_update.
 {
-    // Are we changing the pwm?
-    if (pwm_width != pwm_dir_b_save)
+    // Determine the duty cycle value for the timer.
+    uint16_t duty_cycle = PWM_OCRN_VALUE(pwm_div, pwm_duty);
+
+    // Disable interrupts.
+    cli();
+
+    // Do we need to reconfigure PWM output?
+    if (!pwm_b)
     {
-        // Disable interrupts.
-        cli();
+        // Yes. Make sure PB1 and PB2 are zero.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
 
-        // Store the new pwm.
-        pwm_dir_b_save = pwm_width;
-        pwm_dir_a_save = 0;
+        // Disable OC1A and enable OC1B output.
+        TCCR1A = (0<<COM1A1) | (0<<COM1A0) |
+                 (1<<COM1B1) | (0<<COM1B0) |
+                 (0<<WGM11) | (0<<WGM10);
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-        // Set PB1/OC1A to low.
-        PORTB &= ~(1<<PB1);
-
-        // Disable timer 1 pulse width modulator A.
-        TCCR1 = (0<<CTC1) |                                     // Don't reset after compare match.
-                (0<<PWM1A) |                                    // Disable timer 1A PWM.
-                (0<<COM1A1) | (0<<COM1A0) |                     // Disconnect timer 1A from outputs.
-                (0<<CS13) | (0<<CS12) | (1<<CS11) | (0<<CS10);  // Prescale divide by 2.
-
-        // Set the timer 1 output compare register C (OCR1C).  This values
-        // sets how many clock cycles compose an entire PWM cycle.
-        OCR1C = 0xFF;
-
-        // Set the timer 1 ouput compare register B (OCR1B).  The ratio of this value to
-        // 0xFF set in OCR1C determines the duty cycle of the PWM signal on OC1B/PB4.
-        OCR1B = pwm_width;
-
-        // Enable timer 1 pulse width modulator B.  This also configures OC1B/PB4
-        // to be set when timer counter 1 (TCNT1) equals 0x01 and cleared when timer
-        // counter 1 (TCNT1) equals value in output compare register B (OCR1B).
-        GTCCR = (1<<PWM1B) |                                    // Enable timer 1B PWM.
-                (1<<COM1B1) | (0<<COM1B0) |                     // OC1B cleared on compare match. Set on TCNT1=$01.
-                (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);            // Unused timer 1 features.
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
-
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
-        // Set PB1/OC1A to low.
-        PORTB &= ~(1<<PB1);
-
-        // Stop the timer counter.
-        TCCR1B = 0;
-
-        // Set the timer compare registers.  The ratio of this value to 0xFF
-        // determines the duty cycle of the PWM signal on OC1A and OC1B.
-        OCR1A = 0;
-        OCR1B = pwm_width;
-
-        // Disable timer 1 and enable timer 2.
-        TCCR1A = (0<<COM1A1) | (0<<COM1A0) |                    // OC1A disconnected.
-                 (1<<COM1B1) | (0<<COM1B0) |                    // Clear OC1B on compare match on up-count.
-                 (0<<WGM11) | (1<<WGM10);                       // Phase correct PWM 8-bit - waveform generation mode 1.
-
-        // Set clock select bits to start timer.
-        TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
-                 (0<<WGM13) | (0<<WGM12) |                      // Select waveform mode 1.
-                 (0<<CS12) | (0<<CS11) | (1<<CS10);             // No prescaling.
-#endif // __AVR_ATmega8 || __AVR_ATmega88__ || __AVR_ATmega168__
-
-        // Restore interrupts.
-        sei();
+        // Reset the A direction flag.
+        pwm_a = 0;
     }
+
+    // Set the B direction flag.
+    pwm_b = pwm_duty;
+
+    // Update the PWM duty cycle.
+    OCR1A = 0;
+    OCR1B = duty_cycle;
+
+    // Restore interrupts.
+    sei();
+
+    // Save the pwm A and B duty values.
+    registers_write_byte(REG_PWM_DIRA, pwm_a);
+    registers_write_byte(REG_PWM_DIRB, pwm_b);
+}
+
+
+void pwm_registers_defaults(void)
+// Initialize the PWM algorithm related register values.  This is done 
+// here to keep the PWM related code in a single file.  
+{
+    // PWM divider is a value between 1 and 1024.  This divides the fundamental
+    // PWM frequency (500 kHz for 8MHz clock, 1250 kHz for 20MHz clock) by a 
+    // constant value to produce a PWM frequency suitable to drive a motor.  A 
+    // small motor with low inductance and impedance such as those found in an 
+    // RC servo will my typically use a divider value between 16 and 64.  A larger 
+    // motor with higher inductance and impedance may require a greater divider.
+    registers_write_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO, DEFAULT_PWM_FREQ_DIVIDER);
 }
 
 
 void pwm_init(void)
 // Initialize the PWM module for controlling a DC motor.
 {
-    // Init is same as stop.
-    pwm_stop();
+    // Initialize the pwm frequency divider value.
+    pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+
+    // Set PB1/OC1A and PB2/OC1B to low.
+    PORTB &= ~((1<<PB1) | (1<<PB2));
+
+    // Enable PB1/OC1A and PB2/OC1B as outputs.
+    DDRB |= ((1<<DDB1) | (1<<DDB2));
+
+    // Reset the timer1 configuration.
+    TCNT1 = 0;
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCCR1C = 0;
+    TIMSK1 = 0;
+
+    // Set timer top value.
+    ICR1 = PWM_TOP_VALUE(pwm_div);
+
+    // Set the PWM duty cycle to zero.
+    OCR1A = 0;
+    OCR1B = 0;
+
+    // Configure timer 1 for PWM, Phase and Frequency Correct operation, but leave outputs disabled.
+    TCCR1A = (0<<COM1A1) | (0<<COM1A0) |                    // Disable OC1A output.
+             (0<<COM1B1) | (0<<COM1B0) |                    // Disable OC1B output.
+             (0<<WGM11) | (0<<WGM10);                       // PWM, Phase and Frequency Correct, TOP = ICR1
+    TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
+             (1<<WGM13) | (0<<WGM12) |                      // PWM, Phase and Frequency Correct, TOP = ICR1
+             (0<<CS12) | (0<<CS11) | (1<<CS10);             // No prescaling.
+
+    // Update the pwm values.
+    registers_write_byte(REG_PWM_DIRA, 0);
+    registers_write_byte(REG_PWM_DIRB, 0);
 }
 
 
@@ -225,6 +208,36 @@ void pwm_update(uint16_t position, int16_t pwm)
     uint8_t pwm_width;
     uint16_t min_position;
     uint16_t max_position;
+
+    // Quick check to see if the frequency divider changed.  If so we need to 
+    // configure a new top value for timer/counter1.  This value should only 
+    // change infrequently so we aren't too elegant in how we handle updating
+    // the value.  However, we need to be careful that we don't configure the
+    // top to a value lower than the counter and compare values.
+    if (registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div)
+    {
+        // Clear PB1 and PB2.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
+
+        // Disable OC1A and OC1B outputs.
+        TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
+        TCCR1A &= ~((1<<COM1B1) | (1<<COM1B0));
+
+        // Reset the A and B direction flags.
+        pwm_a = 0;
+        pwm_b = 0;
+
+        // Update the pwm frequency divider value.
+        pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+
+        // Update the timer top value.
+        ICR1 = PWM_TOP_VALUE(pwm_div);
+
+        // Reset the counter and compare values to prevent problems with the new top value.
+        TCNT1 = 0;
+        OCR1A = 0;
+        OCR1B = 0;
+    }
 
     // Are we reversing the seek sense?
     if (registers_read_byte(REG_REVERSE_SEEK) != 0)
@@ -300,10 +313,6 @@ void pwm_update(uint16_t position, int16_t pwm)
         // Stop all PWM activity to the motor.
         pwm_stop();
     }
-
-    // Update the pwm values.
-    registers_write_byte(REG_PWM_DIRB, pwm_dir_b_save);
-    registers_write_byte(REG_PWM_DIRA, pwm_dir_a_save);
 }
 
 
@@ -313,47 +322,30 @@ void pwm_stop(void)
     // Disable interrupts.
     cli();
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-    // Set PB4/OC1B and PB1/OC1A to low.
-    PORTB &= ~((1<<PB4) | (1<<PB1));
+    // Are we moving in the A or B direction?
+    if (pwm_a || pwm_b)
+    {
+        // Clear PB1 and PB2.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
 
-    // Enable PB4/OC1B and PB1/OC1A as outputs.
-    DDRB |= ((1<<DDB4) | (1<<DDB1));
+        // Disable OC1A and OC1B outputs.
+        TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
+        TCCR1A &= ~((1<<COM1B1) | (1<<COM1B0));
 
-    // Disable timer1/counter2.
-    TCCR1 = 0;
-    GTCCR = 0;
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+        // Reset the A and B direction flags.
+        pwm_a = 0;
+        pwm_b = 0;
+    }
 
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
-    // Set PB1/OC1A and PB2/OC1B to low.
-    PORTB &= ~((1<<PB2) | (1<<PB1));
-
-    // Enable PB1/OC1A and PB2/OC1B as outputs.
-    DDRB |= ((1<<DDB2) | (1<<DDB1));
-
-    // Reset count and compare registers.
-    TCNT1 = 0;
+    // Set the PWM duty cycle to zero.
     OCR1A = 0;
     OCR1B = 0;
 
-    // Disable timer/counter1.
-    TCCR1A = 0;
-    TCCR1B = 0;
-#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
-    TCCR1C = 0;
-#endif
-#endif // __AVR_ATmega8 || __AVR_ATmega88__ || __AVR_ATmega168__
-
-    // Set the saved pwm values to zero.
-    pwm_dir_b_save = 0;
-    pwm_dir_a_save = 0;
-
-    // Update the pwm values.
-    registers_write_byte(REG_PWM_DIRA, pwm_dir_b_save);
-    registers_write_byte(REG_PWM_DIRB, pwm_dir_a_save);
-
     // Restore interrupts.
     sei();
+
+    // Save the pwm A and B duty values.
+    registers_write_byte(REG_PWM_DIRA, pwm_a);
+    registers_write_byte(REG_PWM_DIRB, pwm_b);
 }
 

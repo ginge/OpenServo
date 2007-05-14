@@ -31,9 +31,6 @@
 #include "pid.h"
 #include "registers.h"
 
-// Compile following for PID motion control algorithm.
-#if PID_MOTION_ENABLED
-
 // The minimum and maximum servo position as defined by 10-bit ADC values.
 #define MIN_POSITION            (0)
 #define MAX_POSITION            (1023)
@@ -76,30 +73,6 @@ static int16_t filter_update(int16_t input)
     return (int16_t) (filter_reg >> FILTER_SHIFT);
 }
 
-static int16_t gain_multiply(int16_t error, uint16_t gain)
-// Multiplies the PID error value by the PID gain value.
-// The result is scaled and bounds checked to fit within
-// a signed sixteen bit return value.
-{
-    int32_t result;
-
-    // Multiply the error times the gain.
-    result = (int32_t) error * (int32_t) gain;
-
-    // Shift by 8 to account for fixed point gain.
-    result >>= 8;
-
-    // Perform bounds checking against reasonable miniums and maximums.
-    // We keep the individual results between -10000 and 10000 so that
-    // the combined proportional, integral and derivative results fit
-    // within signed sixteen bit values of -32768 and 32767.
-    if (result > 10000) result = 10000;
-    if (result < -10000) result = -10000;
-
-    return (int16_t) result;
-}
-
-
 void pid_init(void)
 // Initialize the PID algorithm module.
 {
@@ -113,8 +86,8 @@ void pid_registers_defaults(void)
 // Initialize the PID algorithm related register values.  This is done 
 // here to keep the PID related code in a single file.  
 {
-    // Default offset value.
-    registers_write_byte(REG_PID_OFFSET, 0x30);
+    // Default deadband.
+    registers_write_byte(REG_PID_DEADBAND, DEFAULT_PID_DEADBAND);
 
     // Default gain values.
     registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, DEFAULT_PID_PGAIN);
@@ -135,18 +108,19 @@ int16_t pid_position_to_pwm(int16_t current_position)
 // velocity are assumed to be a moving target.  The algorithm attempts to
 // output a pwm value that will achieve a predicted position and velocity.
 {
-    int16_t output;
-    int16_t output_minimum;
-    int16_t current_velocity;
-    int16_t filtered_position;
-    int16_t seek_position;
-    int16_t seek_velocity;
-    int16_t minimum_position;
-    int16_t maximum_position;
-    int16_t p_component;
-    int16_t d_component;
-    uint16_t d_gain;
-    uint16_t p_gain;
+    // We declare these static to keep them off the stack.
+    static int16_t deadband;
+    static int16_t p_component;
+    static int16_t d_component;
+    static int16_t seek_position;
+    static int16_t seek_velocity;
+    static int16_t minimum_position;
+    static int16_t maximum_position;
+    static int16_t current_velocity;
+    static int16_t filtered_position;
+    static int32_t pwm_output;
+    static uint16_t d_gain;
+    static uint16_t p_gain;
 
     // Filter the current position thru a digital low-pass filter.
     filtered_position = filter_update(current_position);
@@ -182,6 +156,9 @@ int16_t pid_position_to_pwm(int16_t current_position)
         registers_write_word(REG_VELOCITY_HI, REG_VELOCITY_LO, (uint16_t) current_velocity);
     }
 
+    // Get the deadband.
+    deadband = (int16_t) registers_read_byte(REG_PID_DEADBAND);
+
     // Use the filtered position when the seek position is not changing.
     if (seek_position == previous_seek) current_position = filtered_position;
     previous_seek = seek_position;
@@ -200,34 +177,35 @@ int16_t pid_position_to_pwm(int16_t current_position)
     p_gain = registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
     d_gain = registers_read_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
 
-    // Determine the proportional and derivative components of the pwm output.
-    output = gain_multiply(p_component, p_gain);
-    output += gain_multiply(d_component, d_gain);
+    // Start with zero PWM output.
+    pwm_output = 0;
 
-    // Get the PID offset.  This value offsets the output to compensate for
-    // static friction and other drag within the servo.  If the offset is
-    // not great enough to move the servo the output may not be of sufficient
-    // strength to move the motor -- inducing motor vibrations and wasting power.
-    output_minimum = (int16_t) registers_read_byte(REG_PID_OFFSET);
+    // Apply proportional component to the PWM output if outside the deadband.
+    if ((p_component > deadband) || (p_component < -deadband))
+    {
+        // Apply the proportional component of the PWM output.
+        pwm_output += (int32_t) p_component * (int32_t) p_gain;
+    }
 
-    // Apply the PID offset adjustment to compensate for static friction within the servo.
-    if (output > 0) output += output_minimum;
-    else if (output < 0) output -= output_minimum;
+    // Apply the derivative component of the PWM output.
+    pwm_output += (int32_t) d_component * (int32_t) d_gain;
+
+    // Shift by 8 to account for the multiply by the 8:8 fixed point gain values.
+    pwm_output >>= 8;
 
     // Check for output saturation.
-    if (output > MAX_OUTPUT)
+    if (pwm_output > MAX_OUTPUT)
     {
         // Can't go higher than the maximum output value.
-        output = MAX_OUTPUT;
+        pwm_output = MAX_OUTPUT;
     }
-    else if (output < MIN_OUTPUT)
+    else if (pwm_output < MIN_OUTPUT)
     {
         // Can't go lower than the minimum output value.
-        output = MIN_OUTPUT;
+        pwm_output = MIN_OUTPUT;
     }
 
     // Return the PID output.
-    return output;
+    return (int16_t) pwm_output;
 }
 
-#endif // PID_MOTION_ENABLED
