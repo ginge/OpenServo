@@ -138,7 +138,7 @@ uint8_t banks_save_registers(void)
                          REDIRECT_REGISTER_COUNT);
 
     // Save the alert registers
-    eeprom_write_block(&banks[BANK_1][ALERT_CURR_MAX_LIMIT_HI], 
+    eeprom_write_block(&banks[ALERT_CONFIG_BANK][ALERT_CURR_MAX_LIMIT_HI], 
                         (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 2), 
                          ALERT_SAVE_COUNT);
 
@@ -156,7 +156,7 @@ uint8_t banks_restore_registers(void)
                         REDIRECT_REGISTER_COUNT);
 
     // Load the alert limits
-    eeprom_read_block(&banks[BANK_1][ALERT_CURR_MAX_LIMIT_HI], 
+    eeprom_read_block(&banks[ALERT_CONFIG_BANK][ALERT_CURR_MAX_LIMIT_HI], 
                        (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 2), 
                         ALERT_SAVE_COUNT);
 

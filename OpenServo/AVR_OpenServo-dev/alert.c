@@ -84,27 +84,27 @@ void alert_check(void)
     current = registers_read_word(REG_POWER_HI,REG_POWER_LO);
 
     // Get the set limits for voltage and power
-    max_voltage = banks_read_word(BANK_1, ALERT_VOLT_MAX_LIMIT_HI, ALERT_VOLT_MAX_LIMIT_LO);
-    min_voltage = banks_read_word(BANK_1, ALERT_VOLT_MIN_LIMIT_HI, ALERT_VOLT_MIN_LIMIT_LO);
+    max_voltage = banks_read_word(ALERT_CONFIG_BANK, ALERT_VOLT_MAX_LIMIT_HI, ALERT_VOLT_MAX_LIMIT_LO);
+    min_voltage = banks_read_word(ALERT_CONFIG_BANK, ALERT_VOLT_MIN_LIMIT_HI, ALERT_VOLT_MIN_LIMIT_LO);
 
-    max_current = banks_read_word(BANK_1, ALERT_CURR_MAX_LIMIT_HI, ALERT_CURR_MAX_LIMIT_LO);
+    max_current = banks_read_word(ALERT_CONFIG_BANK, ALERT_CURR_MAX_LIMIT_HI, ALERT_CURR_MAX_LIMIT_LO);
 
     // Check the voltage is not below or above the set voltage. Ignore if 0
     // NOTE: This would be a good place to alter the pwm of the motor to output the same voltage
     if (voltage > max_voltage && max_voltage >0)
     {
-        banks_write_byte(BANK_0, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERVOLT));
+        banks_write_byte(ALERT_BANK, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERVOLT));
     }
     else if (voltage < min_voltage && min_voltage >0)
     {
-        banks_write_byte(BANK_0, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_UNDERVOLT));
+        banks_write_byte(ALERT_BANK, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_UNDERVOLT));
     }
 
     // Check the curent is not over the maximum set current. Ignore if 0
     // NOTE: This would be a good place to throttle the current if we want to
     if (current > max_current && max_current >0)
     {
-        banks_write_byte(BANK_0, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERCURR));
+        banks_write_byte(ALERT_BANK, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERCURR));
         throttle = max_current - current;
     }
 
