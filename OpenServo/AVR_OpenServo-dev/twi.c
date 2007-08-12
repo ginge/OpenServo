@@ -103,6 +103,11 @@ static volatile uint8_t twi_rxhead;
 static volatile uint8_t twi_rxtail;
 static uint8_t twi_rxbuf[TWI_RX_BUFFER_SIZE];
 
+// General call status flag
+volatile uint8_t twi_general_call_enabled;
+volatile uint8_t twi_general_call_start_move;
+volatile uint8_t twi_general_call_start_wait;
+
 #if TWI_CHECKED_ENABLED
 static uint8_t twi_chk_count;            // current byte in transaction
 static uint8_t twi_chk_count_target;     // How many bytes are we reading/writing
@@ -456,6 +461,38 @@ static uint8_t twi_write_data(uint8_t data)
     return ack;
 }
 
+// general call functions
+void general_call_enable(void)
+{
+    TWAR |=  (1<<TWGCE);       // Enable general call at address 0x00
+    twi_general_call_enabled = 1;
+}
+
+void general_call_disable(void)
+{
+    TWAR &= ~(1<<TWGCE);                      // disable general call
+    twi_general_call_enabled = 0;
+}
+
+void general_call_start_reset(void)
+{
+    twi_general_call_start_move = 0;
+}
+
+void general_call_start_move(void)
+{
+    twi_general_call_start_move = 1;
+}
+
+void general_call_start_wait(void)
+{
+    twi_general_call_start_wait = 1;
+}
+
+void general_call_start_wait_reset(void)
+{
+    twi_general_call_start_wait = 0;
+}
 
 void
 twi_slave_init(uint8_t slave_address)
@@ -497,6 +534,10 @@ twi_slave_init(uint8_t slave_address)
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Set own TWI slave address.
     TWAR = slave_address << 1;
+
+    twi_general_call_enabled = 0;
+    twi_general_call_start_move = 0;
+    twi_general_call_start_wait = 0;
 
     // Default content = SDA released.
     TWDR = 0xFF;
@@ -753,7 +794,8 @@ SIGNAL(SIG_TWI)
 
         // Own SLA+W has been received; ACK has been returned.
         case TWI_SRX_ADR_ACK:
-
+        // General call GEN+W received; ACK has been returned
+        case TWI_SRX_GEN_ACK:
             // Reset the data state.
             twi_data_state = TWI_DATA_STATE_COMMAND;
 
@@ -770,7 +812,8 @@ SIGNAL(SIG_TWI)
 
         // Previously addressed with own SLA+W; data has been received; ACK has been returned.
         case TWI_SRX_ADR_DATA_ACK:
-
+        // Previously addressed with general call SLA+W; data has been received; ACK has been returned.
+        case TWI_SRX_GEN_DATA_ACK:
             // Write the data.
             twi_write_data(TWDR);
 
@@ -789,7 +832,8 @@ SIGNAL(SIG_TWI)
         case TWI_SRX_ADR_DATA_NACK:
         // A STOP condition or repeated START condition has been received while still addressed as Slave.
         case TWI_SRX_STOP_RESTART:
-
+        // Previously addressed with general call; data has been received; NOT ACK has been returned
+	case TWI_SRX_GEN_DATA_NACK:
              // Switch to the not addressed slave mode; own SLA will be recognized.
              TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
                     (1<<TWIE) |                              // Keep the TWI interrupt enabled.
