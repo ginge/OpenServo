@@ -116,9 +116,9 @@ uint16_t alert_pwm_throttle(uint16_t pwm)
 {
     // Do something here if you want to throttle PWM somehow
     if (pwm>0)
-        pwm -= (throttle * 5);
+        pwm -= (throttle * 2);
     else
-        pwm += (throttle * 5);
+        pwm += (throttle * 2);
 
     return pwm;
 }
