@@ -51,11 +51,14 @@
 #include "banks.h"
 #include "alert.h"
 
+static uint16_t throttle;
+
 void alert_init(void)
 // Function to initialize alerts.
 {
     // reset the alerts register to 0, or no errors
     banks_write_byte(0, ALERT_STATUS, 0x00);
+    throttle = 0;
 }
 
 void alert_defaults(void)
@@ -73,6 +76,8 @@ void alert_check(void)
     uint8_t max_voltage;
     uint8_t min_voltage;
     uint8_t max_current;
+
+    throttle = 0;
 
     // Get the current voltage and power
     voltage = registers_read_word(REG_VOLTAGE_HI,REG_VOLTAGE_LO);
@@ -100,6 +105,7 @@ void alert_check(void)
     if (current > max_current && max_current >0)
     {
         banks_write_byte(BANK_0, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERCURR));
+        throttle = max_current - current;
     }
 
 }
@@ -109,6 +115,11 @@ uint16_t alert_pwm_throttle(uint16_t pwm)
 // This function runs in the ADC context, so don't tie up for any longer than 2ms
 {
     // Do something here if you want to throttle PWM somehow
+    if (pwm>0)
+        pwm -= (throttle * 5);
+    else
+        pwm += (throttle * 5);
+
     return pwm;
 }
 
