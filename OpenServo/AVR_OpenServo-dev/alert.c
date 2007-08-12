@@ -115,10 +115,11 @@ uint16_t alert_pwm_throttle(uint16_t pwm)
 // This function runs in the ADC context, so don't tie up for any longer than 2ms
 {
     // Do something here if you want to throttle PWM somehow
+
     if (pwm>0)
-        pwm -= (throttle * 2);
+        pwm -= (throttle*2);
     else
-        pwm += (throttle * 2);
+        pwm += (throttle*2);
 
     return pwm;
 }
@@ -128,7 +129,7 @@ uint16_t alert_pwm_throttle(uint16_t pwm)
 uint8_t alert_setbit(uint8_t reg, uint8_t bit)
 // set a bit in the register
 {
-    reg = reg^bit;
+    reg = reg | (1<<bit);
 
     return reg;
 }
