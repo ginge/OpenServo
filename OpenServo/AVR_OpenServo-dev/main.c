@@ -303,6 +303,7 @@ int main (void)
             int16_t position;
             static int16_t last_seek_position;
             static int16_t wait_seek_position;
+            static int16_t new_seek_position;
 #if PULSE_CONTROL_ENABLED
             // Give pulse control a chance to update the seek position.
             pulse_control_update();
@@ -319,26 +320,31 @@ int main (void)
             // General call support
             // Check to see if we have the wait flag enabled. If so save the new position, and write in the
             // old position until we get the move command
-            if (general_call_enabled() && general_call_wait()) //we need to wait for the go command before moving
+            if (general_call_enabled()) 
             {
-                // store the new position, but let the servo lock to the last seek position
-                wait_seek_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
-                if (wait_seek_position != last_seek_position) // do we ave a new position?
+                //we need to wait for the go command before moving
+                if (general_call_wait())
                 {
-                    registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, last_seek_position);  // write the last position
-                    general_call_start_wait_reset();  // reset the wait flag
+                    // store the new position, but let the servo lock to the last seek position
+                    wait_seek_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
+                    if (wait_seek_position != last_seek_position) // do we ave a new position?
+                    {
+                        new_seek_position = wait_seek_position;
+                        registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, last_seek_position);
+                    }
                 }
-            }
+                last_seek_position = registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
 
-            if (general_call_enabled() && general_call_start())  //check to make sure that we can start the move.
-            {
-                // write the new position with the previously saved position
-                registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, wait_seek_position);  
-                general_call_start_reset();  // reset the start flag
-            }
+                //check to make sure that we can start the move.
+                if (general_call_start())
+                {
+                    // write the new position with the previously saved position
+                    registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, new_seek_position);  
+                    general_call_start_wait_reset();  // reset the wait flag
+                    general_call_start_reset();  // reset the start flag
+                }
 
-            // Get the last seek position used for the wait until command motion support
-            last_seek_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
+            }
 
 #if ESTIMATOR_ENABLED
             // Estimate velocity.
