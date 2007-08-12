@@ -53,19 +53,19 @@ void registers_init(void)
     registers_write_byte(REG_VERSION_MAJOR, SOFTWARE_VERSION_MAJOR);
     registers_write_byte(REG_VERSION_MINOR, SOFTWARE_VERSION_MINOR);
 
+    banks_init();
+
     // Restore the read/write protected registers from EEPROM.  If the
     // EEPROM fails checksum this function will return zero and the
     // read/write protected registers should be initialized to defaults.
     if (!eeprom_restore_registers())
     {
         // Reset read/write protected registers to zero.
-        memset(&registers[MIN_WRITE_PROTECT_REGISTER], WRITE_PROTECT_REGISTER_COUNT, REGISTER_COUNT);
+        memset(&registers[MIN_WRITE_PROTECT_REGISTER], WRITE_PROTECT_REGISTER_COUNT, WRITE_PROTECT_REGISTER_COUNT);
 
         // Initialize read/write protected registers to defaults.
         registers_defaults();
     }
-
-    banks_init();
 }
 
 

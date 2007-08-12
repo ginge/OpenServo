@@ -125,7 +125,7 @@
 
 // Define the total number of registers define.  This includes 
 // all registers except unused and redirected registers.
-#define REGISTER_COUNT              (MIN_UNUSED_REGISTER+65)
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER+1)
 
 #else // ESTIMATOR_ENABLED
 
@@ -145,7 +145,7 @@
 
 // Define the total number of registers define.  This includes 
 // all registers except unused and redirected registers.
-#define REGISTER_COUNT              (MIN_UNUSED_REGISTER+65)
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER+1)
 
 #endif // ESTIMATOR_ENABLED
 
