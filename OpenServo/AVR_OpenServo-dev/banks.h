@@ -69,6 +69,8 @@
 #define BANK1_RESERVED_0E           0x0E
 #define BANK1_RESERVED_0F           0x0F
 
+#define ALERT_SAVE_COUNT ALERT_VOLT_MIN_LIMIT_LO - ALERT_CURR_MAX_LIMIT_HI + 1
+
 // Bank 2
 // Put the redirects into bank 2
 #define REDIRECTED_BANK BANK_2

@@ -131,10 +131,16 @@ uint8_t banks_save_registers(void)
 // Save the registers that need saving in the bank. Add your save functions here
 // There is no checksum done on these as yet. Needs discussion
 {
-    //alert_save_registers();
-    
+
     // Save the redirected registers at REGISTERS_COUNT + 3 NOTE: no checksum!
-    eeprom_write_block(&banks[REDIRECTED_BANK][MIN_BANK_REGISTER + MIN_REDIRECT_REGISTER], (void *)(REGISTER_COUNT+2), REDIRECT_REGISTER_COUNT);
+    eeprom_write_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
+                        (void *)(WRITE_PROTECT_REGISTER_COUNT + 2),
+                         REDIRECT_REGISTER_COUNT);
+
+    // Save the alert registers
+    eeprom_write_block(&banks[BANK_1][ALERT_CURR_MAX_LIMIT_HI], 
+                        (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 2), 
+                         ALERT_SAVE_COUNT);
 
     return 1;
 }
@@ -145,7 +151,14 @@ uint8_t banks_restore_registers(void)
 
 {
     // Load the redirected registers out of the eeprom
-    eeprom_read_block(&banks[REDIRECTED_BANK][MIN_BANK_REGISTER + MIN_REDIRECT_REGISTER], (void *)(REGISTER_COUNT+2), REDIRECT_REGISTER_COUNT);
+    eeprom_read_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
+                       (void *)(WRITE_PROTECT_REGISTER_COUNT + 2), 
+                        REDIRECT_REGISTER_COUNT);
+
+    // Load the alert limits
+    eeprom_read_block(&banks[BANK_1][ALERT_CURR_MAX_LIMIT_HI], 
+                       (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 2), 
+                        ALERT_SAVE_COUNT);
 
     return 1;
 }
