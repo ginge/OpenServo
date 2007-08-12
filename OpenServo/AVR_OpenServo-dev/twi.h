@@ -97,11 +97,7 @@ void twi_slave_init(uint8_t);
 uint8_t twi_receive_byte(void);
 uint8_t twi_data_in_receive_buffer(void);
 
-//general call
-extern volatile uint8_t twi_general_call_enabled;
-extern volatile uint8_t twi_general_call_start_move;
-extern volatile uint8_t twi_general_call_start_wait;
-
+// General call functions
 void general_call_enable(void);
 void general_call_disable(void);
 void general_call_start_move(void);
@@ -111,17 +107,17 @@ void general_call_start_wait_reset(void);
 
 inline static uint8_t general_call_enabled(void)
 {
-    return twi_general_call_enabled;
+    return (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_GENERALCALL_ENABLED)) ? 1 : 0;
 }
 
 inline static uint8_t general_call_start(void)
 {
-    return twi_general_call_start_move;
+    return (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_GENERALCALL_START)) ? 1 : 0;
 }
 
 inline static uint8_t general_call_wait(void)
 {
-    return twi_general_call_start_wait;
+    return (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_GENERALCALL_WAIT)) ? 1 : 0;
 }
 
 #endif // _OS_TWI_H_

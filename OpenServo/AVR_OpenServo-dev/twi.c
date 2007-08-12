@@ -103,11 +103,6 @@ static volatile uint8_t twi_rxhead;
 static volatile uint8_t twi_rxtail;
 static uint8_t twi_rxbuf[TWI_RX_BUFFER_SIZE];
 
-// General call status flag
-volatile uint8_t twi_general_call_enabled;
-volatile uint8_t twi_general_call_start_move;
-volatile uint8_t twi_general_call_start_wait;
-
 #if TWI_CHECKED_ENABLED
 static uint8_t twi_chk_count;            // current byte in transaction
 static uint8_t twi_chk_count_target;     // How many bytes are we reading/writing
@@ -461,33 +456,48 @@ static uint8_t twi_write_data(uint8_t data)
 void general_call_enable(void)
 {
     TWAR |=  (1<<TWGCE);       // Enable general call at address 0x00
-    twi_general_call_enabled = 1;
+
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    // Enable PWM to the servo motor.
+    registers_write_byte(REG_FLAGS_LO, flags_lo | (1<<FLAGS_LO_GENERALCALL_ENABLED));
 }
 
 void general_call_disable(void)
 {
     TWAR &= ~(1<<TWGCE);                      // disable general call
-    twi_general_call_enabled = 0;
+
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    registers_write_byte(REG_FLAGS_LO, flags_lo  & ~(1<<FLAGS_LO_GENERALCALL_ENABLED));
 }
 
 void general_call_start_reset(void)
 {
-    twi_general_call_start_move = 0;
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    registers_write_byte(REG_FLAGS_LO, flags_lo  & ~(1<<FLAGS_LO_GENERALCALL_START));
 }
 
 void general_call_start_move(void)
 {
-    twi_general_call_start_move = 1;
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    registers_write_byte(REG_FLAGS_LO, flags_lo | (1<<FLAGS_LO_GENERALCALL_START));
 }
 
 void general_call_start_wait(void)
 {
-    twi_general_call_start_wait = 1;
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    registers_write_byte(REG_FLAGS_LO, flags_lo | (1<<FLAGS_LO_GENERALCALL_WAIT));
 }
 
 void general_call_start_wait_reset(void)
 {
-    twi_general_call_start_wait = 0;
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    registers_write_byte(REG_FLAGS_LO, flags_lo  & ~(1<<FLAGS_LO_GENERALCALL_WAIT));
 }
 
 void
@@ -531,9 +541,9 @@ twi_slave_init(uint8_t slave_address)
     // Set own TWI slave address.
     TWAR = slave_address << 1;
 
-    twi_general_call_enabled = 0;
-    twi_general_call_start_move = 0;
-    twi_general_call_start_wait = 0;
+    general_call_disable();
+    general_call_start_reset();
+    general_call_start_wait_reset();
 
     // Default content = SDA released.
     TWDR = 0xFF;
