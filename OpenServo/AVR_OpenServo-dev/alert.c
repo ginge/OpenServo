@@ -105,7 +105,7 @@ void alert_check(void)
     if (current > max_current && max_current >0)
     {
         banks_write_byte(ALERT_BANK, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERCURR));
-        throttle = max_current - current;
+        throttle = current - max_current ;
     }
 
 }
