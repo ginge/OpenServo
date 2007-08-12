@@ -148,11 +148,7 @@ static uint8_t twi_registers_read(uint8_t address)
     {
         switch(banks_selected_bank())
         {
-            case BANK_0:
-                break;
-            case BANK_1:
-                break;
-            case BANK_2:
+            case REDIRECTED_BANK:
                 // Are we reading a redirect register.
                 if (address <=  MIN_BANK_REGISTER + MAX_REDIRECT_REGISTER)
                 {
@@ -176,7 +172,7 @@ static uint8_t twi_registers_read(uint8_t address)
                 }
                 break;
             default:
-                return 0;
+                break;
         }
         // Yes.
         return banks_read_byte(banks_selected_bank(), address-MIN_BANK_REGISTER);
