@@ -77,8 +77,6 @@ void alert_check(void)
     uint8_t min_voltage;
     uint8_t max_current;
 
-    throttle = 0;
-
     // Get the current voltage and power
     voltage = registers_read_word(REG_VOLTAGE_HI,REG_VOLTAGE_LO);
     current = registers_read_word(REG_POWER_HI,REG_POWER_LO);
@@ -108,6 +106,8 @@ void alert_check(void)
         throttle = current - max_current ;
     }
 
+    if(throttle >0) throttle--;
+    if(throttle >0) throttle--;
 }
 
 uint16_t alert_pwm_throttle(uint16_t pwm)
