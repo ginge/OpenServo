@@ -25,14 +25,6 @@ LDFLAGS = $(COMMON)
 LDFLAGS += -nostartfiles -v  -Wl,-Map=ATmega168_OpenServo.map
 
 
-## Intel Hex file production flags
-HEX_FLASH_FLAGS = -R .eeprom
-
-HEX_EEPROM_FLAGS = -j .eeprom
-HEX_EEPROM_FLAGS += --set-section-flags=.eeprom="alloc,load"
-HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
-
-
 ## Objects that must be built in order to link
 OBJECTS = bootcrt.o main.o adc.o registers.o eeprom.o watchdog.o motion.o math.o ipd.o pid.o regulator.o power.o twi.o pwm.o estimator.o seek.o timer.o curve.o pulsectl.o banks.o alert.o
 
@@ -40,7 +32,7 @@ OBJECTS = bootcrt.o main.o adc.o registers.o eeprom.o watchdog.o motion.o math.o
 LINKONLYOBJECTS =
 
 ## Build
-all: $(TARGET) ATmega168_OpenServo.hex ATmega168_OpenServo.eep ATmega168_OpenServo.lss size
+all: $(TARGET) ATmega168_OpenServo.hex ATmega168_OpenServo.lss size
 
 ## Compile
 bootcrt.o: bootcrt.s
@@ -113,9 +105,6 @@ $(TARGET): $(OBJECTS)
 %.hex: $(TARGET)
 	avr-objcopy -O ihex $(HEX_FLASH_FLAGS)  $< $@
 
-%.eep: $(TARGET)
-	avr-objcopy $(HEX_EEPROM_FLAGS) -O ihex $< $@
-
 %.lss: $(TARGET)
 	avr-objdump -h -S $< > $@
 
@@ -126,7 +115,7 @@ size: ${TARGET}
 ## Clean target
 .PHONY: clean
 clean:
-	-rm -rf $(OBJECTS) ATmega168_OpenServo.elf dep/* ATmega168_OpenServo.hex ATmega168_OpenServo.eep ATmega168_OpenServo.lss ATmega168_OpenServo.map
+	-rm -rf $(OBJECTS) ATmega168_OpenServo.elf dep/* ATmega168_OpenServo.hex ATmega168_OpenServo.lss ATmega168_OpenServo.map
 
 
 ## Other dependencies
