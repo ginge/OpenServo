@@ -52,6 +52,17 @@ int main(void)
     // Make sure interrupts are cleared.
     cli();
 
+    // Diable the watchdog timer in case we got here through applicaition reset
+
+    // Clear WDRF in MCUSR.
+    MCUSR &= ~(1<<WDRF);
+
+    // Write logical one to WDCE and WDE.
+    WDTCSR |= (1<<WDCE) | (1<<WDE);
+
+    // Turn off WDT.
+    WDTCSR = 0x00;
+
     // Initialize the bootloader exit and active flags.
     bootloader_exit = 0;
     bootloader_active = 0;
