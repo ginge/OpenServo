@@ -22,7 +22,7 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
 ## Linker flags
 LDFLAGS = $(COMMON)
-LDFLAGS += -nostartfiles -Wl,-section-start=.bootloader=0x3C00 -Wl,-Map=ATmega168_Bootloader.map
+LDFLAGS += -nostartfiles -Wl,-Ttext,0x3C00 -Wl,-Map=ATmega168_Bootloader.map
 
 ## Objects that must be built in order to link
 OBJECTS = bootcrt.o bootstart.o bootloader.o main.o prog.o twi.o
