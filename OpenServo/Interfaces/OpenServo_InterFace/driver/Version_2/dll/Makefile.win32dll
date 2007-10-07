@@ -1,0 +1,16 @@
+CC=gcc
+CFLAGS=-I.
+DEPS = OSIFdll.h OSIFflash.h OSIFlib.h
+OBJ = OSIFdll.o OSIFflash.o OSIFhex.o OSIFio.o
+DEF = -DWIN -DBUILD_DLL
+		
+%.o: %.c $(DEPS)
+	$(CC) $(DEF) -c -o $@ $< $(CFLAGS)
+
+libOSIFlib: $(OBJ)
+	gcc -shared -o OSIFdll.dll -Wl,--out-implib,OSIFdll.a $^ $(CFLAGS) -lusb
+
+clean:
+	del *.o
+	del OSIFdll.dll
+
