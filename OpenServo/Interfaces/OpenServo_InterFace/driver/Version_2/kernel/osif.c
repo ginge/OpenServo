@@ -100,6 +100,14 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 err("failure reading data");
                 return -EREMOTEIO;
             }
+            if(usb_read(adapter, USBI2C_STOP, 
+               0, 0, 
+               0, 0) >0) {
+
+                   err("failure sending STOP");
+                   return -EREMOTEIO;
+            }
+
 #ifdef DEBUG_IO
             { 
                 char str[32];
@@ -129,6 +137,14 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 err("failure writing data");
                 return -EREMOTEIO;
             }
+            if(usb_read(adapter, USBI2C_STOP, 
+               0, 0, 
+               0, 0) >0) {
+
+                   err("failure sending STOP");
+                   return -EREMOTEIO;
+               }
+
         }
 
         /* read status */
