@@ -65,7 +65,7 @@ void alert_defaults(void)
     banks_write_word(ALERT_CONFIG_BANK, ALERT_VOLT_MAX_LIMIT_HI, ALERT_VOLT_MAX_LIMIT_LO, 0);
     banks_write_word(ALERT_CONFIG_BANK, ALERT_VOLT_MIN_LIMIT_HI, ALERT_VOLT_MIN_LIMIT_LO, 0);
 
-    banks_write_word(ALERT_CONFIG_BANK, ALERT_TEMP_MAX_LIMIT_HI, ALERT_TEMP_MAX_LIMIT_LO,220);
+    banks_write_word(ALERT_CONFIG_BANK, ALERT_TEMP_MAX_LIMIT_HI, ALERT_TEMP_MAX_LIMIT_LO,250);
 
     banks_write_word(ALERT_CONFIG_BANK, ALERT_CURR_MAX_LIMIT_HI, ALERT_CURR_MAX_LIMIT_LO,0);
 
@@ -119,6 +119,8 @@ void alert_check(void)
     if (temperature > max_temperature && max_temperature >0)
     {
         alert_setbit(ALERT_OVERTEMP);
+        // Turn off pwm?
+        pwm_disable();
     }
 
     if(throttle >0) throttle--;
