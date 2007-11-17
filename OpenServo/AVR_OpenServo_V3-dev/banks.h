@@ -72,14 +72,14 @@
 #define REG_PID_DGAIN_LO            0x05
 #define REG_PID_IGAIN_HI            0x06
 #define REG_PID_IGAIN_LO            0x07
-#define REG_PWM_FREQ_DIVIDER_HI     0x08
-#define REG_PWM_FREQ_DIVIDER_LO     0x09
-#define REG_PWM_MAX                 0x0A
-#define REG_MIN_SEEK_HI             0x0B
-#define REG_MIN_SEEK_LO             0x0C
-#define REG_MAX_SEEK_HI             0x0D
-#define REG_MAX_SEEK_LO             0x0E
-#define REG_REVERSE_SEEK            0x0F
+#define REG_MIN_SEEK_HI             0x08
+#define REG_MIN_SEEK_LO             0x09
+#define REG_MAX_SEEK_HI             0x0A
+#define REG_MAX_SEEK_LO             0x0B
+#define REG_REVERSE_SEEK            0x0C
+#define REG_PWM_FREQ_DIVIDER_HI     0x0D
+#define REG_PWM_FREQ_DIVIDER_LO     0x0E
+#define REG_PWM_MAX                 0x0F
 
 #define ALERT_CURR_MAX_LIMIT_HI     0x10
 #define ALERT_CURR_MAX_LIMIT_LO     0x11
