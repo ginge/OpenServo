@@ -61,6 +61,25 @@ static uint8_t pwm_b;
 // Pwm frequency divider value.
 static uint16_t pwm_div;
 
+//
+// The delay_loop function is used to provide a delay. The purpose of the delay is to
+// allow changes asserted at the AVRs I/O pins to take effect in the H-bridge (for example
+// turning on or off one of the MOSFETs). This is to prevent improper states from occurring
+// in the H-bridge and leading to brownouts or "crowbaring" of the supply. This is
+// more of a problem with the faster clock rate introduced with the V3 boards (20MHz)
+// that it was with the 8Hhz V2.1 boards- there was still a problem with the old code,
+// with that board, just less pronounced.
+//
+#define DELAYLOOP 20 // This needs to be adjusted  to account for the clock rate.
+inline static void delay_loop(int n)
+{
+    uint8_t i;
+    for(i=0; i<n; i++)
+    {
+        asm("nop");
+    }
+}
+
 static void pwm_dir_a(uint8_t pwm_duty)
 // Send PWM signal for rotation with the indicated pwm ratio (0 - 255).
 // This function is meant to be called only by pwm_update.
@@ -73,9 +92,7 @@ static void pwm_dir_a(uint8_t pwm_duty)
 
     // Do we need to reconfigure PWM output for direction A?
     if (!pwm_a)
-    {
-        // Yes. Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
+    { // Yes...
 
         // Set SMPLn_B (PD4) and SMPLn_A (PD7) to high.
         PORTD |= ((1<<PD4) | (1<<PD7));
@@ -83,13 +100,31 @@ static void pwm_dir_a(uint8_t pwm_duty)
         // Set EN_B (PD3) to low.
         PORTD &= ~(1<<PD3);
 
-        // Enable PWM_A (PB1/OC1A) and disable PWM_B (PB2/OC1B) output.
-        TCCR1A = (1<<COM1A1) | (0<<COM1A0) |
-                 (0<<COM1B1) | (0<<COM1B0) |
-                 (0<<WGM11) | (0<<WGM10);
+        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        // NOTE: Actually PWM_A should already be disabled...
+        TCCR1A = 0;
+
+        // Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
+
+        // Give the H-bridge time to respond to the above, failure to do so, or to wait long
+        // enough will result in brownouts as the power is "crowbarred" to varying extents.
+        // The delay required is also dependant on factors which may affect the speed with
+        // which the MOSFETs can respond, such as the impedance or the motor, the supply
+        // voltage, etc.
+        //
+        // Experiments have shown that NNN microseconds should be sufficient for most purposes.
+        //
+        delay_loop(DELAYLOOP);
+
+        // Enable PWM_A (PB1/OC1A)  output.
+        TCCR1A |= (1<<COM1A1);
 
         // Set EN_A (PD2) to high.
         PORTD |= (1<<PD2);
+
+        // NOTE: The PWM driven state of the H-bridge should not be switched to b-mode or braking
+        //       with a suffient delay.
 
         // Reset the B direction flag.
         pwm_b = 0;
@@ -124,9 +159,7 @@ static void pwm_dir_b(uint8_t pwm_duty)
 
     // Do we need to reconfigure PWM output for direction B?
     if (!pwm_b)
-    {
-        // Yes. Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
+    { // Yes...
 
         // Set SMPLn_B (PD4) and SMPLn_A (PD7) to high.
         PORTD |= ((1<<PD4) | (1<<PD7));
@@ -134,13 +167,31 @@ static void pwm_dir_b(uint8_t pwm_duty)
         // Set EN_A (PD2) to low.
         PORTD &= ~(1<<PD2);
 
-        // Disable PWM_A (PB1/OC1A) and enable PWM_B (PB2/OC1B) output.
-        TCCR1A = (0<<COM1A1) | (0<<COM1A0) |
-                 (1<<COM1B1) | (0<<COM1B0) |
-                 (0<<WGM11) | (0<<WGM10);
+        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        // NOTE: Actually PWM_B should already be disabled...
+        TCCR1A = 0;
+
+        // Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
+
+        // Give the H-bridge time to respond to the above, failure to do so, or to wait long
+        // enough will result in brownouts as the power is "crowbarred" to varying extents.
+        // The delay required is also dependant on factors which may affect the speed with
+        // which the MOSFETs can respond, such as the impedance or the motor, the supply
+        // voltage, etc.
+        //
+        // Experiments have shown that NNN microseconds should be sufficient for most purposes.
+        //
+        delay_loop(DELAYLOOP);
+
+        // Enable PWM_B (PB2/OC1B) output.
+        TCCR1A = (1<<COM1B1);
 
         // Set EN_B (PD3) to high.
         PORTD |= (1<<PD3);
+
+        // NOTE: The PWM driven state of the H-bridge should not be switched to b-mode or braking
+        //       with a suffient delay.
 
         // Reset the A direction flag.
         pwm_a = 0;
@@ -360,16 +411,19 @@ void pwm_stop(void)
         // Make sure that SMPLn_B (PD4) and SMPLn_A (PD7) are held high.
         PORTD |= ((1<<PD4) | (1<<PD7));
 
+        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        TCCR1A = 0;
+
         // Make sure that PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are held low.
         PORTB &= ~((1<<PB1) | (1<<PB2));
-
-        // Disable OC1A and OC1B outputs.
-        TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
-        TCCR1A &= ~((1<<COM1B1) | (1<<COM1B0));
 
         // Do we want to enable braking?
         if (1)
         {
+            // Before enabling braking (which turns on the "two lower MOSFETS"), delay sufficiently
+            // to give the H-bridge time to respond
+           delay_loop(DELAYLOOP);
+
             // Hold EN_A (PD2) and EN_B (PD3) high.
             PORTD |= ((1<<PD2) | (1<<PD3));
         }
