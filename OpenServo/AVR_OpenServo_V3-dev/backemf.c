@@ -59,7 +59,7 @@ void backemf_init(void)
 
     // Setup the default charge times
     banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, 0);
-    banks_write_byte(CONFIG_BANK,      REG_EMF_COLLAPSE_DELAY,         1);
+    banks_write_byte(CONFIG_BANK,      REG_EMF_COLLAPSE_DELAY,         2);
     banks_write_byte(CONFIG_BANK,      REG_EMF_CHARGE_TIME,            3);
 }
 
