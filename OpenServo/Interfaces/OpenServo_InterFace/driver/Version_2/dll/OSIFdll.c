@@ -131,7 +131,7 @@ EXPORT int OSIF_init(void)
         }
     }
 
-    if(!handle) {
+    if(!handle || adapter_count < 0) {
         adapter_count = -1;
         return -1;
     }
