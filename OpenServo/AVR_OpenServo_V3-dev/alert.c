@@ -74,13 +74,13 @@ void alert_defaults(void)
 void alert_check(void)
 // Check the alert registers for min/max overflows and set the status register accordingly
 {
-    uint8_t voltage;
-    uint8_t current;
-    uint8_t temperature;
-    uint8_t max_voltage;
-    uint8_t min_voltage;
-    uint8_t max_current;
-    uint8_t max_temperature;
+    uint16_t voltage;
+    uint16_t current;
+    uint16_t temperature;
+    uint16_t max_voltage;
+    uint16_t min_voltage;
+    uint16_t max_current;
+    uint16_t max_temperature;
 
     // Get the current voltage and power
     voltage     = registers_read_word(REG_VOLTAGE_HI,REG_VOLTAGE_LO);
