@@ -347,6 +347,9 @@ int main (void)
             // Get the new power value.
             uint16_t power = adc_get_power_value();
 
+            // Save temperature value to registers
+            registers_write_word(REG_TEMPERATURE_HI, REG_TEMPERATURE_LO, (int16_t)adc_get_temperature_value());
+
             // Update the power value for reporting.
             power_update(power);
 
