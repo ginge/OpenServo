@@ -36,7 +36,7 @@
 // so that external TWI clients can query the version of the software
 // running on the servo.
 #define SOFTWARE_VERSION_MAJOR          3
-#define SOFTWARE_VERSION_MINOR          3
+#define SOFTWARE_VERSION_MINOR          1
 
 // The default TWI address. Change this if you want to change the TWI address of the servo
 #define REG_DEFAULT_TWI_ADDR        0x10
