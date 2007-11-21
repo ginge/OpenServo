@@ -120,8 +120,6 @@ void banks_init(void);
 void banks_defaults(void);
 uint16_t banks_read_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo);
 void banks_write_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo, uint16_t value);
-uint8_t banks_save_registers(void);
-uint8_t banks_restore_registers(void);
 void banks_update_registers(void);
 // Bank in-line functions.
 
