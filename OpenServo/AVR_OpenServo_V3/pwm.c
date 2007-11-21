@@ -110,10 +110,10 @@ static void pwm_dir_a(uint8_t pwm_duty)
         // Give the H-bridge time to respond to the above, failure to do so, or to wait long
         // enough will result in brownouts as the power is "crowbarred" to varying extents.
         // The delay required is also dependant on factors which may affect the speed with
-        // which the MOSFETs can respond, such as the impedance or the motor, the supply
+        // which the MOSFETs can respond, such as the impedance of the motor, the supply
         // voltage, etc.
         //
-        // Experiments have shown that NNN microseconds should be sufficient for most purposes.
+        // Experiments have shown that 5 microseconds should be sufficient for most purposes.
         //
         delay_loop(DELAYLOOP);
 
@@ -177,10 +177,10 @@ static void pwm_dir_b(uint8_t pwm_duty)
         // Give the H-bridge time to respond to the above, failure to do so, or to wait long
         // enough will result in brownouts as the power is "crowbarred" to varying extents.
         // The delay required is also dependant on factors which may affect the speed with
-        // which the MOSFETs can respond, such as the impedance or the motor, the supply
+        // which the MOSFETs can respond, such as the impedance of the motor, the supply
         // voltage, etc.
         //
-        // Experiments have shown that NNN microseconds should be sufficient for most purposes.
+        // Experiments have shown that 5 microseconds should be sufficient for most purposes.
         //
         delay_loop(DELAYLOOP);
 
