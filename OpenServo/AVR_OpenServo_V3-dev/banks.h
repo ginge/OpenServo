@@ -90,13 +90,13 @@
 #define ALERT_TEMP_MAX_LIMIT_HI     0x16
 #define ALERT_TEMP_MAX_LIMIT_LO     0x17
 // Delay in ms for the back emf spike collapse
-#define REG_EMF_COLLAPSE_DELAY      0x20
+#define REG_EMF_COLLAPSE_DELAY      0x2A
 // This is 41us * n us delay for back emf charging cap
-#define REG_EMF_CHARGE_TIME         0x21
+#define REG_EMF_CHARGE_TIME         0x2B
 
 
 #define CONFIG_SAVE_MIN             0x00
-#define CONFIG_SAVE_MAX             0x16
+#define CONFIG_SAVE_MAX             0x2B 
 #define CONFIG_SAVE_COUNT (CONFIG_SAVE_MAX - CONFIG_SAVE_MIN + 1)
 
 // Bank 2

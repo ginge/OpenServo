@@ -56,7 +56,7 @@
 #include "registers.h"
 #include "banks.h"
 #include "alert.h"
-#include <avr/eeprom.h>
+#include "backemf.h"
 
 // Register values.
 uint8_t banks[MAX_BANKS][BANK_REGISTER_COUNT];
@@ -95,6 +95,7 @@ void banks_defaults(void)
     // Default TWI address.
     banks_write_byte(POS_PID_BANK, REG_TWI_ADDRESS, REG_DEFAULT_TWI_ADDR);
     alert_defaults();
+    backemf_defaults();
 }
 
 uint16_t banks_read_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo)
