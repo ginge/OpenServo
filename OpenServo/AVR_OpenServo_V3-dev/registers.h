@@ -65,7 +65,7 @@
 #define REG_SEEK_POSITION_LO        0x21
 #define REG_SEEK_VELOCITY_HI        0x22
 #define REG_SEEK_VELOCITY_LO        0x23
-#define REG_CURVE_RESERVED          0x24
+
 
 #define REG_CURVE_DELTA_HI          0x24
 #define REG_CURVE_DELTA_LO          0x25
@@ -75,6 +75,7 @@
 #define REG_CURVE_IN_VELOCITY_LO    0x29
 #define REG_CURVE_OUT_VELOCITY_HI   0x2A
 #define REG_CURVE_OUT_VELOCITY_LO   0x2B
+#define REG_CURVE_RESERVED          0x2C
 #define REG_BANK_SELECT             0x2F
 
 // TWI safe read/write registers.  These registers
@@ -88,7 +89,7 @@
 #define MIN_READ_WRITE_REGISTER     0x20
 #define MAX_READ_WRITE_REGISTER     0x37
 #define MIN_WRITE_PROTECT_REGISTER  0x38
-#define MAX_WRITE_PROTECT_REGISTER  0x3F
+#define MAX_WRITE_PROTECT_REGISTER  0x3E
 #define MIN_UNUSED_REGISTER         0x3F
 #define MAX_UNUSED_REGISTER         0x3F
 #define MIN_BANK_REGISTER           0x40
