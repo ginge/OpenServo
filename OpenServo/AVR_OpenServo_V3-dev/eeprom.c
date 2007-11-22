@@ -102,26 +102,27 @@ uint8_t eeprom_restore_registers(void)
     if (header[1] != eeprom_checksum(&registers[MIN_WRITE_PROTECT_REGISTER], WRITE_PROTECT_REGISTER_COUNT, EEPROM_VERSION)) return 0;
 
     // Read EEPROM header which is the first two bytes of EEPROM.
-    eeprom_read_block(&header[0], (void *) WRITE_PROTECT_REGISTER_COUNT+2, 1);
+    eeprom_read_block(&header[0], (void *) WRITE_PROTECT_REGISTER_COUNT + 2, 1);
 
     // Load the redirected registers out of the eeprom
-    eeprom_read_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
-                       (void *)(WRITE_PROTECT_REGISTER_COUNT + 3), 
-                        REDIRECT_REGISTER_COUNT);
-
-    // Does the checksum match?
-    if (header[0] != eeprom_checksum(&banks[REDIRECTED_BANK][MIN_WRITE_PROTECT_REGISTER], REDIRECT_REGISTER_COUNT, EEPROM_VERSION)) return 0;
-
-    // Read EEPROM header
-    eeprom_read_block(&header[0], (void *) REDIRECT_REGISTER_COUNT+WRITE_PROTECT_REGISTER_COUNT+4, 1);
-
-    // Load the configuration bank
     eeprom_read_block(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], 
-                       (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 5), 
+                       (void *)(WRITE_PROTECT_REGISTER_COUNT + 3), 
                         CONFIG_SAVE_COUNT);
 
     // Does the checksum match?
-    if (header[0] != eeprom_checksum(&banks[CONFIG_BANK][MIN_WRITE_PROTECT_REGISTER], CONFIG_SAVE_COUNT, EEPROM_VERSION)) return 0;
+    if (header[0] != eeprom_checksum(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], CONFIG_SAVE_COUNT, EEPROM_VERSION)) return 0;
+
+    // Read redirect page 2
+    // Read EEPROM header
+    eeprom_read_block(&header[0], (void *) CONFIG_SAVE_COUNT + WRITE_PROTECT_REGISTER_COUNT + 4, 1);
+
+    // Load the configuration bank
+    eeprom_read_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
+                       (void *)(WRITE_PROTECT_REGISTER_COUNT + CONFIG_SAVE_COUNT + 5), 
+                        REDIRECT_REGISTER_COUNT);
+
+    // Does the checksum match?
+    if (header[0] != eeprom_checksum(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], REDIRECT_REGISTER_COUNT, EEPROM_VERSION)) return 0;
 
     // XXX Restore PWM to servo motor.
 
@@ -149,27 +150,28 @@ uint8_t eeprom_save_registers(void)
 
     // Save any registers defined in banks.
     
-    // Calculate a new checksum for bank 0
-    header[0] = eeprom_checksum(&banks[REDIRECTED_BANK][MIN_WRITE_PROTECT_REGISTER], WRITE_PROTECT_REGISTER_COUNT, EEPROM_VERSION);
+    // Save the config bank (1)
+    // Calculate a new checksum for bank 1
+    header[0] = eeprom_checksum(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], CONFIG_SAVE_COUNT, EEPROM_VERSION);
 
     // Write the EEPROM header which is 1 byte long
     eeprom_write_block(&header[0], (void *) WRITE_PROTECT_REGISTER_COUNT + 2, 1);
 
     // Save the redirected registers at REGISTERS_COUNT + 3
-    eeprom_write_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
+    eeprom_write_block(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], 
                         (void *)(WRITE_PROTECT_REGISTER_COUNT + 3),
-                         REDIRECT_REGISTER_COUNT);
+                         CONFIG_SAVE_COUNT);
 
-    // Calculate the checksum for bank 1
-    header[0] = eeprom_checksum(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], CONFIG_SAVE_COUNT, EEPROM_VERSION);
+    // Calculate the checksum for bank 2 redirects
+    header[0] = eeprom_checksum(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], REDIRECT_REGISTER_COUNT, EEPROM_VERSION);
 
     // Write the EEPROM header which is 1 byte long, after bank 0
-    eeprom_write_block(&header[0], (void *) REDIRECT_REGISTER_COUNT + WRITE_PROTECT_REGISTER_COUNT + 4, 1);
+    eeprom_write_block(&header[0], (void *) CONFIG_SAVE_COUNT + WRITE_PROTECT_REGISTER_COUNT + 4, 1);
 
     // Save the alert registers
-    eeprom_write_block(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], 
-                        (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 5), 
-                         CONFIG_SAVE_COUNT);
+    eeprom_write_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
+                        (void *)(WRITE_PROTECT_REGISTER_COUNT + CONFIG_SAVE_COUNT + 5), 
+                         REDIRECT_REGISTER_COUNT);
 
     // XXX Restore PWM to servo motor.
 
