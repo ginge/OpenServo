@@ -58,7 +58,12 @@ void backemf_init(void)
     for (i = 0; i < 8; ++i) bemf_array[i] = 0;
 
     // Setup the default charge times
-    banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, 0);
+    banks_write_byte(CONFIG_BANK,      REG_EMF_COLLAPSE_DELAY,         2);
+    banks_write_byte(CONFIG_BANK,      REG_EMF_CHARGE_TIME,            3);
+}
+
+void backemf_defaults(void)
+{
     banks_write_byte(CONFIG_BANK,      REG_EMF_COLLAPSE_DELAY,         2);
     banks_write_byte(CONFIG_BANK,      REG_EMF_CHARGE_TIME,            3);
 }

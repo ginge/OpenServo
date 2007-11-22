@@ -31,6 +31,7 @@
 #define F_CPU 20000000UL
 
 void backemf_init(void);
+void backemf_defaults(void);
 void backemf_coast_motor(void);
 void backemf_get_sample(void);
 void backemf_restore_motor(void);
