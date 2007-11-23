@@ -344,11 +344,11 @@ int main (void)
             while(!adc_position_value_is_ready() && !adc_power_value_is_ready() && !adc_temperature_value_is_ready())
                 ;;
 
+            // Save temperature value to registers
+            registers_write_word(REG_TEMPERATURE_HI, REG_TEMPERATURE_LO, (uint16_t)adc_get_temperature_value());
+
             // Get the new power value.
             uint16_t power = adc_get_power_value();
-
-            // Save temperature value to registers
-            registers_write_word(REG_TEMPERATURE_HI, REG_TEMPERATURE_LO, (int16_t)adc_get_temperature_value());
 
             // Update the power value for reporting.
             power_update(power);
