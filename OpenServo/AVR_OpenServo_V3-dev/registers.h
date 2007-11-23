@@ -89,7 +89,7 @@
 #define MIN_READ_WRITE_REGISTER     0x20
 #define MAX_READ_WRITE_REGISTER     0x37
 #define MIN_WRITE_PROTECT_REGISTER  0x38
-#define MAX_WRITE_PROTECT_REGISTER  0x3E
+#define MAX_WRITE_PROTECT_REGISTER  0x3F
 #define MIN_UNUSED_REGISTER         0x3F
 #define MAX_UNUSED_REGISTER         0x3F
 #define MIN_BANK_REGISTER           0x40
@@ -97,7 +97,7 @@
 
 // Define the total number of registers define.  This includes
 // all registers except unused and redirected registers.
-#define REGISTER_COUNT              (MIN_UNUSED_REGISTER + 16)
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER)
 
 // Define the number of write protect registers.
 #define WRITE_PROTECT_REGISTER_COUNT    (MAX_WRITE_PROTECT_REGISTER - MIN_WRITE_PROTECT_REGISTER + 1)
