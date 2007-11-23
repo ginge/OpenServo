@@ -73,6 +73,9 @@ void banks_init(void)
     // Reset the bank selection to 0
     registers_write_byte(REG_BANK_SELECT,0);
 
+    //initialise the alert registers
+    alert_init();
+
     // Restore the read/write protected registers from EEPROM.  If the
     // EEPROM fails checksum this function will return zero and the
     // read/write protected registers should be initialized to defaults.
@@ -82,8 +85,7 @@ void banks_init(void)
         registers_defaults();
     }
 
-    //initialise the alert registers
-    alert_init();
+
 }
 
 
