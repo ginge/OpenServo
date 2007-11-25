@@ -65,12 +65,18 @@ static uint16_t pwm_div;
 // The delay_loop function is used to provide a delay. The purpose of the delay is to
 // allow changes asserted at the AVRs I/O pins to take effect in the H-bridge (for example
 // turning on or off one of the MOSFETs). This is to prevent improper states from occurring
-// in the H-bridge and leading to brownouts or "crowbaring" of the supply. This is
-// more of a problem with the faster clock rate introduced with the V3 boards (20MHz)
-// that it was with the 8Hhz V2.1 boards- there was still a problem with the old code,
-// with that board, just less pronounced.
+// in the H-bridge and leading to brownouts or "crowbaring" of the supply. This was more
+// of a problem, prior to the introduction of the delay, with the faster processor clock
+// rate that was introduced with the V3 boards (20MHz) than it was with the older8Hhz V2.1
+// boards- there was still a problem with the old code, with that board, it was just less
+// pronounced.
 //
-#define DELAYLOOP 20 // This needs to be adjusted  to account for the clock rate.
+// NOTE: Lower impedance motors may increase the lag of the H-bridge and thus require longer
+//       delays.
+//
+#define DELAYLOOP 20 // TODO: This needs to be adjusted to account for the clock rate.
+                     //       This value of 20 gives a 5 microsecond delay and was chosen
+                     //       by experiment with an "MG995".
 inline static void delay_loop(int n)
 {
     uint8_t i;
@@ -107,13 +113,14 @@ static void pwm_dir_a(uint8_t pwm_duty)
         // Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
         PORTB &= ~((1<<PB1) | (1<<PB2));
 
-        // Give the H-bridge time to respond to the above, failure to do so, or to wait long
+        // Give the H-bridge time to respond to the above, failure to do so or to wait long
         // enough will result in brownouts as the power is "crowbarred" to varying extents.
         // The delay required is also dependant on factors which may affect the speed with
         // which the MOSFETs can respond, such as the impedance of the motor, the supply
         // voltage, etc.
         //
-        // Experiments have shown that 5 microseconds should be sufficient for most purposes.
+        // Experiments (with an "MG995") have shown that 5microseconds should be sufficient
+        // for most purposes.
         //
         delay_loop(DELAYLOOP);
 
@@ -124,7 +131,7 @@ static void pwm_dir_a(uint8_t pwm_duty)
         PORTD |= (1<<PD2);
 
         // NOTE: The PWM driven state of the H-bridge should not be switched to b-mode or braking
-        //       with a suffient delay.
+        //       without a suffient delay.
 
         // Reset the B direction flag.
         pwm_b = 0;
@@ -174,15 +181,15 @@ static void pwm_dir_b(uint8_t pwm_duty)
         // Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
         PORTB &= ~((1<<PB1) | (1<<PB2));
 
-        // Give the H-bridge time to respond to the above, failure to do so, or to wait long
+        // Give the H-bridge time to respond to the above, failure to do so or to wait long
         // enough will result in brownouts as the power is "crowbarred" to varying extents.
         // The delay required is also dependant on factors which may affect the speed with
         // which the MOSFETs can respond, such as the impedance of the motor, the supply
         // voltage, etc.
         //
-        // Experiments have shown that 5 microseconds should be sufficient for most purposes.
-        //
-        delay_loop(DELAYLOOP);
+        // Experiments (with an "MG995") have shown that 5microseconds should be sufficient
+        // for most purposes.
+        //        delay_loop(DELAYLOOP);
 
         // Enable PWM_B (PB2/OC1B) output.
         TCCR1A = (1<<COM1B1);
@@ -190,8 +197,8 @@ static void pwm_dir_b(uint8_t pwm_duty)
         // Set EN_B (PD3) to high.
         PORTD |= (1<<PD3);
 
-        // NOTE: The PWM driven state of the H-bridge should not be switched to b-mode or braking
-        //       with a suffient delay.
+        // NOTE: The PWM driven state of the H-bridge should not be switched to a-mode or braking
+        //       without a suffient delay.
 
         // Reset the A direction flag.
         pwm_a = 0;
@@ -420,8 +427,9 @@ void pwm_stop(void)
         // Do we want to enable braking?
         if (1)
         {
-            // Before enabling braking (which turns on the "two lower MOSFETS"), delay sufficiently
-            // to give the H-bridge time to respond
+           // Before enabling braking (which turns on the "two lower MOSFETS"), introduce
+           // sufficient delay to give the H-bridge time to respond to the change of state 
+           // that has just been made.
            delay_loop(DELAYLOOP);
 
             // Hold EN_A (PD2) and EN_B (PD3) high.
@@ -449,6 +457,3 @@ void pwm_stop(void)
     registers_write_byte(REG_PWM_DIRA, pwm_a);
     registers_write_byte(REG_PWM_DIRB, pwm_b);
 }
-
-
-
