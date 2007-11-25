@@ -13,7 +13,7 @@ COMMON = -mmcu=$(MCU)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
-CFLAGS += -Wall -Os -fsigned-char -save-temps
+CFLAGS += -Wall -Os -fsigned-char
 CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d
 
 ## Assembly specific flags
