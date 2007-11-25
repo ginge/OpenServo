@@ -199,7 +199,8 @@ static void pwm_dir_b(uint8_t pwm_duty)
         //
         // Experiments (with an "MG995") have shown that 5microseconds should be sufficient
         // for most purposes.
-        //        delay_loop(DELAYLOOP);
+        //
+        delay_loop(DELAYLOOP);
 
         // Enable PWM_B (PB2/OC1B) output.
         TCCR1A = (1<<COM1B1);
@@ -319,15 +320,27 @@ void pwm_update(uint16_t position, int16_t pwm)
     if ((banks_read_word(POS_PID_BANK, REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div) ||
        (banks_read_byte(POS_PID_BANK, REG_PWM_MAX) != pwm_max))
     {
+
+        // Hold EN_A (PD2) and EN_B (PD3) low.
+        PORTD &= ~((1<<PD2) | (1<<PD3));
+
+        // Give the H-bridge time to respond to the above, failure to do so or to wait long
+        // enough will result in brownouts as the power is "crowbarred" to varying extents.
+        // The delay required is also dependant on factors which may affect the speed with
+        // which the MOSFETs can respond, such as the impedance of the motor, the supply
+        // voltage, etc.
+        //
+        // Experiments (with an "MG995") have shown that 5microseconds should be sufficient
+        // for most purposes.
+        //
+        delay_loop(DELAYLOOP);
+
         // Make sure that PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are held low.
         PORTB &= ~((1<<PB1) | (1<<PB2));
 
         // Disable OC1A and OC1B outputs.
         TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
         TCCR1A &= ~((1<<COM1B1) | (1<<COM1B0));
-
-        // Hold EN_A (PD2) and EN_B (PD3) low.
-        PORTD &= ~((1<<PD2) | (1<<PD3));
 
         // Reset the A and B direction flags.
         pwm_a = 0;
