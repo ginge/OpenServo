@@ -57,14 +57,4 @@ inline static void pwm_disable(void)
     pwm_stop();
 }
 
-// Utility functions
-inline static void delay_loop_crowbar(void)
-{
-    uint8_t i;
-    for(i=0; i<20; i++)
-    {
-        asm("nop");
-    }
-}
-
 #endif // _OS_PWM_H_
