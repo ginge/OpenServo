@@ -29,7 +29,8 @@
 
  * Synopsis     :
  *
- * Basic I2CManager_ExternalAddInterfaces function.
+ * Example I2CManager_ExternalAddInterfaces function for use with in static linking
+ * or DLL/shared libraries.
  */
 #ifdef _WINDOWS
 #include <windows.h>
@@ -42,33 +43,96 @@
 
 #include "i2c_manager.h"
 
-I2CMPROC Diolan_I2CM_GetProcAddress(int nfunc);
+/*******************************************************************************
+ *
+ * An array of structures naming known DLLs/shared libraries and the information
+ * required to retrieve the interface retrieving function.
+ */
+#if defined(_USRDL) || defined(_USRSO)
+static const struct
+{
+   const char *m_pLibraryName;
+#ifndef _WINDOWS
+   const char *m_pAltLibraryName;
+#endif
+   const char *m_pI2CM_GetProcAddressFuncName;
+} LIBRARIES[]=
+{
+#ifdef _WINDOWS
+   { "i2cm_diolan.dll",     "Diolan_I2CM_GetProcAddress"  },
+   { "i2cm_osif.dll",       "OSIF_I2CM_GetProcAddress"    },
+#else
+   { "./i2cm_diolan.so",    "/lib/i2cm_diolan.so",    "Diolan_I2CM_GetProcAddress"  },
+   { "./i2cm_osif.so",      "/lib/i2cm_osif.so",      "OSIF_I2CM_GetProcAddress"    },
+#endif
+};
+
+#else
+   I2CMPROC Diolan_I2CM_GetProcAddress(int_t nfunc);
+#endif
 
 /*******************************************************************************
  *
- * int I2CManager_ExternalAddInterfaces();
+ * int I2CManager_ExternalAddInterfaces()
+ *
+ * Initialise each known layer and call I2CManager_AddInterface to add its
+ * implementation to the I2C Manager.
  */
-int I2CManager_ExternalAddInterfaces()
+int I2CManager_ExternalAddInterfaces(BOOL bGetCount)
 {
    int rc=0;
 
+#if defined(_USRDL) || defined(_USRSO)
+   int i;
+
 /*
- * If the Diolan I2C Manager DLL/dynamic library is present on the system, then attempt to load
- * it and add it's interface
+ * Attempt try to determine if known potential I2C Manager DLL/dynamic libraries
+ * are present, then, if bGetCount is TRUE attempt to load them and add their
+ * interface to the I2C Manager.
+ *
+ * NOTE: There may be a flaw in the logic here: A library that failed to load on the
+ *       first call could, for some undefined reason, load on the second call. This
+ *       would add an additional library that was not counted.
+ *
+ *       TODO: Fix the above issue.
  */
-#if 1
-#ifdef _WINDOWS
-   HMODULE hDLL=LoadLibraryEx("i2cm_diolan.dll",NULL,LOAD_LIBRARY_AS_DATAFILE);
-   if(hDLL!=NULL)
+   for(i=0; i<sizeof(LIBRARIES)/sizeof(LIBRARIES[0]); i++)
    {
-      FreeLibrary(hDLL);
-      hDLL=LoadLibraryEx("i2cm_diolan.dll",NULL,0);
+#ifdef _WINDOWS
+      HMODULE hDLL=LoadLibraryEx(LIBRARIES[i].m_pLibraryName,NULL,LOAD_LIBRARY_AS_DATAFILE);
+      if(hDLL!=NULL)
+      {
+         FreeLibrary(hDLL);
+         hDLL=LoadLibraryEx(LIBRARIES[i].m_pLibraryName,NULL,0);
+         if(hDLL==NULL)
+         {
+            rc=-1; /* TODO */
+         } else
+         {
+            I2CMPROCGETFNADDR pProc=(I2CMPROCGETFNADDR)GetProcAddress(hDLL,
+               LIBRARIES[i].m_pI2CM_GetProcAddressFuncName);
+            if(pProc==NULL)
+            {
+               rc=-1; /* TODO */
+            } else
+            {
+               rc=I2CManager_AddInterface(pProc);
+            }
+         }
+      }
+#else
+      void *hDLL=dlopen(LIBRARIES[i].m_pLibraryName,RTLD_LAZY);
+      if(hDLL==NULL)
+      {
+         hDLL=dlopen(LIBRARIES[i].m_pAltLibraryName,RTLD_LAZY);
+      }
       if(hDLL==NULL)
       {
          rc=-1; /* TODO */
       } else
       {
-         I2CMPROCGETFNADDR pProc=(I2CMPROCGETFNADDR)GetProcAddress(hDLL,"Diolan_I2CM_GetProcAddress");
+         I2CMPROCGETFNADDR pProc=(I2CMPROCGETFNADDR)dlsym(hDLL,
+            LIBRARIES[i].m_pI2CM_GetProcAddressFuncName);
          if(pProc==NULL)
          {
             rc=-1; /* TODO */
@@ -77,30 +141,16 @@ int I2CManager_ExternalAddInterfaces()
             rc=I2CManager_AddInterface(pProc);
          }
       }
-   }
-#else
-   void *hDLL=dlopen("./i2cm_diolan.so",RTLD_LAZY);
-   if(hDLL==NULL)
-   {
-      hDLL=dlopen("/lib/i2cm_diolan.so",RTLD_LAZY);
-   }
-   if(hDLL==NULL)
-   {
-      rc=-1; /* TODO */
-   } else
-   {
-      I2CMPROCGETFNADDR pProc=(I2CMPROCGETFNADDR)dlsym(hDLL,"Diolan_I2CM_GetProcAddress");
-      if(pProc==NULL)
-      {
-         rc=-1; /* TODO */
-      } else
-      {
-         rc=I2CManager_AddInterface(pProc);
-      }
-   }
 #endif
-#else
+   }
+#else  // #if defined(_USRDL) || defined(_USRSO)
+
+/*
+ * Non DLL version with I2C Layers statically linked
+ */
    rc=I2CManager_AddInterface(Diolan_I2CM_GetProcAddress);
-#endif
+
+#endif // #if defined(_USRDL) || defined(_USRSO)
+
    return rc;
 }
