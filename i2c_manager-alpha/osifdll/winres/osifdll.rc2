@@ -1,0 +1,23 @@
+//
+// osifdll.rc2 - resources that Microsoft Visual C++ does not edit directly
+//
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Manifest
+//
+//IDR_MANIFEST RT_MANIFEST MOVEABLE PURE
+//   "osif.dll.manifest.xml"
+
+//
+// Icon
+//
+// NOTE: Icon with lowest ID value placed first to ensure application icon remains
+//       consistent on all systems.
+//
+IDR_ICON    ICON  DISCARDABLE  "osifdll.ico"
+
+////////////////////////////////////////////////////////////////////////////////
