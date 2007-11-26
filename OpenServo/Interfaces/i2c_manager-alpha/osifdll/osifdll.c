@@ -56,7 +56,7 @@
 #define WIN
 #define BUILD_DLL
 #endif
-#include "../../../OpenServo/OpenServo/Interfaces/OpenServo_InterFace/driver/Version_2/dll/osifdll.h"
+#include "../../OpenServo_InterFace/driver/Version_2/dll/osifdll.h"
 
 /*******************************************************************************
  *
