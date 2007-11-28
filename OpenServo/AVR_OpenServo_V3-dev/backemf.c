@@ -42,9 +42,9 @@
 #include "pwm.h"
 
 static uint8_t previous_tccr1a;
-
 static uint8_t bemf_index;
 static uint16_t bemf_array[8];
+
 
 void backemf_init(void)
 // Initialise the back EMF module
@@ -62,11 +62,13 @@ void backemf_init(void)
     banks_write_byte(CONFIG_BANK,      REG_EMF_CHARGE_TIME,            3);
 }
 
+
 void backemf_defaults(void)
 {
     banks_write_byte(CONFIG_BANK,      REG_EMF_COLLAPSE_DELAY,         2);
     banks_write_byte(CONFIG_BANK,      REG_EMF_CHARGE_TIME,            3);
 }
+
 
 void backemf_get_sample(void)
 // Sets up the sampling mechanism for the back EMF reading.
@@ -108,6 +110,7 @@ void backemf_get_sample(void)
     banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, bemf);
 }
 
+
 uint16_t backemf_do_sample(uint8_t pwm_a, uint8_t pwm_b)
 // Do one sample of the back EMF
 {
@@ -132,12 +135,6 @@ uint16_t backemf_do_sample(uint8_t pwm_a, uint8_t pwm_b)
         PORTD &= ~(1<<PD7);
         PORTD |= (1<<PD4);
     }
-    // else not moving so do nothing
-    else
-    {
-        banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, 0);
-        return 0;
-    }
 
     emf_charge_time = banks_read_byte(CONFIG_BANK, REG_EMF_CHARGE_TIME);
     // Delay to allow the BEMF sample hold circuit to charge to a reasonable level
@@ -161,6 +158,7 @@ uint16_t backemf_do_sample(uint8_t pwm_a, uint8_t pwm_b)
     return (uint16_t) adc_get_backemf_value();
 }
 
+
 void backemf_coast_motor(void)
 // Disables the PWM timer to coast the motor
 {
@@ -177,6 +175,7 @@ void backemf_coast_motor(void)
     // Restore interrupts.
     sei();
 }
+
 
 void backemf_restore_motor(void)
 // Enable the PWM timer
