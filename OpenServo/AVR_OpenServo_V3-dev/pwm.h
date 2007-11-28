@@ -57,4 +57,21 @@ inline static void pwm_disable(void)
     pwm_stop();
 }
 
+
+inline static void pwm_brake_enable(void)
+{
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    // Enable PWM to the servo motor.
+    registers_write_byte(REG_FLAGS_LO, flags_lo | (1<<FLAGS_LO_GENERALCALL_ENABLED));
+}
+
+inline static void pwm_brake_disable(void)
+{
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    // Enable PWM to the servo motor.
+    registers_write_byte(REG_FLAGS_LO, flags_lo & ~(1<<FLAGS_LO_GENERALCALL_ENABLED));
+}
+
 #endif // _OS_PWM_H_

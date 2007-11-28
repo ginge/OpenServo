@@ -96,6 +96,7 @@ inline static void delay_loop(int n)
     }
 }
 
+
 static void pwm_dir_a(uint8_t pwm_duty)
 // Send PWM signal for rotation with the indicated pwm ratio (0 - 255).
 // This function is meant to be called only by pwm_update.
@@ -247,6 +248,8 @@ void pwm_registers_defaults(void)
     // This sets the maximum PWM output as a percentage of the calculated PWM divider values
     banks_write_byte(POS_PID_BANK, REG_PWM_MAX, DEFAULT_PWM_MAX);
 
+    // Enable the H-Bridge brake by default.
+    pwm_brake_enable();
 }
 
 
@@ -289,14 +292,17 @@ void pwm_init(void)
     // Configure timer 1 for PWM, Phase and Frequency Correct operation, but leave outputs disabled.
     TCCR1A = (0<<COM1A1) | (0<<COM1A0) |                    // Disable OC1A output.
              (0<<COM1B1) | (0<<COM1B0) |                    // Disable OC1B output.
-             (0<<WGM11) | (0<<WGM10);                       // PWM, Phase and Frequency Correct, TOP = ICR1
-    TCCR1B = (0<<ICNC1) | (0<<ICES1) |                      // Input on ICP1 disabled.
-             (1<<WGM13) | (0<<WGM12) |                      // PWM, Phase and Frequency Correct, TOP = ICR1
-             (0<<CS12) | (0<<CS11) | (1<<CS10);             // No prescaling.
+             (0<<WGM11)  | (0<<WGM10);                      // PWM, Phase and Frequency Correct, TOP = ICR1
+    TCCR1B = (0<<ICNC1)  | (0<<ICES1)  |                    // Input on ICP1 disabled.
+             (1<<WGM13)  | (0<<WGM12)  |                    // PWM, Phase and Frequency Correct, TOP = ICR1
+             (0<<CS12)   | (0<<CS11)   | (1<<CS10);         // No prescaling.
 
     // Update the pwm values.
     registers_write_byte(REG_PWM_DIRA, 0);
     registers_write_byte(REG_PWM_DIRB, 0);
+
+    // Enable the H-Bridge brake by default.
+    pwm_brake_enable();
 }
 
 
@@ -454,14 +460,14 @@ void pwm_stop(void)
         // Make sure that PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are held low.
         PORTB &= ~((1<<PB1) | (1<<PB2));
 
-        // Do we want to enable braking?
-        if (1)
-        {
-           // Before enabling braking (which turns on the "two lower MOSFETS"), introduce
-           // sufficient delay to give the H-bridge time to respond to the change of state 
-           // that has just been made.
-           delay_loop(DELAYLOOP);
+        // Before enabling braking (which turns on the "two lower MOSFETS"), introduce
+        // sufficient delay to give the H-bridge time to respond to the change of state 
+        // that has just been made.
+        delay_loop(DELAYLOOP);
 
+        // Do we want to enable braking?
+        if (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_PWM_BRAKE_ENABLED))
+        {
             // Hold EN_A (PD2) and EN_B (PD3) high.
             PORTD |= ((1<<PD2) | (1<<PD3));
         }
