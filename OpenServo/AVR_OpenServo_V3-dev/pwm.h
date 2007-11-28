@@ -62,15 +62,16 @@ inline static void pwm_brake_enable(void)
 {
     uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
 
-    // Enable PWM to the servo motor.
+    // Enable Hardware brake
     registers_write_byte(REG_FLAGS_LO, flags_lo | (1<<FLAGS_LO_GENERALCALL_ENABLED));
 }
+
 
 inline static void pwm_brake_disable(void)
 {
     uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
 
-    // Enable PWM to the servo motor.
+    // Disable hardware brake.
     registers_write_byte(REG_FLAGS_LO, flags_lo & ~(1<<FLAGS_LO_GENERALCALL_ENABLED));
 }
 
