@@ -200,8 +200,20 @@ static void handle_twi_command(void)
 
         case TWI_CMD_GCALL_START_WAIT:
 
-            // dont move unless we get the start command
+            // dont move unless we get the start command or the group command
             general_call_start_wait();
+
+            break;
+
+        case TWI_CMD_PWM_BRAKE_ENABLE:
+
+            pwm_brake_enable();
+
+            break;
+
+        case TWI_CMD_PWM_BRAKE_DISABLE:
+
+            pwm_brake_disable();
 
             break;
 
@@ -314,7 +326,7 @@ int main (void)
                 {
                     // store the new position, but let the servo lock to the last seek position
                     wait_seek_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
-                    if (wait_seek_position != last_seek_position) // do we ave a new position?
+                    if (wait_seek_position != last_seek_position) // do we have a new position?
                     {
                         new_seek_position = wait_seek_position;
                         registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, last_seek_position);
@@ -323,19 +335,26 @@ int main (void)
                 last_seek_position = registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
 
                 //check to make sure that we can start the move.
-                if (general_call_start())
+                if (general_call_start() || 
+                    ( registers_read_byte(REG_GENERAL_CALL_GROUP_START) == banks_read_byte(CONFIG_BANK, REG_GENERAL_CALL_GROUP)))
                 {
                     // write the new position with the previously saved position
                     registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, new_seek_position);  
                     general_call_start_wait_reset();  // reset the wait flag
                     general_call_start_reset();  // reset the start flag
                 }
-
             }
 
 
-            // Disable PWM
-            backemf_coast_motor();
+            // Quick and dirty check to see if pwm is active. This is done to make sure the motor doesn't
+            // whine in the audible range while idling.
+            uint8_t pwm_a = registers_read_byte(REG_PWM_DIRA);
+            uint8_t pwm_b = registers_read_byte(REG_PWM_DIRB);
+            if (pwm_a || pwm_b)
+            {
+                // Disable PWM
+                backemf_coast_motor();
+            }
 
             // Trigger the adc sampling hardware. This triggers the position and temperature sample
             adc_start(ADC_CHANNEL_POSITION);
@@ -353,11 +372,16 @@ int main (void)
             // Update the power value for reporting.
             power_update(power);
 
-            // Get the backemf sample.
-            backemf_get_sample();
+            // Quick and dirty check to see if pwm is active
+            if (pwm_a || pwm_b)
+            {
+                // Get the backemf sample.
+                backemf_get_sample();
 
-            // Turn the motor back on
-            backemf_restore_motor();
+                // Turn the motor back on
+                backemf_restore_motor();
+            }
+
             // Get the new position value.
             position = (int16_t) adc_get_position_value();
 
