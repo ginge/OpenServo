@@ -39,6 +39,8 @@
 #define TWI_CMD_REGISTERS_RESTORE       0x87        // Restore safe read/write registers from EEPROM
 #define TWI_CMD_REGISTERS_DEFAULT       0x88        // Restore safe read/write registers to defaults
 #define TWI_CMD_EEPROM_ERASE            0x89        // Erase the EEPROM.
+#define TWI_CMD_PWM_BRAKE_ENABLE        0x8A        // Enable PWM H-bridge braking
+#define TWI_CMD_PWM_BRAKE_DISABLE       0x8B        // Disable PWM H-bridge braking
 #define TWI_CMD_VOLTAGE_READ            0x90        // Starts a ADC on the supply voltage channel
 #define TWI_CMD_CURVE_MOTION_ENABLE     0x91        // Enable curve motion processing.
 #define TWI_CMD_CURVE_MOTION_DISABLE    0x92        // Disable curve motion processing.
