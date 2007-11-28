@@ -84,8 +84,6 @@ void banks_init(void)
         // Initialize read/write protected registers to defaults.
         registers_defaults();
     }
-
-
 }
 
 
@@ -99,6 +97,7 @@ void banks_defaults(void)
     alert_defaults();
     backemf_defaults();
 }
+
 
 uint16_t banks_read_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo)
 // Read a 16-bit word from the registers.
@@ -137,6 +136,7 @@ void banks_write_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo, uint
     // Restore status.
     asm volatile ("out __SREG__,%0\n\t" : : "r" (sreg));
 }
+
 
 void banks_update_registers(void)
 // Update any functions that need running in the bank context

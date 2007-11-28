@@ -89,6 +89,9 @@
 #define ALERT_VOLT_MIN_LIMIT_LO     0x15
 #define ALERT_TEMP_MAX_LIMIT_HI     0x16
 #define ALERT_TEMP_MAX_LIMIT_LO     0x17
+
+#define REG_GENERAL_CALL_GROUP      0x20
+#define REG_BRAKE_STRENGTH          0x21
 // Delay in ms for the back emf spike collapse
 #define REG_EMF_COLLAPSE_DELAY      0x2A
 // This is 41us * n us delay for back emf charging cap
