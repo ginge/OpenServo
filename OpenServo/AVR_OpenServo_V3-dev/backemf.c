@@ -42,20 +42,12 @@
 #include "pwm.h"
 
 static uint8_t previous_tccr1a;
-static uint8_t bemf_index;
-static uint16_t bemf_array[8];
 
 
 void backemf_init(void)
 // Initialise the back EMF module
 {
     uint8_t i;
-
-    // Initialize the back emf index.
-    bemf_index = 0;
-
-    // Initialize the back emf array.
-    for (i = 0; i < 8; ++i) bemf_array[i] = 0;
 
     // Setup the default charge times
     banks_write_byte(CONFIG_BANK,      REG_EMF_COLLAPSE_DELAY,         2);
@@ -74,8 +66,6 @@ void backemf_get_sample(void)
 // Sets up the sampling mechanism for the back EMF reading.
 {
     uint16_t bemf;
-    uint8_t i;
-    uint8_t j;
     uint8_t pwm_a;
     uint8_t pwm_b;
 
@@ -85,27 +75,8 @@ void backemf_get_sample(void)
     // Delay for back EMF field collapse recovery. This is interruptable
     _delay_ms(banks_read_byte(CONFIG_BANK, REG_EMF_COLLAPSE_DELAY));
 
-    // Sample the back emf 7 times to get an average
-    for (j=0; j<7; j++)
-    {
-        // Get one sample of the EMF value
-        bemf = (uint16_t)backemf_do_sample(pwm_a, pwm_b);
-
-        // Insert the back emf value into the back emf array.
-        bemf_array[bemf_index] = bemf;
-
-        // Keep the index within the array bounds.
-        bemf_index = (bemf_index + 1) & 7;
-
-        // Reset the back emf value.
-        bemf = 0;
-
-        // Determine the back emf values across the back emf array.
-        for (i = 0; i < 7; ++i) bemf += bemf_array[i];
-
-        // Shift the sum of back emf values to find the average.
-        bemf >>= 3;
-    }
+   // Sample the back emf
+    bemf = (uint16_t)backemf_do_sample(pwm_a, pwm_b);
 
     banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, bemf);
 }
