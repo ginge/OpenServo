@@ -355,6 +355,11 @@ int main (void)
                 // Disable PWM
                 backemf_coast_motor();
             }
+            else
+            {
+                // reset the back EMF value to 0
+                banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, 0);
+            }
 
             // Trigger the adc sampling hardware. This triggers the position and temperature sample
             adc_start(ADC_CHANNEL_POSITION);
