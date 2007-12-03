@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Provides the assignment functionality for the I2CM_GetProcAddress function(s).

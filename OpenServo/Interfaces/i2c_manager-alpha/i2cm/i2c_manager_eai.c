@@ -27,12 +27,13 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Example I2CManager_ExternalAddInterfaces function for use with in static linking
  * or DLL/shared libraries.
  */
-#ifdef _WINDOWS
+#ifdef WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
@@ -98,7 +99,7 @@ int I2CManager_ExternalAddInterfaces(BOOL bGetCount)
  */
    for(i=0; i<sizeof(LIBRARIES)/sizeof(LIBRARIES[0]); i++)
    {
-#ifdef _WINDOWS
+#ifdef WIN32
       HMODULE hDLL=LoadLibraryEx(LIBRARIES[i].m_pLibraryName,NULL,LOAD_LIBRARY_AS_DATAFILE);
       if(hDLL!=NULL)
       {

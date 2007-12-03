@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Implements the I2C Manager interface functions for the Dimax/Diolan U2C12 USB-I2C/SPI/GPIO.

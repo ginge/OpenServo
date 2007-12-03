@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Implements an OSIF DLL/shared library version that uses the "I2C Manager" layer
@@ -56,7 +57,8 @@
 #define WIN
 #define BUILD_DLL
 #endif
-#include "../../OpenServo_InterFace/driver/Version_2/dll/osifdll.h"
+#include "../../../OpenServo/OpenServo/Interfaces/OpenServo_InterFace/driver/Version_2/dll/osifdll.h"
+// #include "../../OpenServo_InterFace/driver/Version_2/dll/osifdll.h"
 
 /*******************************************************************************
  *

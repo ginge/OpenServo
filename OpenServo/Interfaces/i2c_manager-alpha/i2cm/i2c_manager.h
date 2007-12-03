@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Defines the I2C Manager's published interface.
@@ -248,7 +249,7 @@ typedef int_t (*I2CM_GETDEVICEADDRESSFUNC) (int_t nBus, int_t nDevice);
 
 #define I2CM_FID_READ 15
 I2CMSTATIC int_t I2CM_Read(int_t nBus, int_devaddr_t nSlaveAddress, int_t nMemAddressLen, int_memaddr_t nMemAddress, int_t nBytes, byte_t *pBuffer);
-typedef int_t (*I2CM_READFUNC) (int_t nBus, int_devaddr_t nSlaveAddress, int_t nMemAddressLen, int_memaddr_t nMemAddress, int_t nBytes, BYTE *pBuffer);
+typedef int_t (*I2CM_READFUNC) (int_t nBus, int_devaddr_t nSlaveAddress, int_t nMemAddressLen, int_memaddr_t nMemAddress, int_t nBytes, byte_t *pBuffer);
 
 #define I2CM_FID_WRITE 16
 I2CMSTATIC int_t I2CM_Write(int_t nBus, int_devaddr_t nSlaveAddress, int_t nMemAddressLen, int_memaddr_t nMemAddress, int_t nBytes, const byte_t *pBuffer);

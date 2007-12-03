@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Implements the I2C Manager's published interface.
@@ -215,7 +216,8 @@
  * ### Platforms #########################################################################
  *
  * Tested platforms: Microsoft Visual C++ 6.0 (Windows 2000)
- *                   gcc version 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
+ *
+ * Limited testing: gcc version 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
  *
  */
 #ifdef _MSC_VER
@@ -1578,7 +1580,7 @@ int_t I2CM_StartTransaction(int_t nBus)
    {
       I2CMLAYER *plyr=&l_pLayers[pbus->m_nLayer];
       I2CM_SetLastError(plyr->m_Funcs.m_pfx.m_pStartTransaction(nBus),
-         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // THESE LAST ERROR STRINGS ARE WRONG
+         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // TODO: THESE LAST ERROR STRINGS ARE WRONG?
    }
    return I2CM_GetLastError();
 }
@@ -1607,7 +1609,7 @@ int_t I2CM_RestartTransaction(int_t nBus)
    {
       I2CMLAYER *plyr=&l_pLayers[pbus->m_nLayer];
       I2CM_SetLastError(plyr->m_Funcs.m_pfx.m_pRestartTransaction(nBus),
-         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // THESE LAST ERROR STRINGS ARE WRONG
+         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // TODO: THESE LAST ERROR STRINGS ARE WRONG?
    }
    return I2CM_GetLastError();
 }
