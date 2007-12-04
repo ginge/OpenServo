@@ -221,6 +221,9 @@ static void twi_registers_write(uint8_t address, uint8_t data)
             case BANK_0:
                 break;
             case BANK_1:
+                // Are we writing to the configuration bank while writes are disabled?
+                if (registers_is_write_disabled())
+                    return;
                 break;
             case REDIRECTED_BANK:
 
