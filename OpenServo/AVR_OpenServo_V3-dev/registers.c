@@ -39,7 +39,8 @@
 uint8_t registers[REGISTER_COUNT];
 
 #if ROLLING_SUBTYPE
-uint8_t subtype_id[] = {0x4F, 0x70, 0x65, 0x6E, 0x53, 0x65, 0x72, 0x76, 0x6F};
+#define ROLLING_SUBTYPE_LENGTH 9
+uint8_t subtype_id[] = {'O', 'p', 'e', 'n', 'S', 'e', 'r', 'v', 'o'};
 uint8_t subtype_index;
 #endif
 
@@ -123,7 +124,7 @@ void registers_write_word(uint8_t address_hi, uint8_t address_lo, uint16_t value
 uint8_t registers_subtype_cycle(void)
 // Cycle the output of the device subtype register with the values in the subtype_id array
 {
-    if (subtype_index > 7) { subtype_index=0; }
+    if (subtype_index > ROLLING_SUBTYPE_LENGTH-1) { subtype_index=0; }
     return subtype_id[subtype_index++];
 }
 #endif
