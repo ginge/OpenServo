@@ -257,8 +257,10 @@ int main (void)
     pulse_control_init();
 #endif
 
+#if BACKEMF_ENABLED
     // Initialise the back emf module
     backemf_init();
+#endif
 
     // Initialize the TWI slave module.
     twi_slave_init(banks_read_byte(POS_PID_BANK, REG_TWI_ADDRESS));
@@ -345,7 +347,7 @@ int main (void)
                 }
             }
 
-
+#if BACKEMF_ENABLED
             // Quick and dirty check to see if pwm is active. This is done to make sure the motor doesn't
             // whine in the audible range while idling.
             uint8_t pwm_a = registers_read_byte(REG_PWM_DIRA);
@@ -360,7 +362,7 @@ int main (void)
                 // reset the back EMF value to 0
                 banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, 0);
             }
-
+#endif
             // Trigger the adc sampling hardware. This triggers the position and temperature sample
             adc_start(ADC_CHANNEL_POSITION);
 
@@ -377,6 +379,7 @@ int main (void)
             // Update the power value for reporting.
             power_update(power);
 
+#if BACKEMF_ENABLED
             // Quick and dirty check to see if pwm is active
             if (pwm_a || pwm_b)
             {
@@ -386,6 +389,7 @@ int main (void)
                 // Turn the motor back on
                 backemf_restore_motor();
             }
+#endif
 
             // Get the new position value.
             position = (int16_t) adc_get_position_value();

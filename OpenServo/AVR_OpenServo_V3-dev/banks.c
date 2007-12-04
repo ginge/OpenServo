@@ -95,7 +95,9 @@ void banks_defaults(void)
     // Default TWI address.
     banks_write_byte(POS_PID_BANK, REG_TWI_ADDRESS, REG_DEFAULT_TWI_ADDR);
     alert_defaults();
+#if BACKEMF_ENABLED
     backemf_defaults();
+#endif
 }
 
 

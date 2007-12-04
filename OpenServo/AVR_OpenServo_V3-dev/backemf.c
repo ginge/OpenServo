@@ -24,9 +24,10 @@
     $Id$
 */
 
-// Back EMF measurement module
-// 
-// 
+/* Back EMF measurement module
+   The speed of the servo can be determinied by disabling PWM output
+   and sampling the voltage across the motor. 
+*/
 
 #include "backemf.h"
 #include <avr/interrupt.h>
@@ -40,6 +41,8 @@
 #include "banks.h"
 #include "adc.h"
 #include "pwm.h"
+
+#if BACKEMF_ENABLED
 
 static uint8_t previous_tccr1a;
 
@@ -156,3 +159,5 @@ void backemf_restore_motor(void)
     // Restore interrupts.
     sei();
 }
+
+#endif

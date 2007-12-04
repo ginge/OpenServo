@@ -64,6 +64,12 @@
 // change string on each read
 #define ROLLING_SUBTYPE             1
 
+// Enable (1) or disable (0) the back EMF speed measurement module
+// Enabling this function introduces an off period of the PWM
+// output which means you will need to recalibrate the PID and PWM
+// module variables.
+#define BACKEMF_ENABLED             1
+
 // The known OpenServo hardware types are listed below.
 #define HARDWARE_TYPE_UNKNOWN           0
 #define HARDWARE_TYPE_FUTABA_S3003      1
