@@ -47,11 +47,7 @@ static uint8_t previous_tccr1a;
 void backemf_init(void)
 // Initialise the back EMF module
 {
-    uint8_t i;
 
-    // Setup the default charge times
-    banks_write_byte(CONFIG_BANK,      REG_EMF_COLLAPSE_DELAY,         2);
-    banks_write_byte(CONFIG_BANK,      REG_EMF_CHARGE_TIME,            3);
 }
 
 
@@ -75,7 +71,7 @@ void backemf_get_sample(void)
     // Delay for back EMF field collapse recovery. This is interruptable
     _delay_ms(banks_read_byte(CONFIG_BANK, REG_EMF_COLLAPSE_DELAY));
 
-   // Sample the back emf
+    // Sample the back emf
     bemf = (uint16_t)backemf_do_sample(pwm_a, pwm_b);
 
     banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, bemf);
