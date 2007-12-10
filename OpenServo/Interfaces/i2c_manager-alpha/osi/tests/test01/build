@@ -1,0 +1,6 @@
+#!/bin/sh -f
+cc -c ../../osi.c
+cc -c ../../../i2cm/i2c_manager.c
+cc -c ../../../i2cm/i2c_manager_eai.c
+cc -c ../../../i2cm/i2cm_diolan.c
+cc test01.c osi.o i2c_manager.o i2c_manager_eai.o i2cm_diolan.o -llibi2cbrdg -lusb -lstdc++
