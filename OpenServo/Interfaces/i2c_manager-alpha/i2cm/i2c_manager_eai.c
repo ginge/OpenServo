@@ -79,7 +79,7 @@ static const struct
  * Initialise each known layer and call I2CManager_AddInterface to add its
  * implementation to the I2C Manager.
  */
-int I2CManager_ExternalAddInterfaces(BOOL bGetCount)
+int I2CManager_ExternalAddInterfaces()
 {
    int rc=0;
 

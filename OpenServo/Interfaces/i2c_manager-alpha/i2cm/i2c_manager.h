@@ -95,15 +95,25 @@ extern "C" {
 typedef unsigned char byte_t;
 #if defined(_MSC_VER) || defined(_WINDOWS) || defined (__unix) || defined(__linux) || defined(__linux__)
 typedef int int_t;
+#ifndef __int8_t_defined
 typedef char int8_t;
 typedef short int int16_t;
 typedef long int32_t;
+#ifdef _MSC_VER
 typedef __int64 int64_t;
+#else
+typedef long long int64_t;
+#endif
+#endif
 typedef unsigned int uint_t;
 typedef unsigned char uint8_t;
 typedef unsigned short int uint16_t;
 typedef unsigned long uint32_t;
+#ifdef _MSC_VER
 typedef unsigned __int64 uint64_t;
+#else
+typedef unsigned long long uint64_t;
+#endif
 typedef unsigned int bool_t;
 typedef unsigned short int int_devaddr_t;
 typedef unsigned long int_memaddr_t;
@@ -244,8 +254,8 @@ I2CMSTATIC int_t I2CM_GetBusDeviceCount(int_t nBus);
 typedef int_t (*I2CM_GETBUSDEVICECOUNTFUNC) (int_t nBus);
 
 #define I2CM_FID_GETDEVICEADDRESS 14
-I2CMSTATIC int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice);
-typedef int_t (*I2CM_GETDEVICEADDRESSFUNC) (int_t nBus, int_t nDevice);
+I2CMSTATIC int_devaddr_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice);
+typedef int_devaddr_t (*I2CM_GETDEVICEADDRESSFUNC) (int_t nBus, int_t nDevice);
 
 #define I2CM_FID_READ 15
 I2CMSTATIC int_t I2CM_Read(int_t nBus, int_devaddr_t nSlaveAddress, int_t nMemAddressLen, int_memaddr_t nMemAddress, int_t nBytes, byte_t *pBuffer);

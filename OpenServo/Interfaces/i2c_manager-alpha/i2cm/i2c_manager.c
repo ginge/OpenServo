@@ -1424,7 +1424,7 @@ int_t I2CM_GetDeviceCount()
 
 /*******************************************************************************
  *
- * int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
+ * int_devaddr_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
  *
  * Synopsis
  *
@@ -1441,13 +1441,14 @@ int_t I2CM_GetDeviceCount()
  *
  * Return
  *
- * int_t   o The function returns the address of the device or -1 if the I2C Manager
- *           has not been initialised, an illegal bus or device is specified or an
- *           error has occurred.
+ * int_devaddr_t
+ *         o The function returns the address of the device or (int_devaddr_t)-1 if
+ *           the I2C Manager has not been initialised, an illegal bus or device is
+ *           specified or an error has occurred.
  */
-int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
+int_devaddr_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
 {
-   int_t rc=(int)-1;
+   int_devaddr_t rc=(int_devaddr_t)-1;
    I2CBUS *pbus=I2CManager_GetBus(nBus);
    if(pbus!=NULL)
    {
