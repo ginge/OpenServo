@@ -38,16 +38,16 @@
  *
  * Provides a software interface between OpenServo and I2C using the "I2C Manager".
  *
- * NOTE: The initial version of the code is being developed against an OpenServo 2.1 board
- *       with "May 2007" firmware and V3 boards with firmwares available September to
- *       November 2007.
+ * NOTE: The initial version of this software is being developed against an OpenServo 2.1
+ *       board with "May 2007" firmware and V3 boards with "bank switched" firmware
+ *       (OpenServo_V3-dev).
  *
  *       The firmware in general is currently being advanced to include the new facilities
  *       of the OpenServo V3 board (e.g. back EMG) as well as software advances (e.g. "bank
  *       switching").
  *
  *       It is intended that OpenServo interface software will allow both the old and new
- *       boards to be accommodated as well as new firmware.
+ *       boards to be accommodated as well as different firmware versions.
  *
  * ### Overview ##########################################################################
  *
