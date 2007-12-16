@@ -92,8 +92,9 @@ REGINDEXITEM l_GenRegIndex[]=
    ITEM(VELOCITY,          TRUE,  l_regs.m_Velocity,        "%d",     "Velocity=%-9s" ),
    ITEM(SEEK,             FALSE,  l_regs.m_Seek,            "%d",     "Seek=%-13s" ),
    ITEM(SEEKVELOCITY,      TRUE,  l_regs.m_SeekVelocity,    "%d",     "SeekVel=%-10s\n" ),
-   ITEM(VOLTAGE,          FALSE,  l_regs.m_Voltage,         "%d",     "Voltage=%-10s" ),
-   ITEM(POWER,            FALSE,  l_regs.m_Power,           "%d",     "Power=%-12s\n" ),
+   ITEM(BATTVOLTAGE,      FALSE,  l_regs.m_BattVoltage,     "%d",     "Batt. Volts.=%-5s" ),
+   ITEM(CURRENT,          FALSE,  l_regs.m_Current,         "%d",     "Power=%-12s" ),
+   ITEM(TEMPERATURE,      FALSE,  l_regs.m_Temperature,     "%d",     "Temperature=%-6s\n" ),
    ITEM(PID_DEADBAND,     FALSE,  l_regs.m_PID.m_Deadband,  "%d",     "Deadband=%-9s" ),
    ITEM(PID_PGAIN,        FALSE,  l_regs.m_PID.m_PGain,     "%d",     "P-Gain=%-11s" ),
    ITEM(PID_IGAIN,        FALSE,  l_regs.m_PID.m_IGain,     "%d",     "I-Gain=%-11s" ),
@@ -485,10 +486,11 @@ REGINDEXITEM ri[]=
    ITEM(POSITION,         FALSE,  l_regs.m_Position,        "%d",      " pos=%-3s" ),
    ITEM(VELOCITY,          TRUE,  l_regs.m_Velocity,        "%d",      " vel=%-3s" ),
    ITEM(SEEK,             FALSE,  l_regs.m_Seek,            "%d",      " seek=%-3s" ),
-   ITEM(VOLTAGE,          FALSE,  l_regs.m_Voltage,         "%d",      " V=%3s" ),
-   ITEM(POWER,            FALSE,  l_regs.m_Power,           "%d",      " I=%-4s" ),
-   ITEM(PWM_CW,           FALSE,  l_regs.m_PWM_CW,          "%d",      " PWM CW=%s" ),
-   ITEM(PWM_CCW,          FALSE,  l_regs.m_PWM_CCW,         "%d",      ", CCW=%s  \r" ),
+   ITEM(BATTVOLTAGE,      FALSE,  l_regs.m_BattVoltage,     "%d",      " V=%3s" ),
+   ITEM(CURRENT,          FALSE,  l_regs.m_Current,         "%d",      " I=%4s" ),
+   ITEM(TEMPERATURE,      FALSE,  l_regs.m_Temperature,     "%d",      " T=%3s" ),
+   ITEM(PWM_CW,           FALSE,  l_regs.m_PWM_CW,          "%d",      " PWM=%s" ),
+   ITEM(PWM_CCW,          FALSE,  l_regs.m_PWM_CCW,         "%d",      ", %s  \r" ),
 };
             do
             {
@@ -508,7 +510,8 @@ REGINDEXITEM ri[]=
                }
                if(!l_bAbort)
                {
-                  rc=OSI_Command(posid,OSI_CMDID_VOLTAGE_RESAMPLE);
+// TODO: More recent firmware may not require the command to be sent
+//                  rc=OSI_Command(posid,OSI_CMDID_BATTVOLTAGE_RESAMPLE);
                   Sleep(50);
                }
             } while(!l_bAbort);
