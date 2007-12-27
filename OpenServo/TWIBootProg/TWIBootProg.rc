@@ -1,0 +1,653 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\TWIBootProg.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_DISPLAY_MODE        BITMAP                  "res\\toolbar1.bmp"
+IDR_DEVICEBAR           BITMAP                  "res\\bmp00002.bmp"
+IDB_LOGO                BITMAP                  "res\\logo.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  24, 24
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    BUTTON      ID_EDIT_FILL
+END
+
+IDR_DISPLAY_MODE TOOLBAR  24, 24
+BEGIN
+    BUTTON      ID_NIBBLE_MODE
+    BUTTON      ID_BYTE_MODE
+    BUTTON      ID_OCTAL_MODE
+    BUTTON      ID_DECIMAL_MODE
+    BUTTON      ID_WORDB0B1_MODE
+    BUTTON      ID_WORDB1B0_MODE
+END
+
+IDR_DEVICEBAR TOOLBAR  24, 24
+BEGIN
+    BUTTON      ID_DEVICE_PROGRAM
+    BUTTON      ID_DEVICE_READ
+    BUTTON      ID_DEVICE_VERIFY
+    BUTTON      ID_DEVICE_ERASE
+    SEPARATOR
+    BUTTON      ID_DEVICE_CONFIG
+    BUTTON      ID_DEVICE_TYPE
+    BUTTON      ID_DEVICE_SUBTYPE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Lar&ge Icons",                ID_VIEW_LARGEICON
+        MENUITEM "S&mall Icons",                ID_VIEW_SMALLICON
+        MENUITEM "&List",                       ID_VIEW_LIST
+        MENUITEM "&Details",                    ID_VIEW_DETAILS
+        MENUITEM SEPARATOR
+        POPUP "Arrange &Icons"
+        BEGIN
+            MENUITEM "By &Name",                    ID_VIEW_BYNAME
+            MENUITEM SEPARATOR
+            MENUITEM "&Auto Arrange",               ID_VIEW_AUTOARRANGE
+        END
+        MENUITEM "Lin&e up Icons",              ID_VIEW_LINEUP
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About TWIBootProg...",       ID_APP_ABOUT
+    END
+END
+
+IDR_TwiBootProgTYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Fill",                       ID_EDIT_FILL
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Nibble Mode",                 ID_NIBBLE_MODE
+        MENUITEM "Byte Mode",                   ID_BYTE_MODE
+        MENUITEM "Octal Mode",                  ID_OCTAL_MODE
+        MENUITEM "Decimal Mode",                ID_DECIMAL_MODE
+        MENUITEM "Big-Endian Word Mode",        ID_WORDB0B1_MODE
+        MENUITEM "Little-Endian Word Mode",     ID_WORDB1B0_MODE
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+    END
+    POPUP "&Operation"
+    BEGIN
+        MENUITEM "&Program",                    ID_DEVICE_PROGRAM
+        MENUITEM "&Read",                       ID_DEVICE_READ
+        MENUITEM "&Verify",                     ID_DEVICE_VERIFY
+        MENUITEM "&Erase",                      ID_DEVICE_ERASE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About TWIBootProg...",       ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_DOWN,        ID_VK_DOWN,             VIRTKEY, NOINVERT
+    VK_LEFT,        ID_VK_LEFT,             VIRTKEY, NOINVERT
+    VK_RIGHT,       ID_VK_RIGHT,            VIRTKEY, NOINVERT
+    VK_UP,          ID_VK_UP,               VIRTKEY, NOINVERT
+    VK_PRIOR,       ID_VK_PAGE_UP,          VIRTKEY, NOINVERT
+    VK_NEXT,        ID_VK_PAGE_DOWN,        VIRTKEY, NOINVERT
+    VK_HOME,        ID_VK_HOME,             VIRTKEY, NOINVERT
+    VK_END,         ID_VK_END,              VIRTKEY, NOINVERT
+    VK_HOME,        ID_VK_CTRL_HOME,        VIRTKEY, CONTROL, NOINVERT
+    VK_END,         ID_VK_CTRL_END,         VIRTKEY, CONTROL, NOINVERT
+    VK_TAB,         ID_VK_TAB,              VIRTKEY, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 175, 102
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "About TWIBootProg"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         145,IDC_LOGO,"Static",SS_BITMAP | SS_REALSIZEIMAGE,12,7,
+                    141,27
+    CTEXT           "TwiBootProg Version 1.0",IDC_STATIC,7,46,161,8,
+                    SS_NOPREFIX
+    CTEXT           "Copyright (C) 2004 Dimax Technology",IDC_STATIC,7,57,
+                    161,8
+    DEFPUSHBUTTON   "OK",IDOK,62,78,50,16,WS_GROUP
+    CTEXT           "http://www.xdimax.com/usb_i2c/u2c12.html",IDC_A_LINK,7,
+                    67,161,8
+END
+
+IDD_OPENTYPEDLG DIALOGEX 0, 0, 124, 79
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Open File Type"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,56,50,16,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,67,56,50,16,WS_GROUP
+    LTEXT           "Open file as:",IDC_STATIC,7,7,40,8
+    CONTROL         "Binary",IDC_BINARY,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,7,20,35,10
+    CONTROL         "Intel Hex",IDC_INTEL_HEX,"Button",BS_AUTORADIOBUTTON,7,
+                    36,44,10
+END
+
+IDD_BUFFERSIZEDLG DIALOGEX 0, 0, 119, 96
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "New Buffer"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,73,50,16
+    PUSHBUTTON      "Cancel",IDCANCEL,62,73,50,16
+    CONTROL         "",IDC_BUFFER_SIZE_SLIDER,"msctls_trackbar32",
+                    TBS_AUTOTICKS | WS_TABSTOP,23,25,68,22
+    LTEXT           "Buffer size:",IDC_STATIC,7,9,50,8
+    EDITTEXT        IDC_BUFFER_SIZE,62,7,50,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Fill with:",IDC_STATIC,7,55,50,8
+    EDITTEXT        IDC_FILL_WITH,62,53,50,14,ES_UPPERCASE | ES_AUTOHSCROLL
+    LTEXT           "128",IDC_STATIC,7,28,12,8
+    LTEXT           "128M",IDC_STATIC,95,28,17,8
+END
+
+IDD_DEVICEBAR DIALOGEX 0, 0, 330, 16
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Button1",IDC_BUTTON1,0,2,50,14,BS_BITMAP
+    CONTROL         "Check1",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,81,2,39,10
+    COMBOBOX        IDC_COMBO1,159,2,48,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO2,242,2,48,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,125,0,20,20
+END
+
+IDD_FILLDLG DIALOGEX 0, 0, 141, 63
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Fill buffer"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,84,7,50,16
+    PUSHBUTTON      "Cancel",IDCANCEL,84,27,50,16
+    LTEXT           "From:",IDC_STATIC,7,9,18,8
+    LTEXT           "To:",IDC_STATIC,7,26,11,8
+    LTEXT           "With:",IDC_STATIC,7,44,16,8
+    EDITTEXT        IDC_FILL_FROM,35,7,40,14,ES_UPPERCASE | ES_AUTOHSCROLL
+    EDITTEXT        IDC_FILL_TO,35,24,40,14,ES_UPPERCASE | ES_AUTOHSCROLL
+    EDITTEXT        IDC_FILL_WITH,35,42,40,14,ES_UPPERCASE | ES_AUTOHSCROLL
+END
+
+IDD_I2CEEPROMCONFIG DIALOGEX 0, 0, 202, 86
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "TWI Configuration"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,44,63,50,16
+    PUSHBUTTON      "Cancel",IDCANCEL,145,63,50,16
+    EDITTEXT        IDC_BASE_ADDR,96,7,99,14,ES_AUTOHSCROLL
+    LTEXT           "Address:",IDC_STATIC,7,9,81,8
+    LTEXT           "TWI bus frequency:",IDC_STATIC,7,27,82,8
+    COMBOBOX        IDC_FREQ,95,25,100,71,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",IDC_SYNC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,95,47,
+                    10,8
+    LTEXT           "Clock Synchronization:",IDC_STATIC,7,46,79,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,3
+ PRODUCTVERSION 1,0,0,3
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "Comments", "TWI Bootloader Programmer"
+            VALUE "CompanyName", "OpenServo.com"
+            VALUE "FileDescription", "TWI Bootloader Programmer"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "TWIBootProg.exe"
+            VALUE "LegalCopyright", "(c) 2004 Dimax ( http://www.xdimax.com ).  All rights reserved."
+            VALUE "OriginalFilename", "TWIBootProg.exe"
+            VALUE "ProductName", "TWI Bootloader Programmer"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 168
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 94
+    END
+
+    IDD_OPENTYPEDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 117
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 72
+    END
+
+    IDD_BUFFERSIZEDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 112
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 89
+    END
+
+    IDD_DEVICEBAR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 326
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 14
+    END
+
+    IDD_FILLDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 134
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 56
+    END
+
+    IDD_I2CEEPROMCONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 195
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\TWIBootProg.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "TWIBootProg"
+    IDR_I2cProgTYPE         "\nI2cProg\nI2cProg\n\n\nI2cProg.Document\nI2cProg.Document"
+    IDS_SAVE_FAILED_WITH_ERRNO "Failed to save document.\nError:%d"
+    IDS_STATUS_PROGRAMMING  "Programming:"
+    IDS_STATUS_VERIFYING    "Verifying:"
+    IDS_STATUS_READING      "Reading:"
+    IDS_STATUS_ERASING      "Erasing:"
+    IDS_STATUS_PROGRAM_SUCCEED "Programming successfully finished."
+    IDS_STATUS_VERIFY_SUCCEED "Verifying successfully finished."
+    IDS_STATUS_ERASE_SUCCEED "Erasing successfully finished."
+    IDS_STATUS_READ_SUCCEED "Reading successfully finished."
+    IDS_INVALID_FILL_VAL    "Fill value can be in range from 0 to FF."
+    IDS_OPEN_FAILED_WITH_ERRNO "Failed to open document.\nError:%d"
+    IDS_INVALID_HEX_FORMAT  "Invalid hex file format."
+    IDS_OPEN_FAILED         "Failed to open document."
+    IDS_STATUS_FAILED_OPEN_U2C "Failed to open U2C-12 I2CBridge device."
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "TWIBootProg"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+    ID_VIEW_AUTOARRANGE     "Arrange icons on a grid."
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_SMALLICON       "Display items by using small icons.\nSmall Icons"
+    ID_VIEW_LARGEICON       "Display items by using large icons.\nLarge Icons"
+    ID_VIEW_LIST            "Displays items in a list.\nList"
+    ID_VIEW_DETAILS         "Displays detailed information about each item in the window.\nDetails"
+    ID_VIEW_LINEUP          "Arranges icons in a grid."
+    ID_VIEW_BYNAME          "Sorts the icons alphabetically."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NIBBLE_MODE          "View as nibbles\nNibble Mode"
+    ID_BYTE_MODE            "View as bytes\nByte Mode"
+    ID_OCTAL_MODE           "View in 8 bit octal format\nOctal Mode"
+    ID_DECIMAL_MODE         "View in decimal format\nDecimal Mode"
+    ID_WORDB0B1_MODE        "View in big-endian word mode (Byte 0 : Byte 1)\nBig-Endian Word Mode (Byte 0 : Byte 1)"
+    ID_WORDB1B0_MODE        "View in little-endian word mode (Byte 1 : Byte 0)\nLittle-Endian Word Mode (Byte 1 : Byte 0)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SAVE_MODIFIED       "The data in the buffer has been modified! Do you want to save it?"
+    ID_DEVICE_PROGRAM       "Program device\nProgram"
+    ID_DEVICE_READ          "Read device\nRead"
+    ID_DEVICE_VERIFY        "Compare device memory with current buffer\nVerify"
+    ID_DEVICE_ERASE         "Erase device\nErase"
+    ID_FILE_FILL            "Fill the buffer.\nFill"
+    ID_EDIT_FILL            "Fill the buffer.\nFill"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATUS_CHIP_NOT_FOUND 
+                            "Chip to program is absent or doesn't correspond to selected."
+    IDS_ERR_CHIP_NOT_FOUND  "Chip to program is absent or doesn't correspond to selected. Please check that U2C-12 board is connected to chip for programming and it corresponds to selected one."
+    IDS_ERR_OPERATION_FAILED "Operation failed."
+    IDS_STATUS_OPERATION_FAILED "Operation failed."
+    IDS_ERR_U2C_BUSY        "The U2C-12 device is perfoming another operation. Please wait while another operation will be finished and try again."
+    IDS_STATUS_PROGRAM_FAILED "Programming failed."
+    IDS_ERR_PROGRAM_FAILED  "Programming failed."
+    IDS_STATUS_VERIFY_FAILED "Verifying failed."
+    IDS_ERR_VERIFY_FAILED   "Verifying failed."
+    IDS_STATUS_ERASE_FAILED "Erasing failed."
+    IDS_ERR_ERASE_FAILED    "Erasing failed."
+    IDS_STATUS_READ_FAILED  "Reading failed."
+    IDS_ERR_READ_FAILED     "Reading failed."
+    IDS_LARGE_BUFFER        "Buffer used is larger than chip can hold and will be truncated."
+    IDS_STATUS_OPERATION_CANCELLED "Operation cancelled."
+    IDS_STATUS_OUTDATED_DRIVER_VER "Driver version is out of date."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_DEVICE_CONFIG        "Configure device\nConfigure"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\TWIBootProg.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
