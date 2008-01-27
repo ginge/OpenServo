@@ -504,7 +504,7 @@ REGINDEXITEM ri[]=
                      rc=OSI_SetSeek(posid,850);
                   } else
                   {
-                     if(l_regs.m_Position>=850-pid.m_Deadband) //
+                     if(l_regs.m_Position>=850-pid.m_Deadband)
                      {
                         rc=OSI_SetSeek(posid,150);
                      }
