@@ -337,6 +337,8 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_bank[]=
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x2C),
    REGITEM(BANKSELECT,               1, 0xFF, 0x2F),
 
+   REGITEM(BACKEMF,                  2, 0x00, 0x41),
+
    REGITEM(TWI_ADDRESS,              1, 0x01, 0x40),
    REGITEM(PID_DEADBAND,             1, 0x01, 0x41),
    REGITEM(PID_PGAIN,                2, 0x01, 0x42),
@@ -417,6 +419,8 @@ static const OPENSERVOADDRESSMAP l_basemap_21_11[]=
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x16),
    REGITEM(BANKSELECT,               1, 0xFF, 0xFF), /* No "Bank select" in OpenServo 2.1 and earlier */
 
+   REGITEM(BACKEMF,                  2, 0xFF, 0xFF),
+
    REGITEM(TWI_ADDRESS,              1, 0xFF, 0x20),
    REGITEM(PID_DEADBAND,             1, 0xFF, 0x21),
    REGITEM(PID_PGAIN,                2, 0xFF, 0x22),
@@ -485,6 +489,8 @@ static const OPENSERVOADDRESSMAP l_basemap_21_bank[]=
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x16),
    REGITEM(BANKSELECT,               1, 0xFF, 0x2F),
 
+   REGITEM(BACKEMF,                  2, 0x00, 0x41),
+
    REGITEM(TWI_ADDRESS,              1, 0x01, 0x20),
    REGITEM(PID_DEADBAND,             1, 0x01, 0x21),
    REGITEM(PID_PGAIN,                2, 0x01, 0x22),
@@ -551,8 +557,10 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_11[]=
    REGITEM(CURVE_IN_VELOCITY,        2, 0xFF, 0x1C),
    REGITEM(CURVE_OUT_VELOCITY,       2, 0xFF, 0x1E),
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x16),
-
    REGITEM(BANKSELECT,               1, 0xFF, 0xFF), /* No "Bank select" in OpenServo 2.1 and earlier */
+
+   REGITEM(BACKEMF,                  2, 0xFF, 0xFF),
+
    REGITEM(TWI_ADDRESS,              1, 0xFF, 0x20),
    REGITEM(PID_DEADBAND,             1, 0xFF, 0x21),
    REGITEM(PID_PGAIN,                2, 0xFF, 0x22),
@@ -1372,7 +1380,7 @@ static byte_t STR_OPENSERVO[]={ 0x4F, 0x70, 0x65, 0x6E, 0x53, 0x65, 0x72, 0x76 /
  * Older firmware: but is it a OpenServo 2.1 or OSxV2 board?
  */
                   case 0x01:
-                     posid->m_nDType=OSI_DTYPE_21_11; // TODO
+                     posid->m_nDType=OSI_DTYPE_V3_11; // TODO
                      break;
 
 /*

@@ -94,12 +94,13 @@ REGINDEXITEM l_GenRegIndex[]=
    ITEM(SEEKVELOCITY,      TRUE,  l_regs.m_SeekVelocity,    "%d",     "SeekVel=%-10s\n" ),
    ITEM(BATTVOLTAGE,      FALSE,  l_regs.m_BattVoltage,     "%d",     "Batt. Volts.=%-5s" ),
    ITEM(CURRENT,          FALSE,  l_regs.m_Current,         "%d",     "Power=%-12s" ),
-   ITEM(TEMPERATURE,      FALSE,  l_regs.m_Temperature,     "%d",     "Temperature=%-6s\n" ),
+   ITEM(TEMPERATURE,      FALSE,  l_regs.m_Temperature,     "%d",     "Temperature=%-6s" ),
+   ITEM(BACKEMF,          FALSE,  l_regs.m_BackEMF,         "%d",     "Back EMF=%-9s\n" ),
    ITEM(PID_DEADBAND,     FALSE,  l_regs.m_PID.m_Deadband,  "%d",     "Deadband=%-9s" ),
    ITEM(PID_PGAIN,        FALSE,  l_regs.m_PID.m_PGain,     "%d",     "P-Gain=%-11s" ),
    ITEM(PID_IGAIN,        FALSE,  l_regs.m_PID.m_IGain,     "%d",     "I-Gain=%-11s" ),
    ITEM(PID_DGAIN,        FALSE,  l_regs.m_PID.m_DGain,     "%d",     "D-Gain=%-11s\n" ),
-   ITEM(PWM_FREQ_DIVIDER, FALSE,  l_regs.m_PWM_FreqDivider, "%d",     "PWM freq dev=%-5s" ),
+   ITEM(PWM_FREQ_DIVIDER, FALSE,  l_regs.m_PWM_FreqDivider, "%d",     "PWM freq div=%-5s" ),
    ITEM(PWM_CW,           FALSE,  l_regs.m_PWM_CW,          "%d",     "PWM CW=%-11s" ),
    ITEM(PWM_CCW,          FALSE,  l_regs.m_PWM_CCW,         "%d",     "PWM CCW=%-10s\n" ),
    ITEM(MINSEEK,          FALSE,  l_regs.m_MinSeek,         "%d",     "Min Seek=%-9s" ),
@@ -401,12 +402,12 @@ int_t dump_OpenServo(int_t nServoID, REGINDEXITEM *pIndex, int_t nIndex)
             char buffer[32];
             if(pIndex[i].m_rc==OSI_ERR_NOREGISTER)
             {
-               strcpy(buffer,"NOREG");
+               strcpy(buffer,"N/A");
             } else
             {
                if(pIndex[i].m_rc!=OSI_SUCCESS)
                {
-                  strcpy(buffer,"ERROR");
+                  strcpy(buffer,"ERR");
                } else
                {
                   int_t value;
@@ -489,6 +490,7 @@ REGINDEXITEM ri[]=
    ITEM(BATTVOLTAGE,      FALSE,  l_regs.m_BattVoltage,     "%d",      " V=%3s" ),
    ITEM(CURRENT,          FALSE,  l_regs.m_Current,         "%d",      " I=%4s" ),
    ITEM(TEMPERATURE,      FALSE,  l_regs.m_Temperature,     "%d",      " T=%3s" ),
+   ITEM(BACKEMF,          FALSE,  l_regs.m_BackEMF,         "%d",      " BEMF=%3s" ),
    ITEM(PWM_CW,           FALSE,  l_regs.m_PWM_CW,          "%d",      " PWM=%s" ),
    ITEM(PWM_CCW,          FALSE,  l_regs.m_PWM_CCW,         "%d",      ", %s  \r" ),
 };
@@ -497,12 +499,12 @@ REGINDEXITEM ri[]=
                rc=dump_OpenServo(nServoID,ri,sizeof(ri)/sizeof(ri[0]));
                if(rc==OSI_SUCCESS)
                {
-                  if(l_regs.m_Position<151)
+                  if(l_regs.m_Position<=150+pid.m_Deadband)
                   {
                      rc=OSI_SetSeek(posid,850);
                   } else
                   {
-                     if(l_regs.m_Position>849)
+                     if(l_regs.m_Position>=850-pid.m_Deadband)
                      {
                         rc=OSI_SetSeek(posid,150);
                      }

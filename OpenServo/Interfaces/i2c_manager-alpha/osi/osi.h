@@ -124,7 +124,7 @@ typedef enum
    OSI_REGID_BANKSELECT,            // Bank Selection register
 
 //   OSI_REGID_ALERT_STATUS,          // Alert status
-//   OSI_REGID_BACKEMF,               // Last measured back-EMF
+   OSI_REGID_BACKEMF,               // Last measured back-EMF
 
    OSI_REGID_TWI_ADDRESS,           // TWI address of servo
    OSI_REGID_PID_DEADBAND,          // Programmable PID deadband value
@@ -383,6 +383,7 @@ typedef struct OPENSERVOREGSET
    int16_t m_Curve_InVelocity;  // Curve in velocity
    int16_t m_Curve_OutVelocity; // Curve out velocity
    byte_t m_BankSelect;         // Currently selected register bank
+   int16_t m_BackEMF;           // Last measured back EMF
    byte_t m_I2CAddress;         // TWI (I2C) address of servo
    OPENSERVOPIDDATA m_PID;
    uint16_t m_PWM_FreqDivider;  // PWM frequency divider
@@ -651,6 +652,7 @@ OSIAIDEF_Get_FUNC(TIMER,Timer,uint16_t)
 OSIAIDEF_Get_FUNC(POSITION,Position,uint16_t)
 OSIAIDEF_Get_FUNC(VELOCITY,Velocity,int16_t)
 OSIAIDEF_Get_FUNC(CURRENT,Current,uint16_t)
+OSIAIDEF_Get_FUNC(BACKEMF,BackEMF,uint16_t)
 OSIAIDEF_Get_FUNC(SEEK,Seek,uint16_t)
 OSIAIDEF_Set_FUNC(SEEK,Seek,uint16_t)
 OSIAIDEF_Get_FUNC(SEEKVELOCITY,SeekVelocity,uint16_t)
