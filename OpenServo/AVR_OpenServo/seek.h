@@ -27,7 +27,7 @@
 #ifndef _OS_SEEK_H_
 #define _OS_SEEK_H_ 1
 
-void seek_init(uint16_t init_position);
-void seek_update(void);
+// This file is obsolete.  The curve motion control algorithms in motion.c
+// have replaced the seek functionality.
 
 #endif // _OS_SEEK_H_

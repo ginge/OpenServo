@@ -1,418 +1,790 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
-   All rights reserved.
+    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
+    Permission is hereby granted, free of charge, to any person 
+    obtaining a copy of this software and associated documentation 
+    files (the "Software"), to deal in the Software without 
+    restriction, including without limitation the rights to use, copy, 
+    modify, merge, publish, distribute, sublicense, and/or sell copies 
+    of the Software, and to permit persons to whom the Software is 
+    furnished to do so, subject to the following conditions:
 
-   * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+    The above copyright notice and this permission notice shall be 
+    included in all copies or substantial portions of the Software.
 
-   * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+    DEALINGS IN THE SOFTWARE.
 
-   * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
+    $Id$
 */
-
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
 
 #include <inttypes.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <avr/signal.h>
 
-#include "twi.h"
+#include "openservo.h"
+#include "config.h"
 #include "registers.h"
+#include "twi.h"
 
 //////////////////////////////////////////////////////////////////
 ///////////////// Driver Buffer Definitions //////////////////////
 //////////////////////////////////////////////////////////////////
 // 1,2,4,8,16,32,64,128 or 256 bytes are allowed buffer sizes
 
-#define TWI_RX_BUFFER_SIZE (16)
+#define TWI_RX_BUFFER_SIZE (4)
 #define TWI_RX_BUFFER_MASK (TWI_RX_BUFFER_SIZE - 1)
 
 #if (TWI_RX_BUFFER_SIZE & TWI_RX_BUFFER_MASK)
         #error TWI RX buffer size is not a power of 2
 #endif
 
+#define TWI_CHK_WRITE_BUFFER_SIZE (16)
+#define TWI_CHK_WRITE_BUFFER_MASK (TWI_CHK_WRITE_BUFFER_SIZE - 1)
+
+#if (TWI_CHK_WRITE_BUFFER_SIZE & TWI_CHK_WRITE_BUFFER_MASK)
+        #error TWI CHK WRITE buffer size is not a power of 2
+#endif
+
 //////////////////////////////////////////////////////////////////
 
-#define TWI_SLAVE_CHECK_ADDRESS                (0x00)
-#define TWI_SLAVE_SEND_DATA                    (0x01)
-#define TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA (0x02)
-#define TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA   (0x03)
-#define TWI_SLAVE_REQUEST_DATA                 (0x04)
-#define TWI_SLAVE_GET_DATA_AND_SEND_ACK        (0x05)
+// TWI acknowledgment values.
+#define TWI_ACK                             (0x00)
+#define TWI_NAK                             (0x01)
+
+// Data state values.
+#define TWI_DATA_STATE_COMMAND              (0x00)
+#define TWI_DATA_STATE_DATA                 (0x01)
+#if TWI_CHECKED_ENABLED
+#define TWI_DATA_STATE_CHECKED_COUNTING     (0x02)
+#define TWI_DATA_STATE_CHECKED_ADDRESS      (0x03)
+#define TWI_DATA_STATE_CHECKED_DATA         (0x04)
+#endif
 
 // Device dependant defines
-#if defined(__AVR_ATtiny25__) | defined(__AVR_ATtiny45__) | defined(__AVR_ATtiny85__)
-    #define DDRTWI              DDRB
-	#define DDSDA				DDB0
-	#define DDSCL				DDB2
-    #define PORTTWI             PORTB
-    #define PORTSDA        		PB0
-    #define PORTSCL        		PB2
-    #define PINTWI              PINB
-    #define PINSDA         		PINB0
-    #define PINSCL         		PINB2
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+
+// Overflow state values.
+#define TWI_OVERFLOW_STATE_NONE             (0x00)
+#define TWI_OVERFLOW_STATE_ACK_PR_RX        (0x01)
+#define TWI_OVERFLOW_STATE_DATA_RX          (0x02)
+#define TWI_OVERFLOW_STATE_ACK_PR_TX        (0x03)
+#define TWI_OVERFLOW_STATE_PR_ACK_TX        (0x04)
+#define TWI_OVERFLOW_STATE_DATA_TX          (0x05)
+
+#define DDR_USI                             DDRB
+#define DD_SDA                              DDB0
+#define DD_SCL                              DDB2
+#define PORT_USI                            PORTB
+#define P_SDA                               PB0
+#define P_SCL                               PB2
+#define PIN_USI                             PINB
+#define PIN_SDA                             PINB0
+#define PIN_SCL                             PINB2
+
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+static uint8_t twi_slave_address;
+#endif
+
+static volatile uint8_t twi_address;
+static volatile uint8_t twi_data_state;
+static volatile uint8_t twi_overflow_state;
+
+static volatile uint8_t twi_rxhead;
+static volatile uint8_t twi_rxtail;
+static uint8_t twi_rxbuf[TWI_RX_BUFFER_SIZE];
+
+#if TWI_CHECKED_ENABLED
+static uint8_t twi_chk_count;            // current byte in transaction
+static uint8_t twi_chk_count_target;     // How many bytes are we reading/writing
+static uint8_t twi_chk_sum;              // Accumulator for checksum
+static uint8_t twi_chk_write_buffer[TWI_CHK_WRITE_BUFFER_SIZE];
+#endif
+
+static uint8_t twi_registers_read(uint8_t address)
+// Read the byte from the specified register.  This function handles the
+// reading of special registers such as unused registers, redirect and 
+// redirected registers.
+{
+    // Mask the most significant bit of the address.
+    address &= 0x7F;
+
+    // Are we reading a normal register?
+    if (address <= MAX_WRITE_PROTECT_REGISTER)
+    {
+        // Yes. Complete the read.
+        return registers_read_byte(address);
+    }
+
+    // Are we reading an unused register.
+    if (address <= MAX_UNUSED_REGISTER)
+    {
+        // Block the read.
+        return 0;
+    }
+
+    // Are we reading a redirect register.
+    if (address <= MAX_REDIRECT_REGISTER)
+    {
+        // Yes. Complete the read.
+        return registers_read_byte(address - (MIN_REDIRECT_REGISTER - MIN_UNUSED_REGISTER));
+    }
+
+    // Are we reading a redirected register?
+    if (address <= MAX_REDIRECTED_REGISTER)
+    {
+        // Adjust address to reference appropriate redirect register.
+        address = MIN_REDIRECT_REGISTER  + (address - MIN_REDIRECTED_REGISTER);
+
+        // Get the address from the redirect register.
+        address = registers_read_byte(address - (MIN_REDIRECT_REGISTER - MIN_UNUSED_REGISTER));
+
+        // Prevent infinite recursion.
+        if (address <= MAX_REDIRECT_REGISTER)
+        {
+            // Recursively read redirected address.
+            return twi_registers_read(address);
+        }
+    }
+
+    // All other reads are blocked.
+    return 0;
+}
+
+
+static void twi_registers_write(uint8_t address, uint8_t data)
+// Write non-write protected registers.  This function handles the
+// writing of special registers such as unused registers, redirect and 
+// redirected registers.
+{
+    // Mask the most significant bit of the address.
+    address &= 0x7F;
+
+    // Are we writing a read only register?
+    if (address <= MAX_READ_ONLY_REGISTER)
+    {
+        // Yes. Block the write.
+        return;
+    }
+
+    // Are we writing a read/write register?
+    if (address <= MAX_READ_WRITE_REGISTER)
+    {
+        // Yes. Complete the write.
+        registers_write_byte(address, data);
+
+        return;
+    }
+
+    // Is writing to the upper registers disabled?
+    if (registers_is_write_disabled())
+    {
+        // Yes. Block the write.
+        return;
+    }
+
+    // Are we writing a write protected register?
+    if (address <= MAX_WRITE_PROTECT_REGISTER)
+    {
+        // Yes. Complete the write if writes are enabled.
+        registers_write_byte(address, data);
+
+        return;
+    }
+
+    // Are we writing an unused register.
+    if (address <= MAX_UNUSED_REGISTER)
+    {
+        // Yes. Block the write.
+        return;
+    }
+
+
+    // Are we writing a redirect register.
+    if (address <= MAX_REDIRECT_REGISTER)
+    {
+        // Yes. Complete the write.
+        registers_write_byte(address - (MIN_REDIRECT_REGISTER - MIN_UNUSED_REGISTER), data);
+
+        return;
+    }
+
+    // Are we writing a redirected register?
+    if (address <= MAX_REDIRECTED_REGISTER)
+    {
+        // Adjust address to reference appropriate redirect register.
+        address = MIN_REDIRECT_REGISTER  + (address - MIN_REDIRECTED_REGISTER);
+
+        // Get the address from the redirect register.
+        address = registers_read_byte(address - (MIN_REDIRECTED_REGISTER - MIN_UNUSED_REGISTER));
+
+        // Prevent infinite recursion.
+        if (address <= MAX_REDIRECT_REGISTER)
+        {
+            // Recursively write redirected address.
+            twi_registers_write(address, data);
+
+            return;
+        }
+    }
+
+    // All other writes are blocked.
+    return;
+}
+
+
+#if TWI_CHECKED_ENABLED
+static void twi_write_buffer(void)
+// Write the recieve buffer to memory.
+{
+    // Loop over the data within the write buffer.
+    for (twi_chk_count = 0; twi_chk_count < twi_chk_count_target; twi_chk_count++)
+    {
+        // Write the data to the addressed register.
+        twi_registers_write(twi_address, twi_chk_write_buffer[twi_chk_count & TWI_CHK_WRITE_BUFFER_MASK]);
+
+        // Increment to the next address.
+        ++twi_address;
+    }
+}
 #endif
 
 
-// Read registers.  This function is meant to safely read 
-// the registers for the TWI master.
-inline static uint8_t twi_registers_read(uint8_t address)
+static uint8_t twi_read_data()
+// Handle checked/non-checked read of data.
 {
-	// Prevent overflow by wrapping.
-	address &= 0x7F;
+    // By default read the data to be returned.
+    uint8_t data = twi_registers_read(twi_address);
 
-	// Avoid reading unimplemented registers.
-	if (address > 0x3F) return 0;
+#if TWI_CHECKED_ENABLED
+    // Are we handling checked data?
+    if (twi_data_state == TWI_DATA_STATE_CHECKED_DATA)
+    {
+        // Have we reached the end of the read?
+        if (twi_chk_count < twi_chk_count_target)
+        {
+            // Add the data to the check sum.
+            twi_chk_sum += data;
 
-	// Read the register.
-	return registers_read_byte(address);
+            // Increment the check sum data count.
+            ++twi_chk_count;
+
+            // Increment the address.
+            ++twi_address;
+        }
+        else
+        {
+            // Replace the data with the checksum.
+            data = twi_chk_sum;
+        }
+    }
+    else
+    {
+        // Increment the address.
+        ++twi_address;
+    }
+#else
+    // Increment the address.
+    ++twi_address;
+#endif
+
+    return data;
 }
 
 
-// Write non-write protected registers.  This function
-// is meant to safely write registers for the TWI master.
-inline static void twi_registers_write(uint8_t address, uint8_t data)
+static uint8_t twi_write_data(uint8_t data)
+// Handle checked/non-checked write of data or command.
 {
-	// Prevent overflow by wrapping.
-	address &= 0x7F;
+    // By default, return ACK from write.
+    uint8_t ack = TWI_ACK;
 
-	// Avoid writing unimplemented registers.
-	if (address > 0x3F) return;
+    // Handle the write depending on the write state.
+    switch (twi_data_state)
+    {
+        case TWI_DATA_STATE_COMMAND:
 
-	// Don't write to read/only registers.
-	if (address <= MAX_RO_REGISTER) return;
+            // This is a byte.
+            if (data < TWI_CMD_RESET)
+            {
+                // Capture the address.
+                twi_address = data;
 
-	// Don't write to safe read/write registers unless enabled.
-	if (!registers_read_byte(WRITE_ENABLE) && (address > MAX_RW_REGISTER)) return;
+                // Update the write state.
+                twi_data_state = TWI_DATA_STATE_DATA;
+            }
+#if TWI_CHECKED_ENABLED
+            else if (data == TWI_CMD_CHECKED_TXN)
+            {
+                // Update the write state.
+                twi_data_state = TWI_DATA_STATE_CHECKED_COUNTING;
+            }
+#endif
+            else
+            {
+                // Handle the command asynchronously.
+                twi_rxhead = (twi_rxhead + 1) & TWI_RX_BUFFER_MASK;
+                twi_rxbuf[twi_rxhead] = data;
+            }
 
-	// Write the data to the address address.
-	registers_write_byte(address, data);
+            break;
+
+        case TWI_DATA_STATE_DATA:
+
+            // Write the data to the addressed register.
+            twi_registers_write(twi_address, data);
+
+            // Increment to the next address.
+            ++twi_address;
+
+            break;
+
+#if TWI_CHECKED_ENABLED
+        case TWI_DATA_STATE_CHECKED_COUNTING:
+
+            // Read in the count (Make sure it's less than the max count) 
+			// and start the checksum
+            twi_chk_sum = twi_chk_count_target = data & TWI_CHK_WRITE_BUFFER_MASK;
+
+            // Clear the checksum and count.
+            twi_chk_count = 0;
+
+            // Update the write state.
+            twi_data_state = TWI_DATA_STATE_CHECKED_ADDRESS;
+
+            break;
+
+        case TWI_DATA_STATE_CHECKED_ADDRESS:
+
+            // Capture the address and include it in the checksum
+            twi_chk_sum += twi_address = data;
+
+            // Update the write state.
+            twi_data_state = TWI_DATA_STATE_CHECKED_DATA;
+
+            break;
+
+        case TWI_DATA_STATE_CHECKED_DATA:
+
+            // Have we reached the end of the write?
+            if (twi_chk_count < twi_chk_count_target)
+            {
+                // No. Write the data to the checksum buffer
+                twi_chk_write_buffer[twi_chk_count & TWI_CHK_WRITE_BUFFER_MASK] = data;
+
+                // Add the data to the checksum.
+                twi_chk_sum += data;
+
+                // Increment the check sum data count.
+                ++twi_chk_count;
+            }
+            else
+            {
+                // Verify the checksum
+                if (data == twi_chk_sum)
+                {
+                    // Write the checksum buffer to addressed registers.
+                    twi_write_buffer();
+                }
+                else
+                {
+                    // Checksum failed so return NACK.
+                    ack = TWI_NAK;
+                }
+            }
+
+            break;
+#endif
+    }
+
+    return ack;
 }
 
-
-// Locals.
-static uint8_t twi_slave_address;
-static volatile uint8_t twi_overflow_state;
-static volatile uint8_t twi_command_mode;
-static volatile uint8_t twi_address;
-
-static uint8_t twi_rxbuf[TWI_RX_BUFFER_SIZE];
-static volatile uint8_t twi_rxhead;
-static volatile uint8_t twi_rxtail;
 
 void
 twi_slave_init(uint8_t slave_address)
 // Initialise USI for TWI slave mode.
 {
-	// Flush the buffers.
-	twi_rxtail = 0;
-	twi_rxhead = 0;
+    // Flush the buffers.
+    twi_rxtail = 0;
+    twi_rxhead = 0;
 
-	// Set the slave address.
-	twi_slave_address = slave_address;
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+    // Set the slave address.
+    twi_slave_address = slave_address & 0x7f;
 
-	// Set the SCL AND SDA to default to high.
-	PORTTWI |= (1<<PORTSCL) | (1<<PORTSDA);
+    // Set the interrupt enable, wire mode and clock settings.  Note: At this
+    // time the wire mode must not be set to hold the SCL line low when the 
+    // counter overflows. Otherwise, this TWI slave will interfere with other
+    // TWI slaves.
+    USICR = (0<<USISIE) | (0<<USIOIE) |                 // Disable start condition and overflow interrupt.
+            (1<<USIWM1) | (0<<USIWM0) |                 // Set USI to two-wire mode without clock stretching.
+            (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
+            (0<<USITC);                                 // No toggle of clock pin.
 
-	// Set SCL as output, SDA as input.
-	DDRTWI |= (1<<DDSCL);
-	DDRTWI &= ~(1<<DDSDA);
+    // Clear the interrupt flags and reset the counter.
+    USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) |        // Clear interrupt flags.
+            (0x0<<USICNT0);                                 // USI to sample 8 bits or 16 edge toggles.
 
-	// Set the interrupt enable, wire mode and clock settings.
-	USICR = (1<<USISIE) | (0<<USIOIE) |					// Enable Start Condition interrupt. Disable overflow.
-			(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-			(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-			(0<<USITC);									// No toggle of clock pin.
+    // Configure SDA.
+    DDR_USI &= ~(1<<DD_SDA);
+    PORT_USI &= ~(1<<P_SDA);
 
-	// Clear the interrupt flags and reset the counter.
-	USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 		// Clear interrupt flags.
-			(0x0<<USICNT0);									// USI to sample 8 bits or 16 edge toggles.
+    // Configure SCL.
+    DDR_USI |= (1<<DD_SCL);
+    PORT_USI |= (1<<P_SCL);
+
+    // Start condition interrupt enable.
+    USICR |= (1<<USISIE);
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
+    // Set own TWI slave address.
+    TWAR = slave_address << 1;
+
+    // Default content = SDA released.
+    TWDR = 0xFF;
+
+    // Initialize the TWI interrupt to wait for a new event.
+    TWCR = (1<<TWEN) |                                  // Keep the TWI interface enabled.
+           (1<<TWIE) |                                  // Keep the TWI interrupt enabled.
+           (0<<TWSTA) |                                 // Don't generate start condition.
+           (0<<TWSTO) |                                 // Don't generate stop condition.
+           (1<<TWINT) |                                 // Clear the TWI interrupt.
+           (1<<TWEA) |                                  // Acknowledge the data.
+           (0<<TWWC);                                   //
+#endif // __AVR_ATmega8__ || __AVR_ATmega88__ || __AVR_ATmega168__
 }
 
 
 uint8_t twi_receive_byte(void)
 // Returns a byte from the receive buffer. Waits if buffer is empty.
 {
-	// Wait for data in the buffer.
-	while (twi_rxhead == twi_rxtail);
+    // Wait for data in the buffer.
+    while (twi_rxhead == twi_rxtail);
 
-	// Calculate buffer index.
-	twi_rxtail = (twi_rxtail + 1 ) & TWI_RX_BUFFER_MASK;
+    // Calculate buffer index.
+    twi_rxtail = (twi_rxtail + 1 ) & TWI_RX_BUFFER_MASK;
 
-	// Return data from the buffer.
-	return twi_rxbuf[twi_rxtail];
+    // Return data from the buffer.
+    return twi_rxbuf[twi_rxtail];
 }
 
 
 uint8_t twi_data_in_receive_buffer(void)
 // Check if there is data in the receive buffer.
 {
-	// Return 0 (FALSE) if the receive buffer is empty.
-	return (twi_rxhead != twi_rxtail);
+    // Return 0 (FALSE) if the receive buffer is empty.
+    return (twi_rxhead != twi_rxtail);
 }
 
 
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+
 SIGNAL(SIG_USI_START)
-// Detects the USI_TWI Start Condition and intialises the USI
-// for reception of the "TWI Address" packet.
+// Handle the TWI start condition.  This is called when the TWI master initiates
+// communication with a TWI slave by asserting the TWI start condition.
 {
-	// Wait until the "Start Condition" is complete when SCL goes low. If we fail to wait 
-	// for SCL to go low we may miscount the number of clocks pulses for the data because 
-	// the transition of SCL could be mistaken as one of the data clock pulses.
-	while ((PINTWI & (1<<PINSCL)) & ~(PINTWI & (1<<PINSDA)));
+    // Wait until the "Start Condition" is complete when SCL goes low. If we fail to wait
+    // for SCL to go low we may miscount the number of clocks pulses for the data because
+    // the transition of SCL could be mistaken as one of the data clock pulses.
+    while ((PIN_USI & (1<<PIN_SCL)));
 
-	// Make sure SDA didn't return to high indicating a stop condition.
-	if (~(PINTWI & (1<<PINSDA)))
-	{
-		// Update our state.
-		twi_overflow_state = TWI_SLAVE_CHECK_ADDRESS;
+    // Reset the overflow state.
+    twi_overflow_state = TWI_OVERFLOW_STATE_NONE;
 
-		// Set SDA as input
-		DDRTWI &= ~(1<<PORTSDA);
+    // Clear the interrupt flags and reset the counter.
+    USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) |    // Clear interrupt flags.
+            (0x00<<USICNT0);                            // USI to sample 8 bits or 16 edge toggles.
 
-		// Update the interrupt enable, wire mode and clock settings.
-		USICR = (1<<USISIE) | (1<<USIOIE) |					// Enable Overflow and Start Condition Interrupt.
-				(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-				(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-				(0<<USITC);									// No toggle of clock pin.
-	}
-
-	// Clear the interrupt flags and reset the counter.
-	USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 		// Clear interrupt flags.
-			(0x00<<USICNT0);								// USI to sample 8 bits or 16 edge toggles.
+    // Update the interrupt enable, wire mode and clock settings.
+    USICR = (1<<USISIE) | (1<<USIOIE) |                 // Enable Overflow and Start Condition Interrupt.
+            (1<<USIWM1) | (1<<USIWM0) |                 // Maintain USI in two-wire mode with clock stretching.
+            (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
+            (0<<USITC);                                 // No toggle of clock pin.
 }
 
 
 SIGNAL(SIG_USI_OVERFLOW)
-// Handles all the comunication. Disabled only when waiting for new Start Condition.
+// Handle the TWI overflow condition.  This is called when the TWI 4-bit counter
+// overflows indicating the TWI master has clocked in/out a databyte or a single
+// ack/nack byte following a databyte transfer.
 {
-	switch (twi_overflow_state)
-	{
-		// ---------- Address mode ----------
-		// Check address and send ACK (and next TWI_SLAVE_SEND_DATA) if OK, else reset USI.
-		case TWI_SLAVE_CHECK_ADDRESS:
+    // Buffer the USI data.
+    uint8_t usi_data = USIDR;
 
-			// USIDR now contains the TWI address in the upper seven bits 
-			// and the data direction in the lowest bit.  We check here for
-			// an address we are insterested in.
-			if ((USIDR>>1) == (twi_slave_address & 0x7f))
-			{
-				// Check the lowest bit.
-				if (USIDR & 0x01)
-				{
-					// We are to send data to the master.
-					twi_overflow_state = TWI_SLAVE_SEND_DATA;
-				}
-				else
-				{
-					// We are to recieve data from the master.
-					twi_overflow_state = TWI_SLAVE_REQUEST_DATA;
-				}
+    // Handle the interrupt based on the overflow state.
+    switch (twi_overflow_state)
+    {
+        // Handle the first byte transmitted from master -- the slave address.
+        case TWI_OVERFLOW_STATE_NONE:
 
-				// Reset the command mode flag to assume command mode.
-				twi_command_mode = 1;
+            // Are we receiving our address?
+            if ((usi_data >> 1) == twi_slave_address)
+            {
+                // Are we transmitting or receiving data?
+                if (usi_data & 0x01)
+                {
+                    // We are to transmit data.  Reset the overflow 
+                    // state, but preserve the data state from the last write.
+                    twi_overflow_state = TWI_OVERFLOW_STATE_ACK_PR_TX;
+                }
+                else
+                {
+                    // We are receiving data.  Set data and overflow state.
+                    twi_data_state = TWI_DATA_STATE_COMMAND;
+                    twi_overflow_state = TWI_OVERFLOW_STATE_ACK_PR_RX;
+                }
 
-				// Set SDA as output.
-				DDRTWI |= (1<<PORTSDA);
+                // Set SDA for output.
+                PORT_USI |= (1<<P_SDA);
+                DDR_USI |= (1<<DD_SDA);
 
-				// Have the USI send an ACK.
-				USIDR = 0;
+                // Load data for ACK.
+                USIDR = TWI_ACK;
 
-				// Update the interrupt enable, wire mode and clock settings.
-				USICR = (1<<USISIE) | (1<<USIOIE) |					// Enable Start Condition and overflow interrupt.
-						(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-						(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-						(0<<USITC);									// No toggle of clock pin.
+                // Reload counter for ACK -- two clock transitions.
+                USISR = 0x0E;
+            }
+            else
+            {
+                // No. Reset USI to detect start condition.  Update the interrupt enable, 
+                // wire mode and clock settings.  Note: At this time the wire mode must
+                // not be set to hold the SCL line low when the counter overflows.  
+                // Otherwise, this TWI slave will interfere with other TWI slaves.
+                USICR = (1<<USISIE) | (0<<USIOIE) |                 // Enable Start Condition Interrupt. Disable overflow.
+                        (1<<USIWM1) | (0<<USIWM0) |                 // Maintain USI in two-wire mode without clock stretching.
+                        (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
+                        (0<<USITC);                                 // No toggle of clock pin.
+            }
 
-				// Clear the interrupt flags and reset the counter for one bit.
-				USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 		// Clear interrupt flags.
-						(0x0E<<USICNT0);								// USI to sample 1 bit or two edge toggles.
-			}
-			else
-			{
-				// Reset USI to detect start condition.
-				// Update the interrupt enable, wire mode and clock settings.
-				USICR = (1<<USISIE) | (0<<USIOIE) |					// Enable Start Condition Interrupt. Disable overflow.
-						(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-						(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-						(0<<USITC);									// No toggle of clock pin.
+            break;
 
-				// Clear the interrupt flags and reset the counter.
-				USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 	// Clear interrupt flags except start condition.
-						(0x00<<USICNT0);							// USI to sample 8 bits or 16 edge toggles.
+        // Ack sent to master so prepare to receive more data.
+        case TWI_OVERFLOW_STATE_ACK_PR_RX:
 
-			}
-			break;
+            // Update our state.
+            twi_overflow_state = TWI_OVERFLOW_STATE_DATA_RX;
 
-		// ----- Master read data mode ------
+            // Set SDA for input
+            DDR_USI &= ~(1<<DD_SDA);
+            PORT_USI &= ~(1<<P_SDA);
 
-		// Check reply and goto TWI_SLAVE_SEND_DATA if OK, else reset USI.
-		case TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA:
+            break;
 
-			// Check the lowest bit for NACK?  If set, the master does not want more data.
-			if (USIDR & 0x01)
-			{
-				// Reset USI to detect start condition.
-				// Update the interrupt enable, wire mode and clock settings.
-				USICR = (1<<USISIE) | (0<<USIOIE) |					// Enable Start Condition Interrupt. Disable overflow.
-						(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-						(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-						(0<<USITC);									// No toggle of clock pin.
+        // Data received from master so prepare to send ACK.
+        case TWI_OVERFLOW_STATE_DATA_RX:
 
-				// Clear the interrupt flags and reset the counter.
-				USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 	// Clear interrupt flags except start condition.
-						(0x00<<USICNT0);							// USI to sample 8 bits or 16 edge toggles.
+            // Update our state.
+            twi_overflow_state = TWI_OVERFLOW_STATE_ACK_PR_RX;
 
-				return;
-			}
+            // Write the data and return ack/nack.
+            USIDR = twi_write_data(usi_data);
 
-			// From here we just drop straight into TWI_SLAVE_SEND_DATA if the master sent an ACK
+            // Set SDA for output.
+            PORT_USI |= (1<<P_SDA);
+            DDR_USI |= (1<<DD_SDA);
 
-		// Copy data from buffer to USIDR and set USI to shift byte. Next TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA
-		case TWI_SLAVE_SEND_DATA:
+            // Reload counter for ACK -- two clock transitions.
+            USISR = 0x0E;
 
-			// Update our state.
-			twi_overflow_state = TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA;
+            break;
 
-			// Set SDA as output.
-			DDRTWI |= (1<<PORTSDA);
+        // ACK received from master.  Reset USI state if NACK received.
+        case TWI_OVERFLOW_STATE_PR_ACK_TX:
 
-			// Read the data from the addressed register.
-			USIDR = twi_registers_read(twi_address);
+            // Check the lowest bit for NACK?  If set, the master does not want more data.
+            if (usi_data & 0x01)
+            {
+                // Reset USI to detect start condition. Update the interrupt enable,
+                // wire mode and clock settings. Note: At this time the wire mode must
+                // not be set to hold the SCL line low when the counter overflows.  
+                // Otherwise, this TWI slave will interfere with other TWI slaves.
+                USICR = (1<<USISIE) | (0<<USIOIE) |                 // Enable Start Condition Interrupt. Disable overflow.
+                        (1<<USIWM1) | (0<<USIWM0) |                 // Maintain USI in two-wire mode without clock stretching.
+                        (1<<USICS1) | (0<<USICS0) | (0<<USICLK) |   // Shift Register Clock Source = External, positive edge
+                        (0<<USITC);                                 // No toggle of clock pin.
 
-			// Increment to the next address.
-			++twi_address;
 
-			// Update the interrupt enable, wire mode and clock settings.
-			USICR = (1<<USISIE) | (1<<USIOIE) |					// Enable Start Condition and overflow interrupt.
-					(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-					(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-					(0<<USITC);									// No toggle of clock pin.
+                // Clear the overflow interrupt flag and release the hold on SCL.
+                USISR |= (1<<USIOIF);
 
-			// Clear the interrupt flags and reset the counter.
-			USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 	// Clear interrupt flags except start condition.
-					(0x00<<USICNT0);							// USI to sample 8 bits or 16 edge toggles.
+                return;
+            }
 
-			break;
+        // Handle sending a byte of data.
+        case TWI_OVERFLOW_STATE_ACK_PR_TX:
 
-		// ----- Master write data mode ------
-		// Set USI to sample reply from master. Next TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA
-		case TWI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA:
+            // Update our state.
+            twi_overflow_state = TWI_OVERFLOW_STATE_DATA_TX;
 
-			// Update our state.
-			twi_overflow_state = TWI_SLAVE_CHECK_REPLY_FROM_SEND_DATA;
+            // Set SDA for output.
+            PORT_USI |= (1<<P_SDA);
+            DDR_USI |= (1<<DD_SDA);
 
-			// Set SDA as input
-			DDRTWI &= ~(1<<PORTSDA);
+            // Read the checked/non-checked data.
+            USIDR = twi_read_data();
 
-			// Update the interrupt enable, wire mode and clock settings.
-			USICR = (1<<USISIE) | (1<<USIOIE) |					// Enable Start Condition and overflow interrupt.
-					(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-					(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-					(0<<USITC);									// No toggle of clock pin.
+            break;
 
-			// Clear the interrupt flags and reset the counter for one bit.
-			USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 	// Clear interrupt flags except start condition.
-					(0x0E<<USICNT0);							// USI to sample 1 bit or two edge toggles.
+        // Data sent to to master so prepare to receive ack.
+        case TWI_OVERFLOW_STATE_DATA_TX:
 
-			break;
+            // Update our state.
+            twi_overflow_state = TWI_OVERFLOW_STATE_PR_ACK_TX;
 
-		// Set USI to sample data from master. Next TWI_SLAVE_GET_DATA_AND_SEND_ACK.
-		case TWI_SLAVE_REQUEST_DATA:
+            // Set SDA for input.
+            DDR_USI &= ~(1<<DD_SDA);
+            PORT_USI &= ~(1<<P_SDA);
 
-			// Update our state.
-			twi_overflow_state = TWI_SLAVE_GET_DATA_AND_SEND_ACK;
+            // Reload counter for ACK -- two clock transitions.
+            USISR = 0x0E;
 
-			// Set SDA as input
-			DDRTWI &= ~(1<<PORTSDA);
+            break;
 
-			// Update the interrupt enable, wire mode and clock settings.
-			USICR = (1<<USISIE) | (1<<USIOIE) |					// Enable Start Condition and overflow interrupt.
-					(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-					(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-					(0<<USITC);									// No toggle of clock pin.
+    }
 
-			// Clear the interrupt flags and reset the counter.
-			USISR = (0<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 	// Clear interrupt flags except start condition.
-					(0x00<<USICNT0);							// USI to sample 8 bits or 16 edge toggles.
-
-			break;
-
-		// Copy data from USIDR and send ACK. Next TWI_SLAVE_REQUEST_DATA
-		case TWI_SLAVE_GET_DATA_AND_SEND_ACK:
-
-			// Update our state.
-			twi_overflow_state = TWI_SLAVE_REQUEST_DATA;
-
-			// Is this an address or command?
-			if (twi_command_mode)
-			{
-				// Are we switching to addressed mode?
-				if (USIDR < TWI_CMD_RESET)
-				{
-					// Yes. Capture the register address.
-					twi_address = USIDR;
-
-					// Switch out of command mode.
-					twi_command_mode = 0;
-				}
-				else
-				{
-					// Put the command into the receive buffer to be handled asynchronously.
-					twi_rxhead = (twi_rxhead + 1) & TWI_RX_BUFFER_MASK;
-					twi_rxbuf[twi_rxhead] = USIDR;
-				}
-			}
-			else
-			{
-				// Write the data to the addressed register.
-				twi_registers_write(twi_address, USIDR);
-
-				// Increment to the next address.
-				++twi_address;
-			}
-
-			// Set SDA as output.
-			DDRTWI |= (1<<PORTSDA);
-
-			// Have the USI send an ACK.
-			USIDR = 0;
-
-			// Update the interrupt enable, wire mode and clock settings.
-			USICR = (1<<USISIE) | (1<<USIOIE) |					// Enable Start Condition and overflow interrupt.
-					(1<<USIWM1) | (1<<USIWM0) |					// Maintain USI in Two-wire mode. 
-					(1<<USICS1) | (0<<USICS0) | (0<<USICLK) |	// Shift Register Clock Source = External, positive edge
-					(0<<USITC);									// No toggle of clock pin.
-
-			// Clear the interrupt flags and reset the counter for one bit.
-			USISR = (1<<USISIF) | (1<<USIOIF) | (1<<USIPF) | 		// Clear interrupt flags.
-					(0x0E<<USICNT0);								// USI to sample 1 bit or two edge toggles.
-
-			break;
-	}
+    // Clear the overflow interrupt flag and release the hold on SCL.
+    USISR |= (1<<USIOIF);
 }
 
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+
+
+#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
+
+#if defined(__AVR_ATmega8__)
+#define SIG_TWI                 SIG_2WIRE_SERIAL
+#endif
+
+SIGNAL(SIG_TWI)
+// Handle the TWI interrupt condition.
+{
+    switch (TWSR)
+    {
+        // Own SLA+R has been received; ACK has been returned.
+        case TWI_STX_ADR_ACK:
+        // Data byte in TWDR has been transmitted; ACK has been received.
+        case TWI_STX_DATA_ACK:
+
+            // Read the checked/non-checked data.
+            TWDR = twi_read_data();
+
+            // Data byte will be transmitted and ACK should be received.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (0<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+            break;
+
+        // Data byte in TWDR has been transmitted; NOT ACK has been received.
+        case TWI_STX_DATA_NACK:
+        // Last data byte in TWDR has been transmitted (TWEA = "0"); ACK has been received.
+        case TWI_STX_DATA_ACK_LAST_BYTE:
+
+            // Switched to the not addressed slave mode; own SLA will be recognized.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (0<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+            break;
+
+        // Own SLA+W has been received; ACK has been returned.
+        case TWI_SRX_ADR_ACK:
+
+            // Reset the data state.
+            twi_data_state = TWI_DATA_STATE_COMMAND;
+
+            // Data byte will be received and ACK will be returned.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (0<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+
+            break;
+
+        // Previously addressed with own SLA+W; data has been received; ACK has been returned.
+        case TWI_SRX_ADR_DATA_ACK:
+
+            // Write the data.
+            twi_write_data(TWDR);
+
+            // Next data byte will be received and ACK will be returned.
+            TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
+                   (1<<TWIE) |                          // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                         // Don't generate start condition.
+                   (0<<TWSTO) |                         // Don't generate stop condition.
+                   (1<<TWINT) |                         // Clear the TWI interrupt.
+                   (1<<TWEA) |                          // Acknowledge the data.
+                   (0<<TWWC);                           //
+
+            break;
+
+        // Previously addressed with own SLA+W; data has been received; NOT ACK has been returned.
+        case TWI_SRX_ADR_DATA_NACK:
+        // A STOP condition or repeated START condition has been received while still addressed as Slave.
+        case TWI_SRX_STOP_RESTART:
+
+             // Switch to the not addressed slave mode; own SLA will be recognized.
+             TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                    (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                    (0<<TWSTA) |                             // Don't generate start condition.
+                    (0<<TWSTO) |                             // Don't generate stop condition.
+                    (1<<TWINT) |                             // Clear the TWI interrupt.
+                    (1<<TWEA) |                              // Acknowledge the data.
+                    (0<<TWWC);                               //
+
+            break;
+
+        // Bus error due to an illegal START or STOP condition.
+        case TWI_BUS_ERROR:
+
+            // Only the internal hardware is affected, no STOP condition is sent on the bus.
+            // In all cases, the bus is released and TWSTO is cleared.
+            TWCR = (1<<TWEN) |                              // Keep the TWI interface enabled.
+                   (1<<TWIE) |                              // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                             // Don't generate start condition.
+                   (1<<TWSTO) |                             // Don't generate stop condition.
+                   (1<<TWINT) |                             // Clear the TWI interrupt.
+                   (1<<TWEA) |                              // Acknowledge the data.
+                   (0<<TWWC);                               //
+            break;
+
+        // No relevant state information available; TWINT="0".
+        case TWI_NO_STATE:
+
+            // No action required.
+            break;
+
+        default:
+
+            // Reset the TWI interrupt to wait for a new event.
+            TWCR = (1<<TWEN) |                                  // Keep the TWI interface enabled.
+                   (1<<TWIE) |                                  // Keep the TWI interrupt enabled.
+                   (0<<TWSTA) |                                 // Don't generate start condition.
+                   (0<<TWSTO) |                                 // Don't generate stop condition.
+                   (1<<TWINT) |                                 // Clear the TWI interrupt.
+                   (1<<TWEA) |                                  // Acknowledge the data.
+                   (0<<TWWC);                                   //
+            break;
+    }
+}
+
+#endif // __AVR_ATmega8__ || __AVR_ATmega88__ || __AVR_ATmega168__
 

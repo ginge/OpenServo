@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form implementation generated from reading ui file 'mainwin.ui'
 **
-** Created: Sun Mar 18 21:16:55 2007
+** Created: Fri Apr 20 01:09:27 2007
 **      by: The User Interface Compiler ($Id$)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -207,49 +207,84 @@ testMainWin::testMainWin( QWidget* parent, const char* name, bool modal, WFlags 
     groupBox1Layout = new QGridLayout( groupBox1->layout() );
     groupBox1Layout->setAlignment( Qt::AlignTop );
 
-    layout2 = new QGridLayout( 0, 1, 1, 0, 0, "layout2"); 
-
-    textLabel1_2 = new QLabel( groupBox1, "textLabel1_2" );
-
-    layout2->addMultiCellWidget( textLabel1_2, 1, 2, 0, 0 );
-
-    setupSMin = new QLineEdit( groupBox1, "setupSMin" );
-
-    layout2->addWidget( setupSMin, 2, 3 );
+    layout9_2 = new QGridLayout( 0, 1, 1, 0, 0, "layout9_2"); 
 
     textLabel1_4 = new QLabel( groupBox1, "textLabel1_4" );
+    textLabel1_4->setMinimumSize( QSize( 33, 0 ) );
+    textLabel1_4->setMaximumSize( QSize( 33, 32767 ) );
 
-    layout2->addMultiCellWidget( textLabel1_4, 0, 1, 2, 2 );
-
-    setupSMax = new QLineEdit( groupBox1, "setupSMax" );
-
-    layout2->addMultiCellWidget( setupSMax, 0, 1, 3, 3 );
-
-    textLabel1 = new QLabel( groupBox1, "textLabel1" );
-
-    layout2->addWidget( textLabel1, 0, 0 );
-
-    setupD = new QLineEdit( groupBox1, "setupD" );
-
-    layout2->addWidget( setupD, 3, 1 );
+    layout9_2->addMultiCellWidget( textLabel1_4, 0, 0, 3, 4 );
 
     textLabel1_4_2 = new QLabel( groupBox1, "textLabel1_4_2" );
+    textLabel1_4_2->setMinimumSize( QSize( 33, 0 ) );
+    textLabel1_4_2->setMaximumSize( QSize( 33, 32767 ) );
 
-    layout2->addWidget( textLabel1_4_2, 2, 2 );
+    layout9_2->addWidget( textLabel1_4_2, 1, 3 );
 
-    setupP = new QLineEdit( groupBox1, "setupP" );
+    setupD = new QLineEdit( groupBox1, "setupD" );
+    setupD->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, setupD->sizePolicy().hasHeightForWidth() ) );
+    setupD->setMaximumSize( QSize( 50, 32767 ) );
 
-    layout2->addWidget( setupP, 0, 1 );
+    layout9_2->addWidget( setupD, 2, 2 );
 
-    textLabel1_3 = new QLabel( groupBox1, "textLabel1_3" );
+    textLabel1_4_2_2 = new QLabel( groupBox1, "textLabel1_4_2_2" );
+    textLabel1_4_2_2->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)4, (QSizePolicy::SizeType)0, 0, 0, textLabel1_4_2_2->sizePolicy().hasHeightForWidth() ) );
+    textLabel1_4_2_2->setMinimumSize( QSize( 33, 0 ) );
+    textLabel1_4_2_2->setMaximumSize( QSize( 33, 32767 ) );
 
-    layout2->addWidget( textLabel1_3, 3, 0 );
+    layout9_2->addWidget( textLabel1_4_2_2, 2, 3 );
+
+    setupSMin = new QLineEdit( groupBox1, "setupSMin" );
+    setupSMin->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, setupSMin->sizePolicy().hasHeightForWidth() ) );
+    setupSMin->setMaximumSize( QSize( 50, 32767 ) );
+
+    layout9_2->addWidget( setupSMin, 1, 5 );
+
+    textLabel1_2 = new QLabel( groupBox1, "textLabel1_2" );
+    textLabel1_2->setMinimumSize( QSize( 16, 0 ) );
+    textLabel1_2->setMaximumSize( QSize( 15, 32767 ) );
+
+    layout9_2->addWidget( textLabel1_2, 1, 0 );
 
     setupI = new QLineEdit( groupBox1, "setupI" );
+    setupI->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, setupI->sizePolicy().hasHeightForWidth() ) );
+    setupI->setMinimumSize( QSize( 50, 0 ) );
+    setupI->setMaximumSize( QSize( 50, 32767 ) );
 
-    layout2->addWidget( setupI, 2, 1 );
+    layout9_2->addMultiCellWidget( setupI, 1, 1, 1, 2 );
 
-    groupBox1Layout->addLayout( layout2, 0, 0 );
+    setupP = new QLineEdit( groupBox1, "setupP" );
+    setupP->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, setupP->sizePolicy().hasHeightForWidth() ) );
+    setupP->setMaximumSize( QSize( 50, 32767 ) );
+
+    layout9_2->addWidget( setupP, 0, 2 );
+
+    textLabel1 = new QLabel( groupBox1, "textLabel1" );
+    textLabel1->setMinimumSize( QSize( 16, 0 ) );
+    textLabel1->setMaximumSize( QSize( 15, 32767 ) );
+
+    layout9_2->addMultiCellWidget( textLabel1, 0, 0, 0, 1 );
+
+    setupAddr = new QLineEdit( groupBox1, "setupAddr" );
+    setupAddr->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, setupAddr->sizePolicy().hasHeightForWidth() ) );
+    setupAddr->setMinimumSize( QSize( 50, 0 ) );
+    setupAddr->setMaximumSize( QSize( 50, 32767 ) );
+
+    layout9_2->addMultiCellWidget( setupAddr, 2, 2, 4, 5 );
+
+    textLabel1_3 = new QLabel( groupBox1, "textLabel1_3" );
+    textLabel1_3->setMinimumSize( QSize( 16, 0 ) );
+    textLabel1_3->setMaximumSize( QSize( 15, 32767 ) );
+
+    layout9_2->addMultiCellWidget( textLabel1_3, 2, 2, 0, 1 );
+
+    setupSMax = new QLineEdit( groupBox1, "setupSMax" );
+    setupSMax->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, setupSMax->sizePolicy().hasHeightForWidth() ) );
+    setupSMax->setMaximumSize( QSize( 50, 32767 ) );
+
+    layout9_2->addWidget( setupSMax, 0, 5 );
+
+    groupBox1Layout->addLayout( layout9_2, 0, 0 );
     layout26->addWidget( groupBox1 );
 
     testMainWinLayout->addMultiCellLayout( layout26, 0, 0, 1, 10 );
@@ -340,9 +375,11 @@ testMainWin::testMainWin( QWidget* parent, const char* name, bool modal, WFlags 
     logBox = new QTextEdit( this, "logBox" );
     logBox->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)7, (QSizePolicy::SizeType)1, 0, 2, logBox->sizePolicy().hasHeightForWidth() ) );
     logBox->setMinimumSize( QSize( 0, 20 ) );
+    logBox->setDragAutoScroll( TRUE );
     logBox->setTextFormat( QTextEdit::LogText );
     logBox->setWordWrap( QTextEdit::WidgetWidth );
     logBox->setReadOnly( TRUE );
+    logBox->setAutoFormatting( int( QTextEdit::AutoAll ) );
 
     testMainWinLayout->addMultiCellWidget( logBox, 3, 3, 2, 10 );
 
@@ -401,31 +438,44 @@ testMainWin::testMainWin( QWidget* parent, const char* name, bool modal, WFlags 
     groupBox4Layout = new QGridLayout( groupBox4->layout() );
     groupBox4Layout->setAlignment( Qt::AlignTop );
 
-    adapterList = new QListView( groupBox4, "adapterList" );
-    adapterList->addColumn( tr( "Adapter(s)" ) );
-    adapterList->setMinimumSize( QSize( 0, 70 ) );
-    adapterList->setMaximumSize( QSize( 65, 70 ) );
-    adapterList->setVScrollBarMode( QListView::Auto );
-    adapterList->setHScrollBarMode( QListView::AlwaysOff );
-
-    groupBox4Layout->addWidget( adapterList, 0, 0 );
-
     scanBusBtn = new QPushButton( groupBox4, "scanBusBtn" );
     scanBusBtn->setMaximumSize( QSize( 65, 32767 ) );
     scanBusBtn->setAutoDefault( TRUE );
 
-    groupBox4Layout->addWidget( scanBusBtn, 2, 0 );
+    groupBox4Layout->addWidget( scanBusBtn, 3, 0 );
+
+    otherDevList = new QListView( groupBox4, "otherDevList" );
+    otherDevList->addColumn( tr( "Other" ) );
+    otherDevList->header()->setClickEnabled( FALSE, otherDevList->header()->count() - 1 );
+    otherDevList->header()->setResizeEnabled( FALSE, otherDevList->header()->count() - 1 );
+    otherDevList->setMinimumSize( QSize( 0, 60 ) );
+    otherDevList->setMaximumSize( QSize( 65, 60 ) );
+    otherDevList->setVScrollBarMode( QListView::Auto );
+    otherDevList->setHScrollBarMode( QListView::AlwaysOff );
+
+    groupBox4Layout->addWidget( otherDevList, 2, 0 );
 
     servoList = new QListView( groupBox4, "servoList" );
     servoList->addColumn( tr( "Servo(s)" ) );
+    servoList->header()->setResizeEnabled( FALSE, servoList->header()->count() - 1 );
     servoList->setMinimumSize( QSize( 50, 0 ) );
     servoList->setMaximumSize( QSize( 65, 32767 ) );
 
     groupBox4Layout->addWidget( servoList, 1, 0 );
 
+    adapterList = new QListView( groupBox4, "adapterList" );
+    adapterList->addColumn( tr( "Adapter(s)" ) );
+    adapterList->header()->setResizeEnabled( FALSE, adapterList->header()->count() - 1 );
+    adapterList->setMinimumSize( QSize( 0, 60 ) );
+    adapterList->setMaximumSize( QSize( 65, 60 ) );
+    adapterList->setVScrollBarMode( QListView::Auto );
+    adapterList->setHScrollBarMode( QListView::AlwaysOff );
+
+    groupBox4Layout->addWidget( adapterList, 0, 0 );
+
     testMainWinLayout->addMultiCellWidget( groupBox4, 0, 4, 0, 0 );
     languageChange();
-    resize( QSize(610, 323).expandedTo(minimumSizeHint()) );
+    resize( QSize(610, 345).expandedTo(minimumSizeHint()) );
     clearWState( WState_Polished );
 
     // signals and slots connections
@@ -449,6 +499,38 @@ testMainWin::testMainWin( QWidget* parent, const char* name, bool modal, WFlags 
     connect( adapterList, SIGNAL( selectionChanged(QListViewItem*) ), this, SLOT( adapterSelectChange(QListViewItem*) ) );
     connect( logBox, SIGNAL( doubleClicked(int,int) ), this, SLOT( logBoxClear(int,int) ) );
     connect( btnAbout, SIGNAL( clicked() ), this, SLOT( aboutClicked() ) );
+
+    // tab order
+    setTabOrder( setPos, writeBtn );
+    setTabOrder( writeBtn, readBtn );
+    setTabOrder( readBtn, cmdReboot );
+    setTabOrder( cmdReboot, cmdPWM );
+    setTabOrder( cmdPWM, cmdSave );
+    setTabOrder( cmdSave, cmdRestore );
+    setTabOrder( cmdRestore, cmdDefault );
+    setTabOrder( cmdDefault, cmdFlash );
+    setTabOrder( cmdFlash, fileLoad );
+    setTabOrder( fileLoad, voltageRequest );
+    setTabOrder( voltageRequest, setupP );
+    setTabOrder( setupP, setupI );
+    setTabOrder( setupI, setupD );
+    setTabOrder( setupD, setupSMax );
+    setTabOrder( setupSMax, setupSMin );
+    setTabOrder( setupSMin, setupAddr );
+    setTabOrder( setupAddr, genericDevice );
+    setTabOrder( genericDevice, genericRegister );
+    setTabOrder( genericRegister, genericData );
+    setTabOrder( genericData, genericWrite );
+    setTabOrder( genericWrite, genericLen );
+    setTabOrder( genericLen, genericRead );
+    setTabOrder( genericRead, liveData );
+    setTabOrder( liveData, timerIntervalBox );
+    setTabOrder( timerIntervalBox, adapterList );
+    setTabOrder( adapterList, servoList );
+    setTabOrder( servoList, scanBusBtn );
+    setTabOrder( scanBusBtn, logBox );
+    setTabOrder( logBox, btnAbout );
+    setTabOrder( btnAbout, buttonCancel );
 }
 
 /*
@@ -499,16 +581,18 @@ void testMainWin::languageChange()
     textLabel2_4_2->setText( tr( "Voltage" ) );
     voltLbl->setText( tr( "0" ) );
     groupBox1->setTitle( tr( "Servo Setup" ) );
-    textLabel1_2->setText( tr( "I" ) );
-    setupSMin->setText( tr( "0x0000" ) );
     textLabel1_4->setText( tr( "SMax" ) );
-    setupSMax->setText( tr( "0x0000" ) );
-    textLabel1->setText( tr( "P" ) );
-    setupD->setText( tr( "0x0000" ) );
     textLabel1_4_2->setText( tr( "SMin" ) );
-    setupP->setText( tr( "0x0000" ) );
-    textLabel1_3->setText( tr( "D" ) );
+    setupD->setText( tr( "0x0000" ) );
+    textLabel1_4_2_2->setText( tr( "Addr" ) );
+    setupSMin->setText( tr( "0x0000" ) );
+    textLabel1_2->setText( tr( "I" ) );
     setupI->setText( tr( "0x0000" ) );
+    setupP->setText( tr( "0x0000" ) );
+    textLabel1->setText( tr( "P" ) );
+    setupAddr->setText( tr( "0x00" ) );
+    textLabel1_3->setText( tr( "D" ) );
+    setupSMax->setText( tr( "0x0000" ) );
     groupBox2_2->setTitle( tr( "Generic comms" ) );
     textLabel3_2->setText( tr( "Data" ) );
     genericData->setText( tr( "0x00 0x00 0x00 0x00" ) );
@@ -540,10 +624,11 @@ void testMainWin::languageChange()
     readBtn->setAccel( QKeySequence( QString::null ) );
     textLabel3_6->setText( tr( "ms" ) );
     groupBox4->setTitle( tr( "Servos" ) );
-    adapterList->header()->setLabel( 0, tr( "Adapter(s)" ) );
     scanBusBtn->setText( tr( "Sca&n Bus" ) );
     scanBusBtn->setAccel( QKeySequence( tr( "Alt+N" ) ) );
+    otherDevList->header()->setLabel( 0, tr( "Other" ) );
     servoList->header()->setLabel( 0, tr( "Servo(s)" ) );
+    adapterList->header()->setLabel( 0, tr( "Adapter(s)" ) );
 }
 
 void testMainWin::readServo()

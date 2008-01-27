@@ -86,4 +86,5 @@ int  write_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_
 int  read_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t buflen);
 usb_dev_handle *get_adapter_handle(int adapter_no);
 
+int check_params( int val );
 #endif

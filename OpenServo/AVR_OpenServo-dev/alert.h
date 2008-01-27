@@ -27,9 +27,10 @@
 #ifndef _OS_ALERT_H_
 #define _OS_ALERT_H_ 1
 
+#define ALERT_OVERCURR  0
 #define ALERT_OVERVOLT  1
 #define ALERT_UNDERVOLT 2
-#define ALERT_OVERCURR  4
+
 
 // Alert functions.
 void alert_init(void);

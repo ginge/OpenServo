@@ -41,13 +41,13 @@
 #define MIN_POSITION            (0)
 #define MAX_POSITION            (1023)
 
-#if defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
 
 // The timer clock prescaler of 8 is selected to yield a 1MHz ADC clock
 // from an 8 MHz system clock.
 #define CSPS        ((0<<CS22) | (1<<CS21) | (0<<CS20))
 
-#endif // __AVR_ATmega168____
+#endif // __AVR_ATmega88__ || __AVR_ATmega168__
 
 // Globals used for pulse measurement.
 static volatile uint8_t overflow_count;
@@ -96,10 +96,10 @@ void pulse_control_init(void)
     // Initialize the pulse time.
     pulse_time = timer_get();
 
-#if defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Set timer/counter2 control register A.
-    TCCR2A = (0<<COM2A1) | (0<<COM2A0) |                    // Disconnect OCOA.
-             (0<<COM2B1) | (0<<COM2B0) |                    // Disconnect OCOB.
+    TCCR2A = (0<<COM2A1) | (0<<COM2A0) |                    // Disconnect OC2A.
+             (0<<COM2B1) | (0<<COM2B0) |                    // Disconnect OC2B.
              (0<<WGM21) | (0<<WGM20);                       // Mode 0 - normal operation.
 
     // Configure PCINT3 to interrupt on change.
@@ -114,7 +114,7 @@ void pulse_control_init(void)
     DDRB &= ~(1<<DDB3);
     PORTB &= ~(1<<PB3);
 
-#endif // __AVR_ATmega168____
+#endif // __AVR_ATmega88__ || __AVR_ATmega168__
 }
 
 
@@ -181,7 +181,7 @@ void pulse_control_update(void)
 }
 
 
-#if defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
 
 SIGNAL(SIG_OVERFLOW2)
 // Handles timer/counter2 overflow interrupt.
@@ -249,6 +249,6 @@ SIGNAL(SIG_PIN_CHANGE0)
     }
 }
 
-#endif // __AVR_ATmega168__
+#endif // __AVR_ATmega88__ || __AVR_ATmega168__
 
 #endif // PULSE_CONTROL_ENABLED

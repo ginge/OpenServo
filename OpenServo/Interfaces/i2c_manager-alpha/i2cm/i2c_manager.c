@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Implements the I2C Manager's published interface.
@@ -215,7 +216,8 @@
  * ### Platforms #########################################################################
  *
  * Tested platforms: Microsoft Visual C++ 6.0 (Windows 2000)
- *                   gcc version 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
+ *
+ * Limited testing: gcc version 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
  *
  */
 #ifdef _MSC_VER
@@ -1422,7 +1424,7 @@ int_t I2CM_GetDeviceCount()
 
 /*******************************************************************************
  *
- * int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
+ * int_devaddr_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
  *
  * Synopsis
  *
@@ -1439,13 +1441,14 @@ int_t I2CM_GetDeviceCount()
  *
  * Return
  *
- * int_t   o The function returns the address of the device or -1 if the I2C Manager
- *           has not been initialised, an illegal bus or device is specified or an
- *           error has occurred.
+ * int_devaddr_t
+ *         o The function returns the address of the device or (int_devaddr_t)-1 if
+ *           the I2C Manager has not been initialised, an illegal bus or device is
+ *           specified or an error has occurred.
  */
-int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
+int_devaddr_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
 {
-   int_t rc=(int)-1;
+   int_devaddr_t rc=(int_devaddr_t)-1;
    I2CBUS *pbus=I2CManager_GetBus(nBus);
    if(pbus!=NULL)
    {
@@ -1578,7 +1581,7 @@ int_t I2CM_StartTransaction(int_t nBus)
    {
       I2CMLAYER *plyr=&l_pLayers[pbus->m_nLayer];
       I2CM_SetLastError(plyr->m_Funcs.m_pfx.m_pStartTransaction(nBus),
-         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // THESE LAST ERROR STRINGS ARE WRONG
+         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // TODO: THESE LAST ERROR STRINGS ARE WRONG?
    }
    return I2CM_GetLastError();
 }
@@ -1607,7 +1610,7 @@ int_t I2CM_RestartTransaction(int_t nBus)
    {
       I2CMLAYER *plyr=&l_pLayers[pbus->m_nLayer];
       I2CM_SetLastError(plyr->m_Funcs.m_pfx.m_pRestartTransaction(nBus),
-         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // THESE LAST ERROR STRINGS ARE WRONG
+         plyr->m_Funcs.m_pfx.m_pGetLastErrorTextFunc()); // TODO: THESE LAST ERROR STRINGS ARE WRONG?
    }
    return I2CM_GetLastError();
 }

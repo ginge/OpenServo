@@ -18,7 +18,11 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#ifdef WIN
 #include <windows.h>
+#endif
 
 /**
 *
@@ -36,12 +40,19 @@ int OSIF_bootloader_init(int adapter, int servo, char * filename) {
 	int	memory[65536];
 	unsigned char page[MAX_BOOTLDR_SIZE][PAGE_SIZE+10];
 	
+	usb_dev_handle *handle;
+	handle = get_adapter_handle(adapter);
+	
 	int page_fail_cnt=0;
 	unsigned char verbuf[PAGE_SIZE];
 	char buf[255];
 	int max_addr=0;
 	// load file into memory array
-	load_file(filename, memory, &max_addr);
+	if (load_file(filename, memory, &max_addr) <0)
+	{
+		printf("Failed to load file %s. Check path.\n", filename);
+		return -1;
+	}
 	
 	max_addr+=20;
 	// break into 128 byte pages
@@ -114,6 +125,9 @@ int OSIF_bootloader_init(int adapter, int servo, char * filename) {
 int OSIF_verify_page(int adapter, int servo, unsigned char *reg_addr, unsigned char *page) {
 	unsigned char read_page[PAGE_SIZE];
 	
+	usb_dev_handle *handle;
+	handle = get_adapter_handle(adapter);
+	
   //write the register to read from
 	if(usb_control_msg(handle, USB_CTRL_OUT, 
 		     CMD_I2C_IO + CMD_I2C_BEGIN + CMD_I2C_END,
@@ -134,7 +148,7 @@ int OSIF_verify_page(int adapter, int servo, unsigned char *reg_addr, unsigned c
     return -1;
   } 
 
-  if(i2c_tiny_usb_get_status() != STATUS_ADDRESS_ACK) {
+  if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
     fprintf(stderr, "read data status failed\n");
     return -1;
   }
@@ -231,10 +245,10 @@ EXPORT int OSIF_reflash(int adapter, int servo, int bootloader_addr, char *filen
   }
 
   //wait 2 seconds to be sure
-	Sleep( 2000);
+	usleep( 2000);
 
   if ( OSIF_bootloader_init(adapter, bootloader_addr, filename) <0) {
-    printf("Error flashing servo");
+    printf("Error flashing servo\n");
     return -1;
   }
   return 1;

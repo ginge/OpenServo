@@ -22,16 +22,7 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
 ## Linker flags
 LDFLAGS = $(COMMON)
-LDFLAGS += -nostartfiles -Wl,-section-start=.bootloader=0x3C00 -Wl,-Map=ATmega168_Bootloader.map
-
-
-## Intel Hex file production flags
-HEX_FLASH_FLAGS = -R .eeprom
-
-HEX_EEPROM_FLAGS = -j .eeprom
-HEX_EEPROM_FLAGS += --set-section-flags=.eeprom="alloc,load"
-HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
-
+LDFLAGS += -nostartfiles -Wl,-Ttext,0x3C00 -Wl,-Map=ATmega168_Bootloader.map
 
 ## Objects that must be built in order to link
 OBJECTS = bootcrt.o bootstart.o bootloader.o main.o prog.o twi.o
@@ -40,7 +31,7 @@ OBJECTS = bootcrt.o bootstart.o bootloader.o main.o prog.o twi.o
 LINKONLYOBJECTS =
 
 ## Build
-all: $(TARGET) ATmega168_Bootloader.hex ATmega168_Bootloader.eep ATmega168_Bootloader.lss size
+all: $(TARGET) ATmega168_Bootloader.hex ATmega168_Bootloader.lss size
 
 ## Compile
 bootcrt.o: bootcrt.s
@@ -81,7 +72,7 @@ size: ${TARGET}
 ## Clean target
 .PHONY: clean
 clean:
-	-rm -rf $(OBJECTS) ATmega168_Bootloader.elf dep/* ATmega168_Bootloader.hex ATmega168_Bootloader.eep ATmega168_Bootloader.lss ATmega168_Bootloader.map
+	-rm -rf $(OBJECTS) ATmega168_Bootloader.elf dep/* ATmega168_Bootloader.hex ATmega168_Bootloader.lss ATmega168_Bootloader.map
 
 
 ## Other dependencies

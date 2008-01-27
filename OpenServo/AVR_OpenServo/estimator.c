@@ -21,16 +21,16 @@
     OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
     OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+	
+	$Id$
 */
-
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
 
 #include <inttypes.h>
 
+#include "openservo.h"
 #include "config.h"
 #include "registers.h"
+#include "math.h"
 
 #if ESTIMATOR_ENABLED
 
@@ -47,17 +47,6 @@
 // Simulation states preserved across multiple estimation iterations.
 static int16_t z1;      // Position
 static int16_t z2;      // Velocity
-
-
-int16_t multiply(int16_t num1, int16_t num2, int32_t denum)
-// Multiplies numerator1 and numerator2 as int32 and devide it through 
-// the denumerator
-{
-    int32_t result;
-    result = (int32_t) num1 * (int32_t) num2;
-    result /= denum;
-    return (int16_t) result;
-}
 
 
 void estimator_init(void)
@@ -84,11 +73,6 @@ void estimator_registers_defaults(void)
     registers_write_word(REG_RESERVED_34, REG_RESERVED_35,   3144); // L1
     registers_write_word(REG_RESERVED_36, REG_RESERVED_37,   3915); // L2
 
-    /*registers_write_word(REG_RESERVED_30, REG_RESERVED_31,  -1115); // sys a
-    registers_write_word(REG_RESERVED_32, REG_RESERVED_33,  32767); // sys b
-    registers_write_word(REG_RESERVED_34, REG_RESERVED_35,   3144); // L1
-    registers_write_word(REG_RESERVED_36, REG_RESERVED_37,   3915); // L2*/
-
     // Initialize a velocity of zero
     registers_write_word(REG_VELOCITY_HI, REG_VELOCITY_LO,   0);    
 }
@@ -114,36 +98,47 @@ void estimate_velocity(int16_t current_position)
     
     
     // Read last PWM
-    int16_t lastPWM = (int16_t) registers_read_byte(REG_PWM_CCW) - 
-                      (int16_t) registers_read_byte(REG_PWM_CW);
+    int16_t lastPWM = (int16_t) registers_read_byte(REG_PWM_DIRB) - 
+                      (int16_t) registers_read_byte(REG_PWM_DIRA);
     
-    // ** Bits of fixed point **
-    // fp_a           = 16
-    // fp_b           = 27
-    // fp_L1          = 16
-    // fp_L2          = 24
-    // fp_z1          = 5 
-    // fp_z2          = 11
-    // fp_z1d         = 5
-    // fp_z2d         = 11
-    // fp_estim_error = 5
+	// The following operations are fixed point operations. To add/substract
+	// two fixed point values they must have the same fractional precision
+    // (the same number of bits behind the decimal).  When two fixed point
+    // values are multiplied the fractional precision of the result is the sum
+    // of the fractional precision of the the the factors (the sum of the bits
+    // behind the decimal of each factor).  To reach the best possible precision
+    // the fixed point bit is chosen for each variable separately according to 
+    // its maximum and dimension.  A shift factor is then applied after
+    // multiplication in the fixed_multiply() function to adjust the fractional
+    // precision of the product for addition or subtraction.
+
+    // Used fixed point bits, counted from the lowest bit:
+    // System constant a:  fp_a           = 16
+    // System constant b:  fp_b           = 27
+    // Estimator param L1: fp_L1          = 16
+    // Estimator param L2: fp_L2          = 24
+    // Position state z1:  fp_z1          = 5 
+    // Velocity state z2:  fp_z2          = 11
+    // Derivation of z1:   fp_z1d         = 5
+    // Derivation of z2:   fp_z2d         = 11
+    // Estimation error:   fp_estim_error = 5 
     
     // Estimation_error = real_position - simulated_position
-    estim_error  = current_position * 32;       // fp: 0     -> 5  : 2^(+ 5) = 32
-    estim_error -= z1;                          // fp: 5     -> 5  : 2^(  0) = 1
+    estim_error  = current_position * 32;           // fp: 0       -> 5  : factor = 2^(+5) = 32
+    estim_error -= z1;                              // fp: 5       -> 5  : factor = 2^( 0) = 1
 
     // z1' = L1 * (x1-z1) + z2
-    z1d  = multiply(L1, estim_error, 0xFFFF);   // fp: 16+5  -> 5  : 2^(-16) = 1/0xFFFF
-    z1d += z2 / 64;                             // fp: 11    -> 5  : 2^(- 6) = 1/64
+    z1d  = fixed_multiply(L1, estim_error, 16);     // fp: 16 + 5  -> 5  : rshift = 16
+    z1d += z2 / 64;                                 // fp: 11      -> 5  : factor = 2^(-6) = 1/64				
 
     // z2' = L2 * (x1-z1) + a * z2 + b * PWM
-    z2d  = multiply(L2, estim_error, 262144);   // fp: 24+5  -> 11 : 2^(-18) = 1/262144
-    z2d += multiply(a, z2, 0xFFFF);             // fp: 16+11 -> 11 : 2^(-16) = 1/0xFFFF
-    z2d += multiply(b, lastPWM, 0xFFFF);        // fp: 27+0  -> 11 : 2^(-16) = 1/0xFFFF
+    z2d  = fixed_multiply(L2, estim_error, 18);     // fp: 24 + 5  -> 11 : rshift = 18
+    z2d += fixed_multiply(a, z2, 16);               // fp: 16 + 11 -> 11 : rshift = 16
+    z2d += fixed_multiply(b, lastPWM, 16);          // fp: 27 + 0  -> 11 : rshift = 16
 
     // Numerical Integration: Euler forward with step width of 1
-    z1  += z1d;                                 // fp: 5     -> 5  : 2^(  0) = 1
-    z2  += z2d;                                 // fp: 11    -> 11 : 2^(  0) = 1
+    z1  += z1d;                                     // fp: 5       -> 5  : factor = 2^0 = 1
+    z2  += z2d;                                     // fp: 11      -> 11 : factor = 2^0 = 1
   
     // Write estimated velocity to the registers
     registers_write_word(REG_VELOCITY_HI, REG_VELOCITY_LO, z2);

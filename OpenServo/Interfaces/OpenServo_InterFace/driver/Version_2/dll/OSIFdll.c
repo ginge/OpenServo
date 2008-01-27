@@ -82,6 +82,7 @@ EXPORT int OSIF_init(void)
     int ret;
 #endif
     usb_dev_handle *handle;
+    int n;
 
     usb_init();
 
@@ -111,12 +112,26 @@ EXPORT int OSIF_init(void)
 #ifdef DEBUG_OUT
                 printf("adapter init handle %d %d\n", adapters[adapter_count].adapter_handle, handle);
 #endif
+                // For each interface we are going to send the powerup/powerdown sequence
+                // This sets the ports on the AVR to allow very fast I2C comms
+                if (usb_control_msg(handle, USB_CTRL_IN, 
+                    USBTINY_POWERUP,
+                    20, 1, 0, 0, 
+                    500) <1) {
+
+                    }
+                if (usb_control_msg(handle, USB_CTRL_IN, 
+                    USBTINY_POWERDOWN,
+                    0, 0, 0, 0, 
+                    500) <1) {
+                    }
+
                 break;
             }
         }
     }
 
-    if(!handle) {
+    if(!handle || adapter_count < 0) {
         adapter_count = -1;
         return -1;
     }
@@ -129,7 +144,6 @@ EXPORT int OSIF_init(void)
         fprintf(stderr, "claimUSB error: %s\n", usb_strerror());
     }
 #endif
-
     return 0;
 }
 
@@ -309,7 +323,7 @@ EXPORT bool OSIF_probe(int adapter, int servo )
 
     if (write_data( handle, servo, &addr, 1 ) <0 ) { return false; }
 
-    if(OSIF_USB_get_status(handle) == STATUS_ADDRESS_ACK) {
+    if(OSIF_USB_get_status(handle) == STATUS_ADDRESS_ACK)
     {
 #ifdef DEBUG_OUT
         printf("found device 0x%02x\n", servo);

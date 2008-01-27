@@ -38,16 +38,16 @@
  *
  * Provides a software interface between OpenServo and I2C using the "I2C Manager".
  *
- * NOTE: The initial version of the code is being developed against an OpenServo 2.1 board
- *       with "May 2007" firmware and V3 boards with firmwares available September to
- *       November 2007.
+ * NOTE: The initial version of this software is being developed against an OpenServo 2.1
+ *       board with "May 2007" firmware and V3 boards with "bank switched" firmware
+ *       (OpenServo_V3-dev).
  *
  *       The firmware in general is currently being advanced to include the new facilities
  *       of the OpenServo V3 board (e.g. back EMG) as well as software advances (e.g. "bank
  *       switching").
  *
  *       It is intended that OpenServo interface software will allow both the old and new
- *       boards to be accommodated as well as new firmware.
+ *       boards to be accommodated as well as different firmware versions.
  *
  * ### Overview ##########################################################################
  *
@@ -322,11 +322,12 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_bank[]=
    REGITEM(TIMER,                    2, 0xFF, 0x06),
    REGITEM(POSITION,                 2, 0xFF, 0x08),
    REGITEM(VELOCITY,                 2, 0xFF, 0x0A),
-   REGITEM(POWER,                    2, 0xFF, 0x0C),
+   REGITEM(CURRENT,                  2, 0xFF, 0x0C),
    REGITEM(PWM_CW,                   1, 0xFF, 0x0E),
    REGITEM(PWM_CCW,                  1, 0xFF, 0x0F),
-   REGITEM(VOLTAGE,                  2, 0xFF, 0x10),
+   REGITEM(BATTVOLTAGE,              2, 0xFF, 0x10),
    REGITEM(CURVE_BUFFER,             1, 0xFF, 0x12),
+   REGITEM(TEMPERATURE,              2, 0xFF, 0x13),
    REGITEM(SEEK,                     2, 0xFF, 0x20),
    REGITEM(SEEKVELOCITY,             2, 0xFF, 0x22),
    REGITEM(CURVE_DELTA,              2, 0xFF, 0x24),
@@ -335,6 +336,8 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_bank[]=
    REGITEM(CURVE_OUT_VELOCITY,       2, 0xFF, 0x2A),
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x2C),
    REGITEM(BANKSELECT,               1, 0xFF, 0x2F),
+
+   REGITEM(BACKEMF,                  2, 0x00, 0x41),
 
    REGITEM(TWI_ADDRESS,              1, 0x01, 0x40),
    REGITEM(PID_DEADBAND,             1, 0x01, 0x41),
@@ -377,7 +380,7 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_bank[]=
    CMDITEM(REGISTERS_RESTORE,        0x87),
    CMDITEM(REGISTERS_DEFAULT,        0x88),
    CMDITEM(EEPROM_ERASE,             0x89),
-   CMDITEM(VOLTAGE_RESAMPLE,         0x90),
+   CMDITEM(BATTVOLTAGE_RESAMPLE,     0x90),
    CMDITEM(CURVE_MOTION_ENABLE,      0x91),
    CMDITEM(CURVE_MOTION_DISABLE,     0x92),
    CMDITEM(CURVE_MOTION_RESET,       0x93),
@@ -401,11 +404,12 @@ static const OPENSERVOADDRESSMAP l_basemap_21_11[]=
    REGITEM(TIMER,                    2, 0xFF, 0x06),
    REGITEM(POSITION,                 2, 0xFF, 0x08),
    REGITEM(VELOCITY,                 2, 0xFF, 0x0A),
-   REGITEM(POWER,                    2, 0xFF, 0x0C),
+   REGITEM(CURRENT,                  2, 0xFF, 0x0C),
    REGITEM(PWM_CW,                   1, 0xFF, 0x0E),
    REGITEM(PWM_CCW,                  1, 0xFF, 0x0F),
-   REGITEM(VOLTAGE,                  2, 0xFF, 0x14),
+   REGITEM(BATTVOLTAGE,              2, 0xFF, 0x14),
    REGITEM(CURVE_BUFFER,             1, 0xFF, 0x17),
+   REGITEM(TEMPERATURE,              2, 0xFF, 0xFF),
    REGITEM(SEEK,                     2, 0xFF, 0x10),
    REGITEM(SEEKVELOCITY,             2, 0xFF, 0x12),
    REGITEM(CURVE_DELTA,              2, 0xFF, 0x18),
@@ -414,6 +418,8 @@ static const OPENSERVOADDRESSMAP l_basemap_21_11[]=
    REGITEM(CURVE_OUT_VELOCITY,       2, 0xFF, 0x1E),
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x16),
    REGITEM(BANKSELECT,               1, 0xFF, 0xFF), /* No "Bank select" in OpenServo 2.1 and earlier */
+
+   REGITEM(BACKEMF,                  2, 0xFF, 0xFF),
 
    REGITEM(TWI_ADDRESS,              1, 0xFF, 0x20),
    REGITEM(PID_DEADBAND,             1, 0xFF, 0x21),
@@ -425,8 +431,8 @@ static const OPENSERVOADDRESSMAP l_basemap_21_11[]=
    REGITEM(REVERSESEEK,              1, 0xFF, 0x2E),
    REGITEM(PWM_FREQ_DIVIDER,         2, 0xFF, 0x28),
    REGITEM(ALERT_CURR_MAXLIMIT,      2, 0xFF, 0xFF), /* No "Current limit for alerts and throttling" in OpenServo 2.1 and earlier */
-   REGITEM(ALERT_VOLT_MAXLIMIT,      2, 0xFF, 0xFF), /* No "Max Voltage limit" in OpenServo 2.1 and earlier */
-   REGITEM(ALERT_VOLT_MINLIMIT,      2, 0xFF, 0xFF), /* No "Min Voltage limit" in OpenServo 2.1 and earlier */
+   REGITEM(ALERT_VOLT_MAXLIMIT,      2, 0xFF, 0xFF), /* No "Max Battery Voltage limit" in OpenServo 2.1 and earlier */
+   REGITEM(ALERT_VOLT_MINLIMIT,      2, 0xFF, 0xFF), /* No "Min Battery Voltage limit" in OpenServo 2.1 and earlier */
 
 #ifdef _DEBUG
    { OSI_ID_SEPARATOR,               0, 0XFF, 0xFF }, /* Registers/commands seperator */
@@ -444,7 +450,7 @@ static const OPENSERVOADDRESSMAP l_basemap_21_11[]=
    CMDITEM(REGISTERS_RESTORE,        0x87),
    CMDITEM(REGISTERS_DEFAULT,        0x88),
    CMDITEM(EEPROM_ERASE,             0x89),
-   CMDITEM(VOLTAGE_RESAMPLE,         0x90),
+   CMDITEM(BATTVOLTAGE_RESAMPLE,     0x90),
    CMDITEM(CURVE_MOTION_ENABLE,      0x91),
    CMDITEM(CURVE_MOTION_DISABLE,     0x92),
    CMDITEM(CURVE_MOTION_RESET,       0x93),
@@ -468,11 +474,12 @@ static const OPENSERVOADDRESSMAP l_basemap_21_bank[]=
    REGITEM(TIMER,                    2, 0xFF, 0x06),
    REGITEM(POSITION,                 2, 0xFF, 0x08),
    REGITEM(VELOCITY,                 2, 0xFF, 0x0A),
-   REGITEM(POWER,                    2, 0xFF, 0x0C),
+   REGITEM(CURRENT,                  2, 0xFF, 0x0C),
    REGITEM(PWM_CW,                   1, 0xFF, 0x0E),
    REGITEM(PWM_CCW,                  1, 0xFF, 0x0F),
-   REGITEM(VOLTAGE,                  2, 0xFF, 0x14),
+   REGITEM(BATTVOLTAGE,              2, 0xFF, 0x14),
    REGITEM(CURVE_BUFFER,             1, 0xFF, 0x17),
+   REGITEM(TEMPERATURE,              2, 0xFF, 0xFF),
    REGITEM(SEEK,                     2, 0xFF, 0x10),
    REGITEM(SEEKVELOCITY,             2, 0xFF, 0x12),
    REGITEM(CURVE_DELTA,              2, 0xFF, 0x18),
@@ -481,6 +488,8 @@ static const OPENSERVOADDRESSMAP l_basemap_21_bank[]=
    REGITEM(CURVE_OUT_VELOCITY,       2, 0xFF, 0x1E),
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x16),
    REGITEM(BANKSELECT,               1, 0xFF, 0x2F),
+
+   REGITEM(BACKEMF,                  2, 0x00, 0x41),
 
    REGITEM(TWI_ADDRESS,              1, 0x01, 0x20),
    REGITEM(PID_DEADBAND,             1, 0x01, 0x21),
@@ -511,7 +520,7 @@ static const OPENSERVOADDRESSMAP l_basemap_21_bank[]=
    CMDITEM(REGISTERS_RESTORE,        0x87),
    CMDITEM(REGISTERS_DEFAULT,        0x88),
    CMDITEM(EEPROM_ERASE,             0x89),
-   CMDITEM(VOLTAGE_RESAMPLE,         0x90),
+   CMDITEM(BATTVOLTAGE_RESAMPLE,     0x90),
    CMDITEM(CURVE_MOTION_ENABLE,      0x91),
    CMDITEM(CURVE_MOTION_DISABLE,     0x92),
    CMDITEM(CURVE_MOTION_RESET,       0x93),
@@ -535,11 +544,12 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_11[]=
    REGITEM(TIMER,                    2, 0xFF, 0x06),
    REGITEM(POSITION,                 2, 0xFF, 0x08),
    REGITEM(VELOCITY,                 2, 0xFF, 0x0A),
-   REGITEM(POWER,                    2, 0xFF, 0x0C),
+   REGITEM(CURRENT,                  2, 0xFF, 0x0C),
    REGITEM(PWM_CW,                   1, 0xFF, 0x0E),
    REGITEM(PWM_CCW,                  1, 0xFF, 0x0F),
-   REGITEM(VOLTAGE,                  2, 0xFF, 0x14),
+   REGITEM(BATTVOLTAGE,              2, 0xFF, 0x14),
    REGITEM(CURVE_BUFFER,             1, 0xFF, 0x17),
+   REGITEM(TEMPERATURE,              2, 0xFF, 0xFF),
    REGITEM(SEEK,                     2, 0xFF, 0x10),
    REGITEM(SEEKVELOCITY,             2, 0xFF, 0x12),
    REGITEM(CURVE_DELTA,              2, 0xFF, 0x18),
@@ -547,8 +557,10 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_11[]=
    REGITEM(CURVE_IN_VELOCITY,        2, 0xFF, 0x1C),
    REGITEM(CURVE_OUT_VELOCITY,       2, 0xFF, 0x1E),
    REGITEM(CURVE_RESERVED,           1, 0xFF, 0x16),
-
    REGITEM(BANKSELECT,               1, 0xFF, 0xFF), /* No "Bank select" in OpenServo 2.1 and earlier */
+
+   REGITEM(BACKEMF,                  2, 0xFF, 0xFF),
+
    REGITEM(TWI_ADDRESS,              1, 0xFF, 0x20),
    REGITEM(PID_DEADBAND,             1, 0xFF, 0x21),
    REGITEM(PID_PGAIN,                2, 0xFF, 0x22),
@@ -559,8 +571,8 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_11[]=
    REGITEM(REVERSESEEK,              1, 0xFF, 0x2E),
    REGITEM(PWM_FREQ_DIVIDER,         2, 0xFF, 0x28),
    REGITEM(ALERT_CURR_MAXLIMIT,      2, 0xFF, 0xFF), /* No "Current limit for alerts and throttling" in OpenServo 2.1 and earlier */
-   REGITEM(ALERT_VOLT_MAXLIMIT,      2, 0xFF, 0xFF), /* No "Max Voltage limit" in OpenServo 2.1 and earlier */
-   REGITEM(ALERT_VOLT_MINLIMIT,      2, 0xFF, 0xFF), /* No "Min Voltage limit" in OpenServo 2.1 and earlier */
+   REGITEM(ALERT_VOLT_MAXLIMIT,      2, 0xFF, 0xFF), /* No "Max Battery Voltage limit" in OpenServo 2.1 and earlier */
+   REGITEM(ALERT_VOLT_MINLIMIT,      2, 0xFF, 0xFF), /* No "Min Battery Voltage limit" in OpenServo 2.1 and earlier */
 
 #ifdef _DEBUG
    { OSI_ID_SEPARATOR,               0, 0XFF, 0xFF }, /* Registers/commands seperator */
@@ -578,7 +590,7 @@ static const OPENSERVOADDRESSMAP l_basemap_V3_11[]=
    CMDITEM(REGISTERS_RESTORE,        0x87),
    CMDITEM(REGISTERS_DEFAULT,        0x88),
    CMDITEM(EEPROM_ERASE,             0x89),
-   CMDITEM(VOLTAGE_RESAMPLE,         0x90),
+   CMDITEM(BATTVOLTAGE_RESAMPLE,     0x90),
    CMDITEM(CURVE_MOTION_ENABLE,      0x91),
    CMDITEM(CURVE_MOTION_DISABLE,     0x92),
    CMDITEM(CURVE_MOTION_RESET,       0x93),
@@ -1368,7 +1380,7 @@ static byte_t STR_OPENSERVO[]={ 0x4F, 0x70, 0x65, 0x6E, 0x53, 0x65, 0x72, 0x76 /
  * Older firmware: but is it a OpenServo 2.1 or OSxV2 board?
  */
                   case 0x01:
-                     posid->m_nDType=OSI_DTYPE_21_11; // TODO
+                     posid->m_nDType=OSI_DTYPE_V3_11; // TODO
                      break;
 
 /*
@@ -2529,7 +2541,7 @@ int OSI_SetPID(OPENSERVO *posid, const OPENSERVOPIDDATA *pPIDData)
 
 /*******************************************************************************
  *
- * int_t OSI_GetVoltageAsV(OPENSERVO *posid, uint16_t *pnVoltage)
+ * int_t OSI_GetBatteryVoltageAsV(OPENSERVO *posid, uint16_t *pnVoltage)
  *
  * Return the current battery voltage in real units (V*100).
  *
@@ -2541,9 +2553,9 @@ int OSI_SetPID(OPENSERVO *posid, const OPENSERVOPIDDATA *pPIDData)
  *       dealing with limited sized integers. This function deals with
  *       integers and returns an integer for that reason.
  */
-int_t OSI_GetVoltageAsV(OPENSERVO *posid, uint16_t *pnVoltage)
+int_t OSI_GetBatteryVoltageAsV(OPENSERVO *posid, uint16_t *pnVoltage)
 {
-   if(OSI_GetVoltage(posid,pnVoltage)==OSI_SUCCESS)
+   if(OSI_GetBatteryVoltage(posid,pnVoltage)==OSI_SUCCESS)
    {
       /* TODO: Check this for "accuracy" and microcontroller support */
       *pnVoltage=*pnVoltage*posid->m_conf.m_VREG*(posid->m_conf.m_R3R4+posid->m_conf.m_R4R6)/posid->m_conf.m_R4R6/1023;

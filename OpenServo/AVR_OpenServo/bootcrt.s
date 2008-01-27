@@ -1,11 +1,4 @@
 /*
-   Portions of this file derived from gcrt1.S v1.8 from avr-libc project.  
-   See the following link for details:
-
-   http://www.nongnu.org/avr-libc/
-
-   Original copyright notice included below:
-
    Copyright (c) 2002, Marek Michalkiewicz <marekm@amelek.gda.pl>
    All rights reserved.
 
@@ -35,146 +28,186 @@
    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE.
-
-   Copyright for original code not derived from gcrt1.S:
-
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
-   All rights reserved.
 */
+
+/* $Id$ */
 
 #if (__GNUC__ < 3) || (__GNUC__ == 3 && __GNUC_MINOR__ < 3)
 #error "GCC version >= 3.3 required"
 #endif
 
-/* The following is needed until WINAVR supports the ATtinyX5 MCUs. */
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
+#include "macros.h"
 
-#include <avr/io.h>
+    .macro  vector name
+    .if (. - __vectors < _VECTORS_SIZE)
+    .weak   \name
+    .set    \name, __bad_interrupt
+    XJMP    \name
+    .endif
+    .endm
 
-	.macro	vector name
-	.if (. - __vectors < _VECTORS_SIZE)
-	.weak	\name
-	.set	\name, __bad_interrupt
-	rjmp	\name
-	.endif
-	.endm
-
-	.section .vectors,"ax",@progbits
-	.global	__vectors
-	.func	__vectors
+    .section .vectors,"ax",@progbits
+    .global __vectors
+    .func   __vectors
 __vectors:
-	rjmp	__init
-	vector	__vector_1
-	vector	__vector_2
-	vector	__vector_3
-	vector	__vector_4
-	vector	__vector_5
-	vector	__vector_6
-	vector	__vector_7
-	vector	__vector_8
-	vector	__vector_9
-	vector	__vector_10
-	vector	__vector_11
-	vector	__vector_12
-	vector	__vector_13
-	vector	__vector_14
-	vector	__vector_15
-	vector	__vector_16
-	vector	__vector_17
-	vector	__vector_18
-	vector	__vector_19
-	vector	__vector_20
-	vector	__vector_21
-	vector	__vector_22
-	vector	__vector_23
-	vector	__vector_24
-	vector	__vector_25
-	vector	__vector_26
-	vector	__vector_27
-	vector	__vector_28
-	vector	__vector_29
-	vector	__vector_30
-	vector	__vector_31
-	vector	__vector_32
-	vector	__vector_33
-	vector	__vector_34
-	vector	__vector_35
-	vector	__vector_36
-	vector	__vector_37
-	vector	__vector_38
-	vector	__vector_39
-	vector	__vector_40
-	vector	__vector_41
-	vector	__vector_42
-	vector	__vector_43
-	vector	__vector_44
-	vector	__vector_45
-	vector	__vector_46
-	vector	__vector_47
-	vector	__vector_48
-	vector	__vector_49
-	vector	__vector_50
-	vector	__vector_51
-	vector	__vector_52
-	vector	__vector_53
-	vector	__vector_54
-	vector	__vector_55
-	vector	__vector_56
-	.endfunc
+    XJMP    __init
+    vector  __vector_1
+    vector  __vector_2
+    vector  __vector_3
+    vector  __vector_4
+    vector  __vector_5
+    vector  __vector_6
+    vector  __vector_7
+    vector  __vector_8
+    vector  __vector_9
+    vector  __vector_10
+    vector  __vector_11
+    vector  __vector_12
+    vector  __vector_13
+    vector  __vector_14
+    vector  __vector_15
+    vector  __vector_16
+    vector  __vector_17
+    vector  __vector_18
+    vector  __vector_19
+    vector  __vector_20
+    vector  __vector_21
+    vector  __vector_22
+    vector  __vector_23
+    vector  __vector_24
+    vector  __vector_25
+    vector  __vector_26
+    vector  __vector_27
+    vector  __vector_28
+    vector  __vector_29
+    vector  __vector_30
+    vector  __vector_31
+    vector  __vector_32
+    vector  __vector_33
+    vector  __vector_34
+    vector  __vector_35
+    vector  __vector_36
+    vector  __vector_37
+    vector  __vector_38
+    vector  __vector_39
+    vector  __vector_40
+    vector  __vector_41
+    vector  __vector_42
+    vector  __vector_43
+    vector  __vector_44
+    vector  __vector_45
+    vector  __vector_46
+    vector  __vector_47
+    vector  __vector_48
+    vector  __vector_49
+    vector  __vector_50
+    vector  __vector_51
+    vector  __vector_52
+    vector  __vector_53
+    vector  __vector_54
+    vector  __vector_55
+    vector  __vector_56
+    .endfunc
 
-	.global	__boot_vector
+    .global __boot_vector
 __boot_vector:
 
-	/* Jump vector for bootloader. */
-	rjmp	__boot_start
+    /* Jump vector for bootloader. */
+    XJMP    __boot_start
 
-	/* Handle unexpected interrupts (enabled and no handler) by 
-	   jumping to the __vector_default function defined by the user,
-	   otherwise jump to the reset address.
+    /* Handle unexpected interrupts (enabled and no handler), which
+       usually indicate a bug.  Jump to the __vector_default function
+       if defined by the user, otherwise jump to the reset address.
 
-	   This must be in a different section, otherwise the assembler
-	   will resolve "rjmp" offsets and there will be no relocs.  */
+       This must be in a different section, otherwise the assembler
+       will resolve "rjmp" offsets and there will be no relocs.  */
 
-	.text
-	.global	__bad_interrupt
-	.func	__bad_interrupt
+    .text
+    .global __bad_interrupt
+    .func   __bad_interrupt
 __bad_interrupt:
-	.weak	__vector_default
-	.set	__vector_default, __vectors
-	rjmp	__vector_default
-	.endfunc
+    .weak   __vector_default
+    .set    __vector_default, __vectors
+    XJMP    __vector_default
+    .endfunc
 
-	.section .init0,"ax",@progbits
+    .section .init0,"ax",@progbits
 
-	.global	__boot_start
+    .global __boot_start
 __boot_start:
 
-	.weak	__init
+    .weak   __init
+;   .func   __init
 __init:
 
-	.weak	__stack
-	.set	__stack, RAMEND
+#ifndef __AVR_ASM_ONLY__
+    .weak   __stack
 
-	.weak	__heap_end
-	.set	__heap_end, 0
+    /* By default, malloc() uses the current value of the stack pointer
+       minus __malloc_margin as the highest available address.
 
-	.section .init2,"ax",@progbits
+       In some applications with external SRAM, the stack can be below
+       the data section (in the internal SRAM - faster), and __heap_end
+       should be set to the highest address available for malloc().  */
+    .weak   __heap_end
+    .set    __heap_end, 0
 
-	/* Clear out the status register. */
-	clr	r1
-	out	_SFR_IO_ADDR(SREG), r1
+    .section .init2,"ax",@progbits
+    clr __zero_reg__
+    out _SFR_IO_ADDR(SREG), __zero_reg__
+    ldi r28,lo8(__stack)
+#ifdef SPH
+    ldi r29,hi8(__stack)
+    out _SFR_IO_ADDR(SPH), r29
+#endif
+    out _SFR_IO_ADDR(SPL), r28
 
-	/* Configure stack. */
-	ldi	r28,lo8(__stack)
-	ldi	r29,hi8(__stack)
-	out	_SFR_IO_ADDR(SPH), r29
-	out	_SFR_IO_ADDR(SPL), r28
+#if BIG_CODE
+    /* Only for >64K devices with RAMPZ, replaces the default code
+       provided by libgcc.S which is only linked in if necessary.  */
 
-	/* Other init sections provided by libgcc.S will be linked as needed here. */
+    .section .init4,"ax",@progbits
+    .global __do_copy_data
+__do_copy_data:
+    ldi r17, hi8(__data_end)
+    ldi r26, lo8(__data_start)
+    ldi r27, hi8(__data_start)
+    ldi r30, lo8(__data_load_start)
+    ldi r31, hi8(__data_load_start)
 
-	.section .init9,"ax",@progbits
+    /* On the enhanced core, "elpm" with post-increment updates RAMPZ
+       automatically.  Otherwise we have to handle it ourselves.  */
 
-	/* Jump to the main function. */
-	rjmp	main
+#ifdef __AVR_ENHANCED__
+    ldi r16, hh8(__data_load_start)
+#else
+    ldi r16, hh8(__data_load_start - 0x10000)
+.L__do_copy_data_carry:
+    inc r16
+#endif
+    out _SFR_IO_ADDR(RAMPZ), r16
+    rjmp    .L__do_copy_data_start
+.L__do_copy_data_loop:
+#ifdef __AVR_ENHANCED__
+    elpm    r0, Z+
+#else
+    elpm
+#endif
+    st  X+, r0
+#ifndef __AVR_ENHANCED__
+    adiw    r30, 1
+    brcs    .L__do_copy_data_carry
+#endif
+.L__do_copy_data_start:
+    cpi r26, lo8(__data_end)
+    cpc r27, r17
+    brne    .L__do_copy_data_loop
+#endif /* BIG_CODE */
+
+    .set    __stack, RAMEND
+#endif /* !__AVR_ASM_ONLY__ */
+
+    .section .init9,"ax",@progbits
+    XJMP    main
+;   .endfunc
 

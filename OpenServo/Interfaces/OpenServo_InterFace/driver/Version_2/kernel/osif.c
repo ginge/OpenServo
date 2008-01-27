@@ -100,6 +100,14 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 err("failure reading data");
                 return -EREMOTEIO;
             }
+            if(usb_read(adapter, USBI2C_STOP, 
+               0, 0, 
+               0, 0) >0) {
+
+                   err("failure sending STOP");
+                   return -EREMOTEIO;
+            }
+
 #ifdef DEBUG_IO
             { 
                 char str[32];
@@ -129,6 +137,14 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 err("failure writing data");
                 return -EREMOTEIO;
             }
+            if(usb_read(adapter, USBI2C_STOP, 
+               0, 0, 
+               0, 0) >0) {
+
+                   err("failure sending STOP");
+                   return -EREMOTEIO;
+               }
+
         }
 
         /* read status */
@@ -259,14 +275,14 @@ static int osif_probe(struct usb_interface *interface,
     dev->i2c_adap.class	  = I2C_CLASS_HWMON;
     dev->i2c_adap.algo	  = &usb_algorithm;
     dev->i2c_adap.algo_data = dev;
-    sprintf(dev->i2c_adap.name, "i2c-tiny-usb at bus %03d device %03d", 
+    sprintf(dev->i2c_adap.name, "OSIF at bus %03d device %03d", 
             dev->udev->bus->busnum, dev->udev->devnum);
 
     /* and finally attach to i2c layer */
     i2c_add_adapter(&(dev->i2c_adap));
 
     /* inform user about successful attachment to i2c layer */
-    dev_info(&dev->i2c_adap.dev, "connected i2c-tiny-usb device\n");
+    dev_info(&dev->i2c_adap.dev, "connected OSIF device\n");
 
     return 0;
 

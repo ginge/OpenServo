@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * Implements the I2C Manager interface functions for the Dimax/Diolan U2C12 USB-I2C/SPI/GPIO.
@@ -709,11 +710,11 @@ I2CMSTATIC int_t I2CM_GetDeviceCount()
 
 /*******************************************************************************
  *
- * int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
+ * int_devaddr_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
  */
-I2CMSTATIC int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
+I2CMSTATIC int_devaddr_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
 {
-   int_t rc=(int_t)-1;
+   int_devaddr_t rc=(int_devaddr_t)-1;
    if(nBus<0 || nBus>=l_nI2CBuses)
    {
       I2CM_SetLastError(I2CM_ERR_BADARGS,NULL);
@@ -725,7 +726,7 @@ I2CMSTATIC int_t I2CM_GetDeviceAddress(int_t nBus, int_t nDevice)
          I2CM_SetLastError(I2CM_ERR_BADARGS,NULL);
       } else
       {
-         rc=(DWORD)pbus->m_pAddr[nDevice];
+         rc=(int_devaddr_t)pbus->m_pAddr[nDevice];
       }
    }
    return rc;

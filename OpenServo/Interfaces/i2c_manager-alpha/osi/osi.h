@@ -107,12 +107,12 @@ typedef enum
    OSI_REGID_TIMER,                 // ADC Timer
    OSI_REGID_POSITION,              // Current measured servo position
    OSI_REGID_VELOCITY,              // Current measured servo velocity
-   OSI_REGID_POWER,                 // Current measured servo power (current)
+   OSI_REGID_CURRENT,               // Current measured servo current
    OSI_REGID_PWM_CW,                // PWM clockwise value
    OSI_REGID_PWM_CCW,               // PWM counter-clockwise
-   OSI_REGID_VOLTAGE,               // Last measured battery voltage
+   OSI_REGID_BATTVOLTAGE,           // Last measured battery voltage
    OSI_REGID_CURVE_BUFFER,          // Remaining curve buffer space
-//   OSI_REGID_TEMPERATURE,           // Last measured "on-board temperature"
+   OSI_REGID_TEMPERATURE,           // Last measured "on-board temperature"
    OSI_REGID_SEEK,                  // Seek position
    OSI_REGID_SEEKVELOCITY,          // Seek velocity
    OSI_REGID_CURVE_DELTA,           // Curve Time delta
@@ -124,7 +124,7 @@ typedef enum
    OSI_REGID_BANKSELECT,            // Bank Selection register
 
 //   OSI_REGID_ALERT_STATUS,          // Alert status
-//   OSI_REGID_BACKEMF,               // Last measured back-EMF
+   OSI_REGID_BACKEMF,               // Last measured back-EMF
 
    OSI_REGID_TWI_ADDRESS,           // TWI address of servo
    OSI_REGID_PID_DEADBAND,          // Programmable PID deadband value
@@ -137,8 +137,8 @@ typedef enum
    OSI_REGID_PWM_FREQ_DIVIDER,      // PWM frequency divider
 //   OSI_REGID_PWM_MAX,
    OSI_REGID_ALERT_CURR_MAXLIMIT,   // Current limit for alerts and throttling
-   OSI_REGID_ALERT_VOLT_MAXLIMIT,   // Max voltage limit
-   OSI_REGID_ALERT_VOLT_MINLIMIT,   // Min voltage limit
+   OSI_REGID_ALERT_VOLT_MAXLIMIT,   // Max battery voltage limit
+   OSI_REGID_ALERT_VOLT_MINLIMIT,   // Min battery voltage limit
 //   OSI_REGID_ALERT_TEMP_MAXLIMIT,   // Max temperature limit
 //   OSI_REGID_GENERAL_CALL_GROUP,
 //   OSI_REGID_REG_BRAKE_STRENGTH,
@@ -169,7 +169,7 @@ typedef enum
    OSI_CMDID_REGISTERS_RESTORE,     // Restore read/write protected registers from EEPROM
    OSI_CMDID_REGISTERS_DEFAULT,     // Restore read/write protected registers to defaults
    OSI_CMDID_EEPROM_ERASE,          // Erase the AVR EEPROM 
-   OSI_CMDID_VOLTAGE_RESAMPLE,      // Request a new Voltage sample 
+   OSI_CMDID_BATTVOLTAGE_RESAMPLE,  // Request a new Battery Voltage sample 
    OSI_CMDID_CURVE_MOTION_ENABLE,   // Enable curve based motion 
    OSI_CMDID_CURVE_MOTION_DISABLE,  // Disable curve based motion 
    OSI_CMDID_CURVE_MOTION_RESET,    // Clear the curve buffer
@@ -348,6 +348,9 @@ typedef struct OPENSERVOTRANSACTIONSET
  *
  * TODO: Need to check/update these with understating as to what are, and are not,
  *       signed quantities, etc.
+ *
+ *       Should there be an attempt to order these in the same order as the
+ *       register maps? Doing so could lead to a retrieval optimisation.
  */
 typedef struct OPENSERVOPIDDATA
 {
@@ -366,12 +369,13 @@ typedef struct OPENSERVOREGSET
    uint16_t m_Timer;            // ADC timer
    uint16_t m_Position;         // Current servo position
    int16_t m_Velocity;          // Current servo velocity
-   uint16_t m_Power;            // Servo power
+   uint16_t m_Current;          // Servo current
+   uint16_t m_Temperature;      // Servo temperature
    uint8_t m_PWM_CW;            // PWM clockwise value
    uint8_t m_PWM_CCW;           // PWM counter-clockwise value
    uint16_t m_Seek;             // Read/Write, Seek position
    uint16_t m_SeekVelocity;     // Read/Write, Seek position velocity (speed)
-   uint16_t m_Voltage;          // Read/Write, Battery voltage
+   uint16_t m_BattVoltage;      // Read/Write, Battery voltage
    uint8_t m_Curve_Reserved;    // Reserved curve data
    uint8_t m_Curve_Buffer;      // Remaining curve buffer space
    int16_t m_Curve_Delta;       // Curve Time delta
@@ -379,6 +383,7 @@ typedef struct OPENSERVOREGSET
    int16_t m_Curve_InVelocity;  // Curve in velocity
    int16_t m_Curve_OutVelocity; // Curve out velocity
    byte_t m_BankSelect;         // Currently selected register bank
+   int16_t m_BackEMF;           // Last measured back EMF
    byte_t m_I2CAddress;         // TWI (I2C) address of servo
    OPENSERVOPIDDATA m_PID;
    uint16_t m_PWM_FreqDivider;  // PWM frequency divider
@@ -386,8 +391,8 @@ typedef struct OPENSERVOREGSET
    uint16_t m_MaxSeek;          // Maximum seek position
    uint8_t m_ReverseSeek;       // Reverse seek sense
    uint16_t m_Alert_MaxCurrent; // Maximum current (alert)
-   uint16_t m_Alert_MaxVoltage; // Maximum voltage (alert)
-   uint16_t m_Alert_MinVoltage; // Minimum voltage (alert)
+   uint16_t m_Alert_MaxVoltage; // Maximum battery voltage (alert)
+   uint16_t m_Alert_MinVoltage; // Minimum battery voltage (alert)
 
 //   byte_t m_Reserved;           // Read/Write Protected
 
@@ -400,7 +405,7 @@ typedef struct OPENSERVOREGSET
  * The following defines a structure that holds some additional details about
  * an OpenServo, for example the values of certain resistors and the estimated
  * AVCC so that, for example, actually "battery voltage" can be computed, rather
- * then returning just the voltage register content.
+ * then returning just the battery voltage register content.
  *
  * NOTE: At some point this may be loaded into a microcontroller, so the choice
  *       of types (i.e. whether to use double/float, etc.) may be important.
@@ -603,7 +608,8 @@ int_t OSI_Command(OPENSERVO *posid, OSI_CMDID nID);
  * specific registers or issue specific commands "by name". For the most part
  * the functions are declared as being "inline". Some functions are implemented
  * directly (in osi.c), because they are more complex and would not "save space
- * and/or time" by being inlined, for example the OSI_GetVoltageAsV function.
+ * and/or time" by being inlined, for example the OSI_GetBatteryVoltageAsV
+ * function.
  *
  * NOTE: The macro OSI_LEAN can be defined to prevent the "larger" "advanced
  *       interface functions" from being declared or included in the compilation
@@ -645,7 +651,8 @@ OSIAIDEF_Get_FUNC(FLAGS,Flags,uint16_t)
 OSIAIDEF_Get_FUNC(TIMER,Timer,uint16_t)
 OSIAIDEF_Get_FUNC(POSITION,Position,uint16_t)
 OSIAIDEF_Get_FUNC(VELOCITY,Velocity,int16_t)
-OSIAIDEF_Get_FUNC(POWER,Power,uint16_t)
+OSIAIDEF_Get_FUNC(CURRENT,Current,uint16_t)
+OSIAIDEF_Get_FUNC(BACKEMF,BackEMF,uint16_t)
 OSIAIDEF_Get_FUNC(SEEK,Seek,uint16_t)
 OSIAIDEF_Set_FUNC(SEEK,Seek,uint16_t)
 OSIAIDEF_Get_FUNC(SEEKVELOCITY,SeekVelocity,uint16_t)
@@ -667,9 +674,9 @@ OSIAIDEF_Get_FUNC(ALERT_VOLT_MAXLIMIT,MaxVoltage,uint16_t)
 OSIAIDEF_Set_FUNC(ALERT_VOLT_MINLIMIT,MinVoltage,uint16_t)
 OSIAIDEF_Get_FUNC(ALERT_VOLT_MINLIMIT,MinVoltage,uint16_t)
 
-__inline int_t OSI_GetVoltage(OPENSERVO *posid, uint16_t *pnVoltage)
+__inline int_t OSI_GetBatteryVoltage(OPENSERVO *posid, uint16_t *pnVoltage)
 {
-   int_t rc=OSI_ReadRegister(posid,OSI_REGID_VOLTAGE,pnVoltage,sizeof(*pnVoltage));
+   int_t rc=OSI_ReadRegister(posid,OSI_REGID_BATTVOLTAGE,pnVoltage,sizeof(*pnVoltage));
    if(rc==OSI_SUCCESS)
    {
 
@@ -677,8 +684,10 @@ __inline int_t OSI_GetVoltage(OPENSERVO *posid, uint16_t *pnVoltage)
  * NOTE: Every time a voltage reading is requested, send the command to measure
  *       the voltage. The command takes time to complete, so it is sent after
  *       retrieving the currently stored value.
+ *
+ * TODO: Later firmware may not require the command to be sent.
  */
-      rc=OSI_Command(posid,OSI_CMDID_VOLTAGE_RESAMPLE);
+      rc=OSI_Command(posid,OSI_CMDID_BATTVOLTAGE_RESAMPLE);
    }
    return rc;
 }
@@ -697,7 +706,7 @@ __inline int_t OSI_GetPWM(OPENSERVO *posid, uint8_t *pnCW, uint8_t *pnCCW)
 int_t OSI_GetPID(OPENSERVO *posid, OPENSERVOPIDDATA *pPIDData);
 int_t OSI_SetPID(OPENSERVO *posid, const OPENSERVOPIDDATA *pPIDData);
 int_t OSI_RedirectRegister(OPENSERVO *posid, OSI_REGID nReg, byte_t nAddress); // TODO: Implement
-int_t OSI_GetVoltageAsV(OPENSERVO *posid, uint16_t *pnVoltage);
+int_t OSI_GetBatteryVoltageAsV(OPENSERVO *posid, uint16_t *pnVoltage);
 #endif // OSI_LEAN
 
 #undef OSIAIDEF_Set_FUNC

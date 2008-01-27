@@ -22,14 +22,17 @@
 
 CConcreteDeviceFactory<CI2cEeprom> CI2cEeprom::sm_Factory;
 const int erU2CError = 1;
-const DWORD I2C_WRITE_DELAY = 200;
 CI2cEeprom::EepromTypes CI2cEeprom::sm_EepromTypes[] = {
-    {"ATtiny25 Flash", 2048, 32, 0, 2},
-    {"ATtiny45 Flash", 4096, 64, 0, 2},
-    {"ATtiny85 Flash", 8192, 64, 0, 2},
-    {"ATtiny25 EEPROM", 128, 32, 2048, 2},
-    {"ATtiny45 EEPROM", 256, 64, 4096, 2},
-    {"ATtiny85 EEPROM", 512, 64, 8192, 2},
+    {"ATtiny25 Flash", 2048, 32, 0, 2, 2, 200},
+    {"ATtiny45 Flash", 4096, 64, 0, 2, 2, 200},
+    {"ATtiny85 Flash", 8192, 64, 0, 2, 2, 200},
+    {"ATtiny25 EEPROM", 128, 32, 2048, 2, 2, 200},
+    {"ATtiny45 EEPROM", 256, 64, 4096, 2, 2, 200},
+    {"ATtiny85 EEPROM", 512, 64, 8192, 2, 2, 200},
+    {"ATMega8 Flash", 8192, 64, 0, 2, 2, 400},
+    {"ATMega8 EEPROM", 512, 64, 8192, 2, 2, 800},
+    {"ATMega168 Flash", 16384, 128, 0, 2, 4, 400},
+    {"ATMega168 EEPROM", 512, 128, 16384, 2, 4, 600},
 };
 
 CI2cEeprom::CI2cEeprom(void)
@@ -303,7 +306,7 @@ WPARAM CI2cEeprom::prDoProgram()
         CopyMemory(Transaction.Buffer, m_DevOperation.pBuffer + CurrAddr, CurrBufferLen);
         if (U2C_SUCCESS != (Res = U2C_Write(m_hDevice, &Transaction)))
             return DF_PROGRAM_FAILED;
-        Sleep(I2C_WRITE_DELAY);
+        Sleep(sm_EepromTypes[m_Subtype].m_Delay);
     }
     return DF_PROGRAM_FINISHED;
 }
@@ -345,11 +348,13 @@ WPARAM CI2cEeprom::prDoVerify(bool bAfterErase)
             if (CurrAddr == 0)
             {
                 // Sanity check.
-                if (CurrBufferLen > 2)
+                if (CurrBufferLen > sm_EepromTypes[m_Subtype].m_SkipReset)
                 {
                     // Ignore the first two bytes and compare the rest of the transaction
                     // buffer with the erased buffer values.
-                    if (memcmp(ffBuffer + 2, Transaction.Buffer + 2, CurrBufferLen - 2) != 0)
+                    if (memcmp(ffBuffer + sm_EepromTypes[m_Subtype].m_SkipReset,
+						       Transaction.Buffer + sm_EepromTypes[m_Subtype].m_SkipReset, 
+							   CurrBufferLen - sm_EepromTypes[m_Subtype].m_SkipReset) != 0)
                         return DF_VERIFY_FAILED;
                 }
             }
@@ -367,11 +372,13 @@ WPARAM CI2cEeprom::prDoVerify(bool bAfterErase)
             if (CurrAddr == 0)
             {
                 // Sanity check.
-                if (CurrBufferLen > 2)
+                if (CurrBufferLen > sm_EepromTypes[m_Subtype].m_SkipReset)
                 {
                     // Ignore the first two bytes and compare the rest of the transaction
                     // buffer with the erased buffer values.
-                    if (memcmp(m_DevOperation.pBuffer + CurrAddr + 2, Transaction.Buffer + 2, CurrBufferLen - 2) != 0)
+                    if (memcmp(m_DevOperation.pBuffer + CurrAddr + sm_EepromTypes[m_Subtype].m_SkipReset,
+							   Transaction.Buffer + sm_EepromTypes[m_Subtype].m_SkipReset,
+							   CurrBufferLen - sm_EepromTypes[m_Subtype].m_SkipReset) != 0)
                         return DF_VERIFY_FAILED;
                 }
             }
@@ -410,7 +417,7 @@ WPARAM CI2cEeprom::prDoErase()
         prSetAddress(&Transaction, CurrAddr);
         if (U2C_SUCCESS != (Res = U2C_Write(m_hDevice, &Transaction)))
             return DF_ERASE_FAILED;
-        Sleep(I2C_WRITE_DELAY);
+        Sleep(sm_EepromTypes[m_Subtype].m_Delay);
     }
     return DF_ERASE_FINISHED;
 }

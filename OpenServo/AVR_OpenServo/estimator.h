@@ -21,12 +21,12 @@
     OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
     OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+	
+	$Id$
 */
 
 #ifndef _OS_ESTIMATOR_H_
 #define _OS_ESTIMATOR_H_ 1
-
-int16_t multiply(int16_t num1, int16_t num2, int32_t denum);
 
 // Initialize the state estimator module.
 void estimator_init(void);

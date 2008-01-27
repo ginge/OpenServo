@@ -42,7 +42,10 @@
 #define TWI_CMD_CURVE_MOTION_DISABLE    0x92        // Disable curve motion processing.
 #define TWI_CMD_CURVE_MOTION_RESET      0x93        // Reset the curve motion buffer.
 #define TWI_CMD_CURVE_MOTION_APPEND     0x94        // Append curve motion data.
-
+#define TWI_CMD_GCALL_ENABLE            0x95        // Enable General Call
+#define TWI_CMD_GCALL_DISABLE           0x96        // Disable General Call
+#define TWI_CMD_GCALL_START_WAIT        0x97        // Wait for the syncro move
+#define TWI_CMD_GCALL_START_MOVE        0x98        // Start the General call syncro move
 
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__)|| defined(__AVR_ATmega168__)
 
@@ -93,5 +96,28 @@
 void twi_slave_init(uint8_t);
 uint8_t twi_receive_byte(void);
 uint8_t twi_data_in_receive_buffer(void);
+
+// General call functions
+void general_call_enable(void);
+void general_call_disable(void);
+void general_call_start_move(void);
+void general_call_start_wait(void);
+void general_call_start_reset(void);
+void general_call_start_wait_reset(void);
+
+inline static uint8_t general_call_enabled(void)
+{
+    return (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_GENERALCALL_ENABLED)) ? 1 : 0;
+}
+
+inline static uint8_t general_call_start(void)
+{
+    return (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_GENERALCALL_START)) ? 1 : 0;
+}
+
+inline static uint8_t general_call_wait(void)
+{
+    return (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_GENERALCALL_WAIT)) ? 1 : 0;
+}
 
 #endif // _OS_TWI_H_

@@ -51,11 +51,14 @@
 #include "banks.h"
 #include "alert.h"
 
+static uint16_t throttle;
+
 void alert_init(void)
 // Function to initialize alerts.
 {
     // reset the alerts register to 0, or no errors
     banks_write_byte(0, ALERT_STATUS, 0x00);
+    throttle = 0;
 }
 
 void alert_defaults(void)
@@ -79,29 +82,32 @@ void alert_check(void)
     current = registers_read_word(REG_POWER_HI,REG_POWER_LO);
 
     // Get the set limits for voltage and power
-    max_voltage = banks_read_word(BANK_1, ALERT_VOLT_MAX_LIMIT_HI, ALERT_VOLT_MAX_LIMIT_LO);
-    min_voltage = banks_read_word(BANK_1, ALERT_VOLT_MIN_LIMIT_HI, ALERT_VOLT_MIN_LIMIT_LO);
+    max_voltage = banks_read_word(ALERT_CONFIG_BANK, ALERT_VOLT_MAX_LIMIT_HI, ALERT_VOLT_MAX_LIMIT_LO);
+    min_voltage = banks_read_word(ALERT_CONFIG_BANK, ALERT_VOLT_MIN_LIMIT_HI, ALERT_VOLT_MIN_LIMIT_LO);
 
-    max_current = banks_read_word(BANK_1, ALERT_CURR_MAX_LIMIT_HI, ALERT_CURR_MAX_LIMIT_LO);
+    max_current = banks_read_word(ALERT_CONFIG_BANK, ALERT_CURR_MAX_LIMIT_HI, ALERT_CURR_MAX_LIMIT_LO);
 
     // Check the voltage is not below or above the set voltage. Ignore if 0
     // NOTE: This would be a good place to alter the pwm of the motor to output the same voltage
     if (voltage > max_voltage && max_voltage >0)
     {
-        banks_write_byte(BANK_0, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERVOLT));
+        banks_write_byte(ALERT_BANK, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERVOLT));
     }
     else if (voltage < min_voltage && min_voltage >0)
     {
-        banks_write_byte(BANK_0, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_UNDERVOLT));
+        banks_write_byte(ALERT_BANK, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_UNDERVOLT));
     }
 
     // Check the curent is not over the maximum set current. Ignore if 0
     // NOTE: This would be a good place to throttle the current if we want to
     if (current > max_current && max_current >0)
     {
-        banks_write_byte(BANK_0, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERCURR));
+        banks_write_byte(ALERT_BANK, ALERT_STATUS, alert_setbit(ALERT_STATUS, ALERT_OVERCURR));
+        throttle = current - max_current ;
     }
 
+    if(throttle >0) throttle--;
+    if(throttle >0) throttle--;
 }
 
 uint16_t alert_pwm_throttle(uint16_t pwm)
@@ -109,6 +115,12 @@ uint16_t alert_pwm_throttle(uint16_t pwm)
 // This function runs in the ADC context, so don't tie up for any longer than 2ms
 {
     // Do something here if you want to throttle PWM somehow
+
+    if (pwm>0)
+        pwm -= (throttle*2);
+    else
+        pwm += (throttle*2);
+
     return pwm;
 }
 
@@ -117,7 +129,7 @@ uint16_t alert_pwm_throttle(uint16_t pwm)
 uint8_t alert_setbit(uint8_t reg, uint8_t bit)
 // set a bit in the register
 {
-    reg = reg^bit;
+    reg = reg | (1<<bit);
 
     return reg;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form interface generated from reading ui file 'aboutbox.ui'
 **
-** Created: Sun Mar 18 21:56:56 2007
+** Created: Fri Apr 20 01:09:10 2007
 **      by: The User Interface Compiler ($Id$)
 **
 ** WARNING! All changes made in this file will be lost!

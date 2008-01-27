@@ -72,14 +72,14 @@
 #define REG_PID_DGAIN_LO            0x05
 #define REG_PID_IGAIN_HI            0x06
 #define REG_PID_IGAIN_LO            0x07
-#define REG_PWM_FREQ_DIVIDER_HI     0x08
-#define REG_PWM_FREQ_DIVIDER_LO     0x09
-#define REG_PWM_MAX                 0x0A
-#define REG_MIN_SEEK_HI             0x0B
-#define REG_MIN_SEEK_LO             0x0C
-#define REG_MAX_SEEK_HI             0x0D
-#define REG_MAX_SEEK_LO             0x0E
-#define REG_REVERSE_SEEK            0x0F
+#define REG_MIN_SEEK_HI             0x08
+#define REG_MIN_SEEK_LO             0x09
+#define REG_MAX_SEEK_HI             0x0A
+#define REG_MAX_SEEK_LO             0x0B
+#define REG_REVERSE_SEEK            0x0C
+#define REG_PWM_FREQ_DIVIDER_HI     0x0D
+#define REG_PWM_FREQ_DIVIDER_LO     0x0E
+#define REG_PWM_MAX                 0x0F
 
 #define ALERT_CURR_MAX_LIMIT_HI     0x10
 #define ALERT_CURR_MAX_LIMIT_LO     0x11
@@ -89,14 +89,17 @@
 #define ALERT_VOLT_MIN_LIMIT_LO     0x15
 #define ALERT_TEMP_MAX_LIMIT_HI     0x16
 #define ALERT_TEMP_MAX_LIMIT_LO     0x17
+
+#define REG_GENERAL_CALL_GROUP      0x20
+#define REG_BRAKE_STRENGTH          0x21
 // Delay in ms for the back emf spike collapse
-#define REG_EMF_COLLAPSE_DELAY      0x20
+#define REG_EMF_COLLAPSE_DELAY      0x2A
 // This is 41us * n us delay for back emf charging cap
-#define REG_EMF_CHARGE_TIME         0x21
+#define REG_EMF_CHARGE_TIME         0x2B
 
 
 #define CONFIG_SAVE_MIN             0x00
-#define CONFIG_SAVE_MAX             0x16
+#define CONFIG_SAVE_MAX             0x2B 
 #define CONFIG_SAVE_COUNT (CONFIG_SAVE_MAX - CONFIG_SAVE_MIN + 1)
 
 // Bank 2
@@ -120,8 +123,6 @@ void banks_init(void);
 void banks_defaults(void);
 uint16_t banks_read_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo);
 void banks_write_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo, uint16_t value);
-uint8_t banks_save_registers(void);
-uint8_t banks_restore_registers(void);
 void banks_update_registers(void);
 // Bank in-line functions.
 

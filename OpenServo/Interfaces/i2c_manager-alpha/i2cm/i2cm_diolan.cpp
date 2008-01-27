@@ -27,6 +27,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
     DEALINGS IN THE SOFTWARE.
 
+ *
  * Synopsis     :
  *
  * For some reason the Diolan U2C12 USB library has C++ linkage on the PC platform

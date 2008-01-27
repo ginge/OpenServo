@@ -1,24 +1,24 @@
 /*
     Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
 
-    Permission is hereby granted, free of charge, to any person 
-    obtaining a copy of this software and associated documentation 
-    files (the "Software"), to deal in the Software without 
-    restriction, including without limitation the rights to use, copy, 
-    modify, merge, publish, distribute, sublicense, and/or sell copies 
-    of the Software, and to permit persons to whom the Software is 
+    Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
     furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be 
+    The above copyright notice and this permission notice shall be
     included in all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 
     $Id$
@@ -50,8 +50,7 @@ static float curve_b;
 static float curve_c;
 static float curve_d;
 
-void
-curve_init(uint16_t t0, uint16_t t1, float p0, float p1, float v0, float v1)
+void curve_init(uint16_t t0, uint16_t t1, float p0, float p1, float v0, float v1)
 {
     // Set the time parameters.
     curve_t0 = t0;
@@ -59,8 +58,8 @@ curve_init(uint16_t t0, uint16_t t1, float p0, float p1, float v0, float v1)
     curve_duration = t1 - t0;
     curve_duration_float = (float) curve_duration;
 
-    // The tangents are expressed as slope of value/time.  The time span will 
-    // be normalized to 0.0 to 1.0 range so correct the tangents by scaling 
+    // The tangents are expressed as slope of value/time.  The time span will
+    // be normalized to 0.0 to 1.0 range so correct the tangents by scaling
     // them by the duration of the curve.
     v0 *= curve_duration_float;
     v1 *= curve_duration_float;
@@ -73,7 +72,7 @@ curve_init(uint16_t t0, uint16_t t1, float p0, float p1, float v0, float v1)
 
     // Set the cubic coefficients by multiplying the matrix form of
     // the Hermite curve by the curve parameters p0, p1, v0 and v1.
-    // 
+    //
     // | a |   |  2  -2   1   1 |   |       p0       |
     // | b |   | -3   3  -2  -1 |   |       p1       |
     // | c | = |  0   0   1   0 | . | (t1 - t0) * v0 |
@@ -91,8 +90,7 @@ curve_init(uint16_t t0, uint16_t t1, float p0, float p1, float v0, float v1)
 }
 
 
-void
-curve_solve(uint16_t t, float *x, float *dx)
+void curve_solve(uint16_t t, float *x, float *dx)
 {
     // Handle cases where t is outside and indise the curve.
     if (t <= curve_t0)
@@ -117,13 +115,13 @@ curve_solve(uint16_t t, float *x, float *dx)
         // Determine the cubic polynomial.
         // x = at^3 + bt^2 + ct + d
         *x = (curve_a * t3) + (curve_b * t2) + (curve_c * t1) + curve_d;
- 
+
         // Determine the cubic polynomial derivative.
         // dx = 3at^2 + 2bt + c
         *dx = (3.0 * curve_a * t2) + (2.0 * curve_b * t1) + curve_c;
 
         // The time span has been normalized to 0.0 to 1.0 range so correct
-        // the derivative the duration of the curve.
+        // the derivative to the duration of the curve.
         *dx /= curve_duration_float;
     }
 }

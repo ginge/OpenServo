@@ -57,14 +57,22 @@ inline static void pwm_disable(void)
     pwm_stop();
 }
 
-// Utility functions
-inline static void delay_loop_crowbar(void)
+
+inline static void pwm_brake_enable(void)
 {
-    uint8_t i;
-    for(i=0; i<20; i++)
-    {
-        asm("nop");
-    }
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    // Enable Hardware brake
+    registers_write_byte(REG_FLAGS_LO, flags_lo | (1<<FLAGS_LO_GENERALCALL_ENABLED));
+}
+
+
+inline static void pwm_brake_disable(void)
+{
+    uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
+
+    // Disable hardware brake.
+    registers_write_byte(REG_FLAGS_LO, flags_lo & ~(1<<FLAGS_LO_GENERALCALL_ENABLED));
 }
 
 #endif // _OS_PWM_H_

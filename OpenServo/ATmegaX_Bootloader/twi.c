@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
+    Copyright (c) 2007 Michael P. Thompson <mpthompson@gmail.com>
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <avr/io.h>
 
+#include "config.h"
 #include "bootloader.h"
 #include "prog.h"
 #include "twi.h"
@@ -40,7 +41,7 @@
 static uint8_t twi_write_state;
 static uint16_t twi_address;
 
-BOOTLOADER_SECTION void twi_init(void)
+void twi_init(void)
 // Initialise TWI hardware for slave mode.
 {
     // Initialize the TWI state information.
@@ -64,7 +65,7 @@ BOOTLOADER_SECTION void twi_init(void)
 }
 
 
-BOOTLOADER_SECTION void twi_deinit(void)
+void twi_deinit(void)
 // De-initialise TWI hardware.
 {
     // Reset the TWI registers.
@@ -74,7 +75,7 @@ BOOTLOADER_SECTION void twi_deinit(void)
 }
 
 
-BOOTLOADER_SECTION void twi_check_conditions(void)
+void twi_check_conditions(void)
 // Checks for TWI interrupt conditions.
 {
     // Check for TWI interrupt condition.
@@ -87,7 +88,7 @@ BOOTLOADER_SECTION void twi_check_conditions(void)
 }
 
 
-BOOTLOADER_SECTION void twi_handle_interrupt_condition(void)
+void twi_handle_interrupt_condition(void)
 {
     switch (TWSR)
     {
@@ -174,8 +175,12 @@ BOOTLOADER_SECTION void twi_handle_interrupt_condition(void)
                 twi_write_state = TWI_WRITE_DATA_BYTE;
 
                 // Set the twi address.  This will load the corresponding page from
-                // flash into the programming buffer for reading and writing.
+                // flash into the programming buffer for reading and writing.  The
+                // programming code protects itself against invalid addresses.
                 prog_buffer_set_address(twi_address);
+
+                // If this is the magic address then set the bootloader exit flag.
+                if (twi_address == 0xffff) bootloader_exit = 1;
 
                 // Data byte will be received and ACK will be returned.
                 TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.

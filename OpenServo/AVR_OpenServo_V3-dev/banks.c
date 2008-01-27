@@ -56,7 +56,7 @@
 #include "registers.h"
 #include "banks.h"
 #include "alert.h"
-#include <avr/eeprom.h>
+#include "backemf.h"
 
 // Register values.
 uint8_t banks[MAX_BANKS][BANK_REGISTER_COUNT];
@@ -73,6 +73,9 @@ void banks_init(void)
     // Reset the bank selection to 0
     registers_write_byte(REG_BANK_SELECT,0);
 
+    //initialise the alert registers
+    alert_init();
+
     // Restore the read/write protected registers from EEPROM.  If the
     // EEPROM fails checksum this function will return zero and the
     // read/write protected registers should be initialized to defaults.
@@ -81,9 +84,6 @@ void banks_init(void)
         // Initialize read/write protected registers to defaults.
         registers_defaults();
     }
-
-    //initialise the alert registers
-    alert_init();
 }
 
 
@@ -95,7 +95,11 @@ void banks_defaults(void)
     // Default TWI address.
     banks_write_byte(POS_PID_BANK, REG_TWI_ADDRESS, REG_DEFAULT_TWI_ADDR);
     alert_defaults();
+#if BACKEMF_ENABLED
+    backemf_defaults();
+#endif
 }
+
 
 uint16_t banks_read_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo)
 // Read a 16-bit word from the registers.
@@ -135,42 +139,6 @@ void banks_write_word(uint8_t bank, uint8_t address_hi, uint8_t address_lo, uint
     asm volatile ("out __SREG__,%0\n\t" : : "r" (sreg));
 }
 
-uint8_t banks_save_registers(void)
-// Save the registers that need saving in the bank. Add your save functions here
-// There is no checksum done on these as yet. Needs discussion
-{
-
-    // Save the redirected registers at REGISTERS_COUNT + 3 NOTE: no checksum!
-    eeprom_write_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
-                        (void *)(WRITE_PROTECT_REGISTER_COUNT + 2),
-                         REDIRECT_REGISTER_COUNT);
-
-    // Save the alert registers
-    eeprom_write_block(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], 
-                        (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 2), 
-                         CONFIG_SAVE_COUNT);
-
-    return 1;
-}
-
-uint8_t banks_restore_registers(void)
-// Load any addition bank related registers into the banks
-// There is no checksum done on these as yet. Needs discussion
-
-{
-
-    // Load the redirected registers out of the eeprom
-    eeprom_read_block(&banks[REDIRECTED_BANK][MIN_REDIRECT_REGISTER], 
-                       (void *)(WRITE_PROTECT_REGISTER_COUNT + 2), 
-                        REDIRECT_REGISTER_COUNT);
-
-    // Load the configuration bank
-    eeprom_read_block(&banks[CONFIG_BANK][CONFIG_SAVE_MIN], 
-                       (void *)(WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT + 2), 
-                        CONFIG_SAVE_COUNT);
-
-    return 1;
-}
 
 void banks_update_registers(void)
 // Update any functions that need running in the bank context

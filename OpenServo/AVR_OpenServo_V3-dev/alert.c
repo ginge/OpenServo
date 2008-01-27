@@ -65,7 +65,7 @@ void alert_defaults(void)
     banks_write_word(ALERT_CONFIG_BANK, ALERT_VOLT_MAX_LIMIT_HI, ALERT_VOLT_MAX_LIMIT_LO, 0);
     banks_write_word(ALERT_CONFIG_BANK, ALERT_VOLT_MIN_LIMIT_HI, ALERT_VOLT_MIN_LIMIT_LO, 0);
 
-    banks_write_word(ALERT_CONFIG_BANK, ALERT_TEMP_MAX_LIMIT_HI, ALERT_TEMP_MAX_LIMIT_LO,220);
+    banks_write_word(ALERT_CONFIG_BANK, ALERT_TEMP_MAX_LIMIT_HI, ALERT_TEMP_MAX_LIMIT_LO,290);
 
     banks_write_word(ALERT_CONFIG_BANK, ALERT_CURR_MAX_LIMIT_HI, ALERT_CURR_MAX_LIMIT_LO,0);
 
@@ -74,13 +74,13 @@ void alert_defaults(void)
 void alert_check(void)
 // Check the alert registers for min/max overflows and set the status register accordingly
 {
-    uint8_t voltage;
-    uint8_t current;
-    uint8_t temperature;
-    uint8_t max_voltage;
-    uint8_t min_voltage;
-    uint8_t max_current;
-    uint8_t max_temperature;
+    uint16_t voltage;
+    uint16_t current;
+    uint16_t temperature;
+    uint16_t max_voltage;
+    uint16_t min_voltage;
+    uint16_t max_current;
+    uint16_t max_temperature;
 
     // Get the current voltage and power
     voltage     = registers_read_word(REG_VOLTAGE_HI,REG_VOLTAGE_LO);
@@ -119,6 +119,8 @@ void alert_check(void)
     if (temperature > max_temperature && max_temperature >0)
     {
         alert_setbit(ALERT_OVERTEMP);
+        // Turn off pwm?
+        pwm_disable();
     }
 
     if(throttle >0) throttle--;

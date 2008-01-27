@@ -24,6 +24,13 @@
     $Id$
 */
 
+/*
+ * Edit history:
+ *
+ *     26 Jan 2008        Retrofitted as much as possible of the H-bridge
+ *                        "anti-[partial]-crobaring fix" from the code for
+ *                        the V3 board to here (the code for the V2 board).
+ */
 #include <inttypes.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -61,6 +68,26 @@ static uint8_t pwm_b;
 // Pwm frequency divider value.
 static uint16_t pwm_div;
 
+//
+// The delay_loop function is used to provide a delay. The purpose of the delay is to
+// allow changes asserted at the AVRs I/O pins to take effect in the H-bridge (for
+// example turning on or off one of the MOSFETs). This is to prevent improper states
+// from occurring in the H-bridge and leading to brownouts or "crowbaring" of the
+// supply.
+//
+#define DELAYLOOP 8
+inline static void delay_loop(int n)
+{
+    uint8_t i;
+    for(i=0; i<n; i++)
+    {
+        asm("nop");
+    }
+}
+
+//
+//
+//
 static void pwm_dir_a(uint8_t pwm_duty)
 // Send PWM signal for rotation with the indicated pwm ratio (0 - 255).
 // This function is meant to be called only by pwm_update.
@@ -72,15 +99,25 @@ static void pwm_dir_a(uint8_t pwm_duty)
     cli();
 
     // Do we need to reconfigure PWM output?
-    if (!pwm_a)
+    if (!pwm_a || pwm_b)
     {
+
+        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        // NOTE: Actually PWM_A should already be disabled...
+        TCCR1A &= ~((1<<COM1A1) | (1<<COM1B1));
+
+        OCR1A = duty_cycle;
+
         // Yes. Make sure PB1 and PB2 are zero.
         PORTB &= ~((1<<PB1) | (1<<PB2));
 
-        // Disable OC1B and enable OC1A output.
-        TCCR1A = (1<<COM1A1) | (0<<COM1A0) |
-                 (0<<COM1B1) | (0<<COM1B0) |
-                 (0<<WGM11) | (0<<WGM10);
+        //
+        // Give the H-bridge time to respond to the above changes
+        //
+        delay_loop(DELAYLOOP);
+
+        // Enable PWM_A (PB1/OC1A)  output.
+        TCCR1A |= (1<<COM1A1);
 
         // Reset the B direction flag.
         pwm_b = 0;
@@ -113,15 +150,25 @@ static void pwm_dir_b(uint8_t pwm_duty)
     cli();
 
     // Do we need to reconfigure PWM output?
-    if (!pwm_b)
+    if (!pwm_b || pwm_a)
     {
-        // Yes. Make sure PB1 and PB2 are zero.
+
+        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        // NOTE: Actually PWM_B should already be disabled...
+       TCCR1A &= ~((1<<COM1A1) | (1<<COM1B1));
+
+       OCR1B = duty_cycle;
+
+       // Yes. Make sure PB1 and PB2 are zero.
         PORTB &= ~((1<<PB1) | (1<<PB2));
 
-        // Disable OC1A and enable OC1B output.
-        TCCR1A = (0<<COM1A1) | (0<<COM1A0) |
-                 (1<<COM1B1) | (0<<COM1B0) |
-                 (0<<WGM11) | (0<<WGM10);
+        //
+        // Give the H-bridge time to respond to the above changes
+        //
+        delay_loop(DELAYLOOP);
+
+        // Enable PWM_B (PB2/OC1B) output.
+        TCCR1A = (1<<COM1B1);
 
         // Reset the A direction flag.
         pwm_a = 0;
@@ -162,6 +209,11 @@ void pwm_init(void)
 {
     // Initialize the pwm frequency divider value.
     pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+
+    TCCR1A = 0;
+        asm("nop");
+        asm("nop");
+        asm("nop");
 
     // Set PB1/OC1A and PB2/OC1B to low.
     PORTB &= ~((1<<PB1) | (1<<PB2));
@@ -216,12 +268,14 @@ void pwm_update(uint16_t position, int16_t pwm)
     // top to a value lower than the counter and compare values.
     if (registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div)
     {
-        // Clear PB1 and PB2.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
-
         // Disable OC1A and OC1B outputs.
         TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
         TCCR1A &= ~((1<<COM1B1) | (1<<COM1B0));
+
+        // Clear PB1 and PB2.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
+
+        delay_loop(DELAYLOOP);
 
         // Reset the A and B direction flags.
         pwm_a = 0;
@@ -325,12 +379,14 @@ void pwm_stop(void)
     // Are we moving in the A or B direction?
     if (pwm_a || pwm_b)
     {
-        // Clear PB1 and PB2.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
-
         // Disable OC1A and OC1B outputs.
         TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
         TCCR1A &= ~((1<<COM1B1) | (1<<COM1B0));
+
+        // Clear PB1 and PB2.
+        PORTB &= ~((1<<PB1) | (1<<PB2));
+
+        delay_loop(DELAYLOOP);
 
         // Reset the A and B direction flags.
         pwm_a = 0;

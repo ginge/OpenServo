@@ -54,10 +54,12 @@ public slots:
 private:
 	int writeData( int adapter, int servo, int addr, char *val, size_t len );
 	int readData(int adapter, int servo, int addr, unsigned char *buf, size_t len);
+	int readDataOnly(int adapter, int servo, unsigned char *buf, size_t len);
 	int hexarrToInt(unsigned char *ncurrent);
 	int parseData( char *argv[], int count, int len, char *data );
 	int parseOption( char *arg );
 	void logPrint( char *logData);
+	void scanDevices(int adapter);
 	void readPids();
 	int setPosOut;
 	int setupPOut;
@@ -65,6 +67,7 @@ private:
 	int setupDOut;
 	int setupSMaxOut;
 	int setupSMinOut;
+	int setupAddrOut;
 
 	//back buffer variables for comparison.
 	int bckSetPosOut;
@@ -73,18 +76,20 @@ private:
 	int bckSetupDOut;
 	int bckSetupSMaxOut;
 	int bckSetupSMinOut;
+	int bckSetupAddrOut;
 
 	/*Typedef the functions*/
-	typedef int  (*OSIF_initfunc   )();
-	typedef int  (*OSIF_deinitfunc )();
-	typedef int  (*OSIF_writefunc  )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
-	typedef int  (*OSIF_readfunc   )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
-	typedef int  (*OSIF_reflashfunc)(int adapter, int servo, int bootloader_addr, char *filename);
-	typedef int  (*OSIF_commandfunc)(int adapter, int servo, unsigned char command);
-	typedef int  (*OSIF_scanfunc   )(int adapter, int devices[], int *dev_count);
-	typedef bool (*OSIF_probefunc  )(int adapter, int servo);
+	typedef int  (*OSIF_initfunc     )();
+	typedef int  (*OSIF_deinitfunc   )();
+	typedef int  (*OSIF_writefunc    )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
+	typedef int  (*OSIF_readfunc     )(int adapter, int servo, unsigned char addr, unsigned char *data, size_t len);
+	typedef int  (*OSIF_readonlyfunc )(int adapter, int servo, unsigned char *data, size_t len);
+	typedef int  (*OSIF_reflashfunc  )(int adapter, int servo, int bootloader_addr, char *filename);
+	typedef int  (*OSIF_commandfunc  )(int adapter, int servo, unsigned char command);
+	typedef int  (*OSIF_scanfunc     )(int adapter, int devices[], int *dev_count);
+	typedef bool (*OSIF_probefunc    )(int adapter, int servo);
 	typedef int  (*OSIF_get_adapter_namefunc  )(int adapter, char *name);
-	typedef int  (*OSIF_get_adapter_countfunc  )(void);
+	typedef int  (*OSIF_get_adapter_countfunc )(void);
 
 		
 	/*A pointer to a function*/
@@ -92,17 +97,22 @@ private:
 	OSIF_initfunc OSIF_init;
 	OSIF_writefunc OSIF_write;
 	OSIF_readfunc OSIF_read;
+	OSIF_readonlyfunc OSIF_readonly;
 	OSIF_reflashfunc OSIF_reflash;
 	OSIF_scanfunc OSIF_scan;
 	OSIF_probefunc OSIF_probe;
 	OSIF_commandfunc OSIF_command;
 	OSIF_get_adapter_namefunc OSIF_get_adapter_name;
 	OSIF_get_adapter_countfunc OSIF_get_adapter_count;
-
+	
 	int adapters[128];
 	int adapterCount;
 
-	void * libhandle;// handle to the shared lib when opened
+#ifdef Q_WS_WIN
+	HINSTANCE hdll; //Windows handle
+#else
+	void * libhandle; // handle to the shared lib when opened
+#endif
 
 	int devices[128];
 	int devCount;

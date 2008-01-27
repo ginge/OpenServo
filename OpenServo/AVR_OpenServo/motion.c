@@ -1,307 +1,313 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
-   All rights reserved.
+    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
+    Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
 
-   * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
 
-   * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 
-   * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
+    $Id$
 */
 
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
+#include <stdint.h>
 
-#include <inttypes.h>
-
+#include "openservo.h"
+#include "config.h"
+#include "curve.h"
 #include "motion.h"
 #include "registers.h"
 
-// The minimum and maximum servo position.
-#define MIN_POSITION			(0)
-#define MAX_POSITION			(1023)
+#if CURVE_MOTION_ENABLED
 
-// The minimum and maximum output.
-#define MAX_OUTPUT				(255)
-#define MIN_OUTPUT				(-MAX_OUTPUT)
-
-// Static structure for managing position and velocity values.
-static uint8_t velocity_index;
-static int16_t velocity_array[8];
-static int16_t previous_position;
-
-// The accumulator is a structure arranged so that both the most significant
-// and least significant words can be indepently accessed.  The accumulator
-// maintains 32-bit resolution, but only 16-bit is needed for output.
-static union
+// Local types.
+typedef struct motion_key
 {
-	struct
-	{
-		int16_t	lo;
-		int16_t hi;
-	} small;
-	int32_t big;
-} integral_accumulator;
+    uint16_t delta;
+    float position;
+    float in_velocity;
+    float out_velocity;
+} motion_key;
 
 
+// Exported variables.
+uint8_t motion_head;
+uint8_t motion_tail;
+uint32_t motion_counter;
+uint32_t motion_duration;
 
-static int16_t fixed_multiply(int16_t component, uint16_t fixed_gain)
-// Multiplies the signed 16-bit component by the unsigned 16-bit fixed
-// point gain to return a 32-bit output. The result is scaled to account
-// for the fixed point value.
+// Local variables.
+static motion_key keys[MOTION_BUFFER_SIZE];
+
+static float int_to_float(int16_t a)
+// 16bit unsigned integer to float.
 {
-	int32_t output;
-
-	// Multiply the value by the fixed gain value.
-	output = (int32_t) component * (int32_t) fixed_gain;
-
-	// Scale result by 256 to account for fixed point gain.
-	output /= 256;
-
-	return (int16_t) output;
+    return (float) a;
 }
 
-#if 0
-static inline int16_t shift_right(int16_t val, uint8_t cnt)
-// Arithmetic shift right of the signed 16-bit value.
-{
-    asm volatile (
-        "L_asr1%=:" "\n\t"
-		"cp %1,__zero_reg__" "\n\t"
-		"breq L_asr2%=" "\n\t"
-        "dec %1" "\n\t"
-		"asr %B0" "\n\t"
-		"ror %A0" "\n\t"
-        "rjmp L_asr1%=" "\n\t"
-        "L_asr2%=:" "\n\t"
-        : "=&r" (val)
-        : "r" (cnt), "0" (val)
-        );
 
-	return val;
+static int16_t float_to_int(float a)
+// Float to 6:10 signed fixed.
+{
+    return (int16_t) (a + 0.5);
+}
+
+
+static float fixed_to_float(int16_t a)
+// 6:10 signed fixed point to float.
+{
+    return ((float) a) / 1024.0;
+}
+
+
+#if 0
+static int16_t float_to_fixed(float a)
+// Float to 6:10 signed fixed.
+{
+    return (int16_t) (a * 1024.0);
 }
 #endif
 
-static inline int16_t integral_accumulator_get(void)
-// This function returns the most significant word of the integral gain.
-{
-	return integral_accumulator.small.hi;
-}
-
-
-static inline void integral_accumulator_update(int16_t command_error, uint16_t fixed_gain)
-// This function updates the integral accumulator with the command error.  
-// The fixed gain scales the integral accumulator 
-{
-	int32_t temp;
-
-	// Multiply the command error by the fixed gain value.
-	temp = (int32_t) command_error * (int32_t) fixed_gain;
-
-	// Add to the accumulator adjusting for multiplication.
-	integral_accumulator.big += temp;
-}
-
-
-static inline void integral_accumulator_reset(int16_t new_value)
-// This function resets the integral accumulator to a new value.
-{
-	integral_accumulator.small.hi = new_value;
-	integral_accumulator.small.lo = 0;
-}
-
 
 void motion_init(void)
-// Initialize the motion module.
+// Initialize the curve buffer.
 {
-	uint8_t i;
+    // Initialize the counter.
+    motion_counter = 0;
 
-	// Initialize the velocity index.
-	velocity_index = 0;
+    // Initialize the duration.
+    motion_duration = 0;
 
-	// Initialize the velocity array.
-	for (i = 0; i < 8; ++i) velocity_array[i] = 0; 
+    // Initialize the queue.
+    motion_head = 0;
+    motion_tail = 0;
 
-	// Initialize accumulator.
-	integral_accumulator.big = 0;
+    // Initialize the keypoint.
+    keys[0].delta = 0;
+    keys[0].position = 512.0;
+    keys[0].in_velocity = 0.0;
+    keys[0].out_velocity = 0.0;
+
+    // Initialize an empty hermite curve at the center servo position.
+    curve_init(0, 0, 512.0, 512.0, 0.0, 0.0);
+
+    // Reset the registers.
+    motion_registers_reset();
 }
 
 
-int16_t motion_position_to_pwm(int16_t current_position)
-// This function takes the current servo position as input and outputs a pwm 
-// value for the servo motors.  The current position value must be within the
-// range 0 and 1023. The output will be within the range of -255 and 255 with
-// values less than zero indicating clockwise rotation and values more than
-// zero indicating counter-clockwise rotation.
-//
-// The feedback approach implemented here was first published in Richard Phelan's
-// Automatic Control Systems, Cornell University Press, 1977 (ISBN 0-8014-1033-9)
-//
-// The theory of operation of this function will be filled in later, but the
-// diagram below should give a picture of how it is intended to work.
-//
-//
-//                           +<------- bounds checking -------+
-//                           |                                |
-//             |¯¯¯¯¯|   |¯¯¯¯¯¯¯¯|   |¯¯¯¯¯|   |¯¯¯¯¯¯¯¯¯|   |
-//  command -->|  -  |-->|integral|-->|  -  |-->|  motor  |-->+-> actuator
-//             |_____|   |________|   |_____|   |_________|   |
-//                |                      |                    |
-//                |                      +<-- Kv * velocity --+
-//                |                      |                    |
-//                |                      +<-- Kp * position --+
-//                |                                           |
-//                +<-------------Ki * position ---------------+
-//
-//
-//
-//  Apply no gain to the integral output
-//
+void motion_reset(int16_t position)
+// Reset the motion buffer to the specified position.  The enabled state is preserved.
 {
-	uint8_t i;
-	int16_t current_velocity;
-	int16_t command_position;
-	int16_t command_error;
-	int16_t output_range;
-	int16_t output_offset;
-	int16_t output;
-	int16_t position_output;
-	int16_t velocity_output;
-	int16_t integral_output;
-	uint16_t position_gain;
-	uint16_t velocity_gain;
-	uint16_t integral_gain;
+    // Reset the counter.
+    motion_counter = 0;
 
-	// Determine the velocity as the difference between the current and previous position.
-	velocity_array[velocity_index] = current_position - previous_position;
+    // Reset the duration.
+    motion_duration = 0;
 
-	// Increment the velocity index, but wrap if bounds exceeded necessary.
-	velocity_index += 1;
-	velocity_index &= 7;
+    // Reset the queue.
+    motion_head = 0;
+    motion_tail = 0;
 
-	// Reset the velocity value.
-	current_velocity = 0;
+    // Reset the keypoint.
+    keys[0].delta = 0;
+    keys[0].position = int_to_float(position);
+    keys[0].in_velocity = 0.0;
+    keys[0].out_velocity = 0.0;
 
-	// Determine the sum of velocities across the positions.
-	for (i = 0; i < 8; ++i) current_velocity += velocity_array[i]; 
+    // Initialize an empty hermite curve.  This is a degenerate case for the hermite
+    // curve that will always return the position of the curve without velocity.
+    curve_init(0, 0, keys[0].position, keys[0].position, 0.0, 0.0);
 
-	// Update the previous position.
-	previous_position = current_position;
-
-	// Get the command position to where the servo is moving to from the registers.
-	command_position = registers_read_word(SEEK_HI, SEEK_LO);
-
-	// Get the positional, velocity and integral gains from the registers.
-	position_gain = registers_read_word(PID_PGAIN_HI, PID_PGAIN_LO);
-	velocity_gain = registers_read_word(PID_DGAIN_HI, PID_DGAIN_LO);
-	integral_gain = registers_read_word(PID_IGAIN_HI, PID_IGAIN_LO);
-
-	// Get the output offset from the registers.  This value offsets the output 
-	// to compensate for static friction and other drag within the servo.
-	output_offset = (int16_t) registers_read_byte(PID_OFFSET);
-
-	// Sanity check the command position. We do this because this value is
-	// passed from the outside to the servo and it could be an invalid value.
-	if (command_position < MIN_POSITION) command_position = MIN_POSITION;
-	if (command_position > MAX_POSITION) command_position = MAX_POSITION;
-
-	// Are we reversing the seek sense?
-	if (registers_read_byte(REVERSE_SEEK) != 0)
-	{
-		// Yes. Update the system registers with an adjusted reverse sense
-		// position. With reverse sense, the position value to grows from 
-		// a low value to high value in the clockwise direction.
-		registers_write_word(POSITION_HI, POSITION_LO, (uint16_t) (MAX_POSITION - current_position));
-
-		// Adjust command position for the reverse sense.
-		command_position = MAX_POSITION - command_position;
-	}
-	else
-	{
-		// No. Update the system registers with a non-reverse sense position.
-		// Normal position value grows from a low value to high value in the
-		// counter-clockwise direction.
-		registers_write_word(POSITION_HI, POSITION_LO, (uint16_t) current_position);
-	}
-
-	// The command error is the difference between the
-	// command position and current position.
-	command_error = command_position - current_position;
-
-	// Get the integral output.  There is no gain applied to the integral output.
-	integral_output = integral_accumulator_get();
-
-	// Determine the position output component.  We multiply the position gain
-	// by the current position of the servo to create the position output.
-	position_output = fixed_multiply(current_position, position_gain);
-
-	// Determine the velocity output component.  We multiply the velocity gain
-	// by the current velocity of the servo to create the velocity output.
-	velocity_output = fixed_multiply(current_velocity, velocity_gain);
-
-	registers_write_word(RESERVED_0A, RESERVED_0B, (uint16_t) position_output);
-	registers_write_word(RESERVED_0C, RESERVED_0D, (uint16_t) velocity_output);
-	registers_write_word(RESERVED_0E, RESERVED_0F, (uint16_t) integral_output);
-
-	// Add the command error scaled by the position gain to the integral accumulator.
-	// The integral accumulator maintains a sum of total error over each interation.
-	integral_accumulator_update(command_error, integral_gain);
-
-	// The integral output drives the output and the position and velocity outputs
-	// function as a frictional component to counter the integral output.
-	output = integral_output - position_output - velocity_output;
-
-	// Determine the output range which factors out the output offset.
-	output_range = MAX_OUTPUT - output_offset;
-
-	// Is the output saturated? If so we need limit the output and clip
-	// the integral accumulator just at the saturation level.
-	if (output < -output_range)
-	{
-		// Calculate a new integral accumulator based on the output range.  This value
-		// is calculated to keep the integral output just on the verge of saturation.
-		integral_accumulator_reset(position_output + velocity_output - output_range);
-
-		// Limit the output.
-		output = -output_range;
-	}
-	else if (output > output_range)
-	{
-		// Calculate a new integral accumulator based on the output range.  This value
-		// is calculated to keep the integral output just on the verge of saturation.
-		integral_accumulator_reset(position_output + velocity_output + output_range);
-
-		// Limit the output.
-		output = output_range;
-	}
-
-	// Apply the output offset adjustment.
-	if (output > 0) output += output_offset;
-	if (output < 0) output -= output_offset;
-
-	// Return the output.
-	return output;
+    // Reset the registers.
+    motion_registers_reset();
 }
+
+
+void motion_registers_reset(void)
+// Reset the motion registers to zero values.
+{
+    // Set the default position, velocity and delta data.
+    registers_write_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO, 0);
+    registers_write_word(REG_CURVE_IN_VELOCITY_HI, REG_CURVE_IN_VELOCITY_LO, 0);
+    registers_write_word(REG_CURVE_OUT_VELOCITY_HI, REG_CURVE_OUT_VELOCITY_LO, 0);
+    registers_write_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO, 0);
+
+    // Update the buffer status.
+    registers_write_byte(REG_CURVE_RESERVED, 0);
+    registers_write_byte(REG_CURVE_BUFFER, motion_buffer_left());
+}
+
+
+uint8_t motion_append(void)
+// Append a new curve keypoint from data stored in the curve registers.  The keypoint
+// is offset from the previous curve by the specified delta.  An error is returned if
+// there is no more room to store the new keypoint in the buffer or if the delta is
+// less than one (a zero delta is not allowed).
+{
+    int16_t position;
+    int16_t in_velocity;
+    int16_t out_velocity;
+    uint8_t next;
+    uint16_t delta;
+
+    // Get the next index in the buffer.
+    next = (motion_head + 1) & MOTION_BUFFER_MASK;
+
+    // Return error if we have looped the head to the tail and the buffer is filled.
+    if (next == motion_tail) return 0;
+
+    // Get the position, velocity and time delta values from the registers.
+    position = (int16_t) registers_read_word(REG_CURVE_POSITION_HI, REG_CURVE_POSITION_LO);
+    in_velocity = (int16_t) registers_read_word(REG_CURVE_IN_VELOCITY_HI, REG_CURVE_IN_VELOCITY_LO);
+    out_velocity = (int16_t) registers_read_word(REG_CURVE_OUT_VELOCITY_HI, REG_CURVE_OUT_VELOCITY_LO);
+    delta = (uint16_t) registers_read_word(REG_CURVE_DELTA_HI, REG_CURVE_DELTA_LO);
+
+    // Keypoint delta must be greater than zero.
+    if (delta < 1) return 0;
+
+    // Fill in the next keypoint.
+    keys[next].delta = delta;
+    keys[next].position = int_to_float(position);
+    keys[next].in_velocity = fixed_to_float(in_velocity);
+    keys[next].out_velocity = fixed_to_float(out_velocity);
+
+    // Is this keypoint being added to an empty buffer?
+    if (motion_tail == motion_head)
+    {
+        // Initialize a new hermite curve that gets us from the current position to the new position.
+        // We use a velocity of zero at each end to smoothly transition from one to the other.
+        curve_init(0, delta, curve_get_p1(), keys[next].position, 0.0, 0.0);
+    }
+
+    // Increase the duration of the buffer.
+    motion_duration += delta;
+
+    // Set the new head index.
+    motion_head = next;
+
+    // Reset the motion registers and update the buffer status.
+    motion_registers_reset();
+
+    return 1;
+}
+
+
+void motion_next(uint16_t delta)
+// Increment the buffer counter by the indicated delta and return the position
+// and velocity from the buffered curves.  If the delta is zero the current
+// position and velocity is returned.
+{
+    float fposition;
+    float fvelocity;
+
+    // Determine if curve motion is disabled in the registers.
+    if (!(registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_MOTION_ENABLED))) return;
+
+    // Are we processing an empty curve?
+    if (motion_tail == motion_head)
+    {
+        // Yes. Keep the counter and duration at zero.
+        motion_counter = 0;
+        motion_duration = 0;
+    }
+    else
+    {
+        // Increment the counter.
+        motion_counter += delta;
+
+        // Have we exceeded the duration of the currently buffered curve?
+        while (motion_counter > curve_get_duration())
+        {
+            // Reduce the buffer counter by the currently buffered curve duration.
+            motion_counter -= curve_get_duration();
+
+            // Reduce the buffer duration by the currently buffered curve duration.
+            motion_duration -= curve_get_duration();
+
+            // Increment the tail to process the next buffered curve.
+            motion_tail = (motion_tail + 1) & MOTION_BUFFER_MASK;
+
+            // Has the tail caught up with the head?
+            if (motion_tail == motion_head)
+            {
+                // Initialize an empty hermite curve with a zero duration.  This is a degenerate case for
+                // the hermite cuve that will always return the position of the curve without velocity.
+                curve_init(0, 0, keys[motion_head].position, keys[motion_head].position, 0.0, 0.0);
+
+                // Reset the buffer counter and duration to zero.
+                motion_counter = 0;
+                motion_duration = 0;
+            }
+            else
+            {
+                uint8_t curr_point;
+                uint8_t next_point;
+
+                // Get the current point and next point for the curve.
+                curr_point = motion_tail;
+                next_point = (curr_point + 1) & MOTION_BUFFER_MASK;
+
+                // Initialize the hermite curve from the current and next point.
+                curve_init(0, keys[next_point].delta,
+                           keys[curr_point].position, keys[next_point].position,
+                           keys[curr_point].out_velocity, keys[next_point].in_velocity);
+            }
+
+            // Update the space available in the buffer.
+            registers_write_byte(REG_CURVE_BUFFER, motion_buffer_left());
+        }
+    }
+
+    // Get the position and velocity from the hermite curve.
+    curve_solve(motion_counter, &fposition, &fvelocity);
+
+    // The velocity is in position units a millisecond, but we really need the
+    // velocity to be measured in position units every 10 milliseconds to match
+    // the sample period of the ADC.
+    fvelocity *= 10.0;
+
+    // Update the seek position register.
+    registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, float_to_int(fposition));
+
+    // Update the seek velocity register.
+    registers_write_word(REG_SEEK_VELOCITY_HI, REG_SEEK_VELOCITY_LO, float_to_int(fvelocity));
+}
+
+
+uint8_t motion_buffer_left(void)
+// The motion buffer can contain up to MOTION_BUFFER_SIZE keypoints.  The function
+// returns how many keypoints remain free in the buffer for use.
+{
+    uint8_t space_left;
+
+    // Determine the points left to store curve data.
+    if (motion_head < motion_tail)
+    {
+        space_left = (MOTION_BUFFER_SIZE - 1) - (MOTION_BUFFER_SIZE + motion_head - motion_tail);
+    }
+    else
+    {
+        space_left = (MOTION_BUFFER_SIZE - 1) - (motion_head - motion_tail);
+    }
+
+    return space_left;
+}
+
+
+#endif // CURVE_MOTION_ENABLED
 

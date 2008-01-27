@@ -34,6 +34,8 @@
 #define BANK_4 4  //not used
 
 //bank0
+#define ALERT_BANK BANK_0
+
 #define ALERT_STATUS                0x00
 #define BANK0_RESERVED_01           0x01
 #define BANK0_RESERVED_02           0x02
@@ -52,6 +54,8 @@
 #define BANK0_RESERVED_0F           0x0F
 
 // Bank1
+#define ALERT_CONFIG_BANK BANK_1
+
 #define ALERT_CURR_MAX_LIMIT_HI     0x00
 #define ALERT_CURR_MAX_LIMIT_LO     0x01
 #define ALERT_VOLT_MAX_LIMIT_HI     0x02
@@ -68,6 +72,8 @@
 #define BANK1_RESERVED_0D           0x0D
 #define BANK1_RESERVED_0E           0x0E
 #define BANK1_RESERVED_0F           0x0F
+
+#define ALERT_SAVE_COUNT ALERT_VOLT_MIN_LIMIT_LO - ALERT_CURR_MAX_LIMIT_HI + 1
 
 // Bank 2
 // Put the redirects into bank 2

@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
+    Copyright (c) 2007 Michael P. Thompson <mpthompson@gmail.com>
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -26,7 +26,9 @@
 
 #include <inttypes.h>
 #include <avr/io.h>
+#include <avr/interrupt.h>
 
+#include "config.h"
 #include "bootloader.h"
 #include "prog.h"
 #include "timer.h"
@@ -35,22 +37,31 @@
 uint8_t bootloader_exit;
 uint8_t bootloader_active;
 
-// Don't build this function if the BOOTSTRAPPER is being built.
-#ifndef BOOTSTRAPPER
+#if !BOOTSTRAPPER
 
-BOOTLOADER_SECTION void bootloader(void)
-// This is the main bootloader function.  When this function returns
-// the application code loaded into lower memory will be executed.
-// The application code must reside immediately after the vector
-// table at address 0x001E.
+#define TIMEOUT     128
+
+int main(void)
+// This is the main bootloader function.
 {
-    uint8_t timer_count = 0;
+    uint16_t timer_count = 0;
 
-#if 0
-    // XXX Enable PB1/PB3 as outputs and clear the LED.
-    DDRB |= (1<<DDB1) | (1<<DDB3);
-    PORTB |= (1<<PB1) | (1<<PB3);
-#endif
+    // Set up function pointer to RESET vector.
+    void (*reset_vector)( void ) = 0x0000;
+
+    // Make sure interrupts are cleared.
+    cli();
+
+    // Diable the watchdog timer in case we got here through applicaition reset
+
+    // Clear WDRF in MCUSR.
+    MCUSR &= ~(1<<WDRF);
+
+    // Write logical one to WDCE and WDE.
+    WDTCSR |= (1<<WDCE) | (1<<WDE);
+
+    // Turn off WDT.
+    WDTCSR = 0x00;
 
     // Initialize the bootloader exit and active flags.
     bootloader_exit = 0;
@@ -78,25 +89,11 @@ BOOTLOADER_SECTION void bootloader(void)
             ++timer_count ;
 
             // Have we exceeded the bootloader timeout (about three seconds)?
-            if (timer_count > 128)
+            if (timer_count > TIMEOUT)
             {
                 // Set the bootloader exit flag if the bootloader is not active.
                 if (!bootloader_active) bootloader_exit = 1;
             }
-
-#if 0
-            // XXX Turn off or on the LED.
-            if (timer_count & 0x40)
-            {
-                // XXX Turn on the PB1 LED.
-                PORTB &= ~(1<<PB1);
-            }
-            else
-            {
-                // XXX Turn off the PB1 LED.
-                PORTB |= (1<<PB1);
-            }
-#endif
         }
     }
 
@@ -105,6 +102,44 @@ BOOTLOADER_SECTION void bootloader(void)
 
     // Restore TWI interface to powerup defaults.
     twi_deinit();
+
+    // Call application RESET vector.
+    reset_vector();
+
+    return 0;
 }
 
-#endif // !BOOTSTRAPPER
+#else
+
+int main(void)
+// This is the main bootloader function.
+{
+    // Make sure interrupts are cleared.
+    cli();
+
+    // Initialize the bootloader active flags.
+    bootloader_active = 0;
+
+    // Initialize programming module.
+    prog_init();
+
+    // Initialize TWI module.
+    twi_init();
+
+    // Loop forever.
+    for (;;)
+    {
+        // Check for TWI conditions that require handling.
+        twi_check_conditions();
+    }
+
+    // Restore timer to powerup defaults.
+    timer_deinit();
+
+    // Restore TWI interface to powerup defaults.
+    twi_deinit();
+
+    return 0;
+}
+
+#endif

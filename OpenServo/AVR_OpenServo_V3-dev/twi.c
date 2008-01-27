@@ -212,6 +212,7 @@ static void twi_registers_write(uint8_t address, uint8_t data)
         return;
     }
 
+    //TODO check to see if we have writes enabled/disabled
     // Are we writing a bank register? 
     if (address <= MAX_BANK_REGISTER)
     {
@@ -220,6 +221,9 @@ static void twi_registers_write(uint8_t address, uint8_t data)
             case BANK_0:
                 break;
             case BANK_1:
+                // Are we writing to the configuration bank while writes are disabled?
+                if (registers_is_write_disabled())
+                    return;
                 break;
             case REDIRECTED_BANK:
 
@@ -428,8 +432,16 @@ static uint8_t twi_write_data(uint8_t data)
     return ack;
 }
 
-// general call functions
+// General call functions. General call allows you to send a data packet to all 
+// servos at the same time. In order to use the general call support of the AVR you 
+// address the OpenServos at address 0x00. Every servo will respond to the general
+// call request and act appropriately. 
+// You can specify groups to use with the broadcast request to allow for the servo
+// to respond to different requests, or you can allow all to respond to a single
+// request.
+
 void general_call_enable(void)
+// Enable general call broadcast support at address 0x00
 {
     TWAR |=  (1<<TWGCE);       // Enable general call at address 0x00
 
@@ -440,6 +452,7 @@ void general_call_enable(void)
 }
 
 void general_call_disable(void)
+// Disable general call support.
 {
     TWAR &= ~(1<<TWGCE);                      // disable general call
 
@@ -449,13 +462,19 @@ void general_call_disable(void)
 }
 
 void general_call_start_reset(void)
+// Remove the flag that waits for the broadcast request
 {
     uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
 
+    // Disable the general call wait flag
     registers_write_byte(REG_FLAGS_LO, flags_lo  & ~(1<<FLAGS_LO_GENERALCALL_START));
+
+    // reset the group call register
+    registers_write_byte(REG_GENERAL_CALL_GROUP_START, 0);
 }
 
 void general_call_start_move(void)
+// Start the move by broadcasting at address 0x00
 {
     uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
 
@@ -463,6 +482,7 @@ void general_call_start_move(void)
 }
 
 void general_call_start_wait(void)
+// Set the servo into wait mode. We will wait for the broadcast before move
 {
     uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
 
@@ -470,6 +490,7 @@ void general_call_start_wait(void)
 }
 
 void general_call_start_wait_reset(void)
+// Disable the start wait state. Returns servo to normal operation.
 {
     uint8_t flags_lo = registers_read_byte(REG_FLAGS_LO);
 

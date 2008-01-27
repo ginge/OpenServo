@@ -125,7 +125,7 @@
 
 // Define the total number of registers define.  This includes 
 // all registers except unused and redirected registers.
-#define REGISTER_COUNT              (MIN_UNUSED_REGISTER)
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER+1)
 
 #else // ESTIMATOR_ENABLED
 
@@ -145,7 +145,7 @@
 
 // Define the total number of registers define.  This includes 
 // all registers except unused and redirected registers.
-#define REGISTER_COUNT              (MIN_UNUSED_REGISTER)
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER+1)
 
 #endif // ESTIMATOR_ENABLED
 
@@ -159,23 +159,23 @@
 // Define the flag register REG_FLAGS_HI and REG_FLAGS_LO bits.
 //
 
-#define FLAGS_HI_RESERVED_07        0x07
-#define FLAGS_HI_RESERVED_06        0x06
-#define FLAGS_HI_RESERVED_05        0x05
-#define FLAGS_HI_RESERVED_04        0x04
-#define FLAGS_HI_RESERVED_03        0x03
-#define FLAGS_HI_RESERVED_02        0x02
-#define FLAGS_HI_RESERVED_01        0x01
-#define FLAGS_HI_RESERVED_00        0x00
+#define FLAGS_HI_RESERVED_07         0x07
+#define FLAGS_HI_RESERVED_06         0x06
+#define FLAGS_HI_RESERVED_05         0x05
+#define FLAGS_HI_RESERVED_04         0x04
+#define FLAGS_HI_RESERVED_03         0x03
+#define FLAGS_HI_RESERVED_02         0x02
+#define FLAGS_HI_RESERVED_01         0x01
+#define FLAGS_HI_RESERVED_00         0x00
 
-#define FLAGS_LO_RESERVED_07        0x07
-#define FLAGS_LO_RESERVED_06        0x06
-#define FLAGS_LO_RESERVED_05        0x05
-#define FLAGS_LO_RESERVED_04        0x04
-#define FLAGS_LO_RESERVED_03        0x03
-#define FLAGS_LO_MOTION_ENABLED     0x02
-#define FLAGS_LO_WRITE_ENABLED      0x01
-#define FLAGS_LO_PWM_ENABLED        0x00
+#define FLAGS_LO_RESERVED_07         0x07
+#define FLAGS_LO_RESERVED_06         0x06
+#define FLAGS_LO_GENERALCALL_START   0x05
+#define FLAGS_LO_GENERALCALL_WAIT    0x04
+#define FLAGS_LO_GENERALCALL_ENABLED 0x03
+#define FLAGS_LO_MOTION_ENABLED      0x02
+#define FLAGS_LO_WRITE_ENABLED       0x01
+#define FLAGS_LO_PWM_ENABLED         0x00
 
 // Global register array.  Note: to minimize memory the register count doesn't
 // include the unused and redirected registers.  For this reason care must be

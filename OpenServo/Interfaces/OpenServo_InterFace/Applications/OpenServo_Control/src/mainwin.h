@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form interface generated from reading ui file 'mainwin.ui'
 **
-** Created: Sun Mar 18 21:15:33 2007
+** Created: Fri Apr 20 01:09:10 2007
 **      by: The User Interface Compiler ($Id$)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -60,16 +60,18 @@ public:
     QLabel* textLabel2_4_2;
     QLabel* voltLbl;
     QGroupBox* groupBox1;
-    QLabel* textLabel1_2;
-    QLineEdit* setupSMin;
     QLabel* textLabel1_4;
-    QLineEdit* setupSMax;
-    QLabel* textLabel1;
-    QLineEdit* setupD;
     QLabel* textLabel1_4_2;
-    QLineEdit* setupP;
-    QLabel* textLabel1_3;
+    QLineEdit* setupD;
+    QLabel* textLabel1_4_2_2;
+    QLineEdit* setupSMin;
+    QLabel* textLabel1_2;
     QLineEdit* setupI;
+    QLineEdit* setupP;
+    QLabel* textLabel1;
+    QLineEdit* setupAddr;
+    QLabel* textLabel1_3;
+    QLineEdit* setupSMax;
     QGroupBox* groupBox2_2;
     QLabel* textLabel3_2;
     QLineEdit* genericData;
@@ -94,9 +96,10 @@ public:
     QPushButton* readBtn;
     QLabel* textLabel3_6;
     QGroupBox* groupBox4;
-    QListView* adapterList;
     QPushButton* scanBusBtn;
+    QListView* otherDevList;
     QListView* servoList;
+    QListView* adapterList;
 
 public slots:
     virtual void readServo();
@@ -134,7 +137,7 @@ protected:
     QHBoxLayout* layout8;
     QHBoxLayout* layout7;
     QGridLayout* groupBox1Layout;
-    QGridLayout* layout2;
+    QGridLayout* layout9_2;
     QGridLayout* groupBox2_2Layout;
     QGridLayout* layout24;
     QGridLayout* groupBox4Layout;

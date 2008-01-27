@@ -39,7 +39,7 @@
 // functions.  These functions allow the OpenServo to be controlled
 // by keypoints along a cubic Hermite curve with each keypoint
 // indicating servo position and velocity at a particular time.
-#define CURVE_MOTION_ENABLED        0
+#define CURVE_MOTION_ENABLED        1
 
 // Enable (1) or disable (0) some test motion code within the
 // main.c module.  This test code can be enabled to test basic

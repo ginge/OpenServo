@@ -241,9 +241,6 @@ SIGNAL(SIG_ADC)
 
             adc_temperature_value = new_value;
 
-            // Save temperature value to registers
-            registers_write_word(REG_TEMPERATURE_HI, REG_TEMPERATURE_LO, new_value);
-
             break;
     }
     

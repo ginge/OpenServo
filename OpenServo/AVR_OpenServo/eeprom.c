@@ -1,89 +1,131 @@
 /*
-   Copyright (c) 2005, Mike Thompson <mpthompson@gmail.com>
-   All rights reserved.
+    Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
+    Permission is hereby granted, free of charge, to any person 
+    obtaining a copy of this software and associated documentation 
+    files (the "Software"), to deal in the Software without 
+    restriction, including without limitation the rights to use, copy, 
+    modify, merge, publish, distribute, sublicense, and/or sell copies 
+    of the Software, and to permit persons to whom the Software is 
+    furnished to do so, subject to the following conditions:
 
-   * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+    The above copyright notice and this permission notice shall be 
+    included in all copies or substantial portions of the Software.
 
-   * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+    DEALINGS IN THE SOFTWARE.
 
-   * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-   POSSIBILITY OF SUCH DAMAGE.
+    $Id$
 */
 
-// The following is needed until WINAVR supports the ATtinyX5 MCUs.
-#undef __AVR_ATtiny2313__
-#define __AVR_ATtiny45__
-
 #include <inttypes.h>
+#include <string.h>
+#include <avr/io.h>
 #include <avr/eeprom.h>
 
+#include "openservo.h"
+#include "config.h"
 #include "eeprom.h"
 #include "registers.h"
 
-uint8_t eeprom_is_erased(void)
-// Perform simple test to determine if the EEPROM may have been erased
-// and register values should not be restored from the EEPROM.
+static uint8_t eeprom_checksum(const uint8_t *buffer, size_t size, uint8_t sum)
+// Adds the buffer to the checksum passed in returning the updated sum.
 {
-	// Validate certain register values that should not be 0xFF.
-	if (eeprom_read_byte ((void *) (TWI_ADDRESS - MIN_SW_REGISTER)) == 0xFF) return 1;
-	if (eeprom_read_byte ((void *) (PID_OFFSET - MIN_SW_REGISTER)) == 0xFF) return 1;
-	if (eeprom_read_byte ((void *) (PID_PGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-	if (eeprom_read_byte ((void *) (PID_DGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-	if (eeprom_read_byte ((void *) (PID_IGAIN_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-	if (eeprom_read_byte ((void *) (MIN_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-	if (eeprom_read_byte ((void *) (MAX_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
-	if (eeprom_read_byte ((void *) (DEFAULT_SEEK_HI - MIN_SW_REGISTER)) == 0xFF) return 1;
+    // Keep going while bytes in the buffer.
+    while (size)
+    {
+        // Add the buffer to the sum.
+        sum += *buffer;
 
-	// Doesn't appear to be erased.
-	return 0;
+        // One less byte left.
+        ++buffer;
+        --size;
+    }
+
+    // Return the new sum.
+    return sum;
 }
 
 
-void eeprom_restore_registers(void)
-// Restore registers from EEPROM.
+uint8_t eeprom_erase(void)
+// Erase the entire EEPROM.
 {
-	// XXX Disable PWM to servo motor while reading registers.
+    uint16_t i;
+    uint8_t buffer[16];
 
-	// Read the safe read/write registers from EEPROM.
-	eeprom_read_block(&registers[MAX_RW_REGISTER + 1], (void *) 0, 16);
+    // XXX Disable PWM to servo motor while reading registers.
 
-	// XXX Restore PWM to servo motor.
+    // Clear the buffer contents to 0xFF.
+    memset(buffer, 0xFF, sizeof(buffer));
 
-	return;
+    // Loop over the EEPROM in buffer increments.
+    for (i = 0; i < E2END; i += sizeof(buffer))
+    {
+        // Write the buffer to the block of EEPROM.
+        eeprom_write_block(buffer, (void *) i, sizeof(buffer));
+    } 
+
+    // XXX Restore PWM to servo motor.
+
+    // Return success.
+    return 1;
 }
 
 
-void eeprom_save_registers(void)
+uint8_t eeprom_restore_registers(void)
+// Restore registers from EEPROM.  Returns 1 if success or 0 if the registers failed 
+// checksum.  Upon failure the caller should initialize the registers to defaults.
+{
+    uint8_t header[2];
+
+    // XXX Disable PWM to servo motor while reading registers.
+
+    // Read EEPROM header which is the first two bytes of EEPROM.
+    eeprom_read_block(&header[0], (void *) 0, 2);
+
+    // Does the version match?
+    if (header[0] != EEPROM_VERSION) return 0;
+
+    // Read the write protected and redirect registers from EEPROM.
+    eeprom_read_block(&registers[MIN_WRITE_PROTECT_REGISTER], (void *) 2, WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT);
+
+    // Does the checksum match?
+    if (header[1] != eeprom_checksum(&registers[MIN_WRITE_PROTECT_REGISTER], WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT, EEPROM_VERSION)) return 0;
+
+    // XXX Restore PWM to servo motor.
+
+    // Return success.
+    return 1;
+}
+
+
+uint8_t eeprom_save_registers(void)
 // Save registers to EEPROM.
 {
-	// XXX Disable PWM to servo motor while reading registers.
+    uint8_t header[2];
 
-	// Write the safe read/write registers from EEPROM.
-	eeprom_write_block(&registers[MAX_RW_REGISTER + 1], (void *) 0, 16);
+    // XXX Disable PWM to servo motor while reading registers.
 
-	// XXX Restore PWM to servo motor.
+    // Fill in the EEPROM header.
+    header[0] = EEPROM_VERSION;
+    header[1] = eeprom_checksum(&registers[MIN_WRITE_PROTECT_REGISTER], WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT, EEPROM_VERSION);
 
-	return;
+    // Write the EEPROM header which is the first two bytes of EEPROM.
+    eeprom_write_block(&header[0], (void *) 0, 2);
+
+    // Write the write protected and redirect registers from EEPROM.
+    eeprom_write_block(&registers[MIN_WRITE_PROTECT_REGISTER], (void *) 2, WRITE_PROTECT_REGISTER_COUNT + REDIRECT_REGISTER_COUNT);
+
+    // XXX Restore PWM to servo motor.
+
+    // Return success.
+    return 1;
 }
 
 

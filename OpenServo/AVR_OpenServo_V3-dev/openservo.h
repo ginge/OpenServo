@@ -36,38 +36,9 @@
 // so that external TWI clients can query the version of the software
 // running on the servo.
 #define SOFTWARE_VERSION_MAJOR          3
-#define SOFTWARE_VERSION_MINOR          3
+#define SOFTWARE_VERSION_MINOR          1
 
 // The default TWI address. Change this if you want to change the TWI address of the servo
 #define REG_DEFAULT_TWI_ADDR        0x10
-
-//
-// Utility functions.
-//
-
-// Disable interrupts and returns SREG value used to restore interrupts.
-inline static uint8_t disable_interrupts(void)
-{
-    uint8_t sreg;
-
-    asm volatile (
-        "in %0,__SREG__\n\t"
-        "cli\n\t"
-        : "=r" ((uint8_t) sreg)
-        :
-    );
-
-    return sreg;
-}
-
-// Restore interrupts Enables interrupts according to the SREG.
-inline static void restore_interrupts(uint8_t sreg)
-{
-    asm volatile (
-        "out __SREG__,%0\n\t"
-        :
-        : "r" ((uint8_t) sreg)
-    );
-}
 
 #endif // _OS_OPENSERVO_H_

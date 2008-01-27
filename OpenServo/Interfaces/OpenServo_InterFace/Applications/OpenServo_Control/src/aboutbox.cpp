@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Form implementation generated from reading ui file 'aboutbox.ui'
 **
-** Created: Sun Mar 18 21:56:57 2007
+** Created: Fri Apr 20 01:09:35 2007
 **      by: The User Interface Compiler ($Id$)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -105,7 +105,7 @@ void aboutBoxWidget::languageChange()
     closeBtn->setAccel( QKeySequence( tr( "Alt+L" ) ) );
     textLabel5->setText( tr( "<a href=\"mailto:Barry.Carter@headfuzz.co.uk\">Barry.Carter@headfuzz.co.uk</a>" ) );
     textLabel6->setText( tr( "<a href=\"http://www.openservo.com/\">www.headfuzz.co.uk</a>" ) );
-    textLabel4->setText( tr( "Copyright 2007 Barry Carter" ) );
+    textLabel4->setText( tr( "v0.6.1 Copyright 2007 Barry Carter" ) );
     textLabel8->setText( tr( "<p align=\"center\">This may require root access under *NIX systems. Be sure to install the underlying OSIF_xxx library for your OS</p>" ) );
     textLabel7->setText( tr( "<a href=\"http://www.openservo.com/\">www.OpenServo.com</a>" ) );
 }

@@ -45,13 +45,50 @@
 
 // Enable (1) or disable (0) the PID algorithm for motion 
 // control in the motion.c module.  This setting cannot be
-// set when the MOTION_IPD_ENABLED setting is enabled.
-#define MOTION_PID_ENABLED          0
+// set when the other XXX_MOTION_ENABLED flags are set.
+//
+// NOTE: This is the motion control algorithm most people should
+// use until the other algorithms are further developed.
+#define PID_MOTION_ENABLED          1
 
 // Enable (1) or disable (0) the IPD algorithm for motion 
 // control in the motion.c module.  This setting cannot be
-// set when the MOTION_PID_ENABLED setting is enabled.
-#define MOTION_IPD_ENABLED          1
+// set when the other XXX_MOTION_ENABLED flags are set.
+//
+// NOTE: The IPD algorithm is still under development and is
+// currently unstable.  Please contact Mike Thompson in the 
+// OpenServo forums for more information before enabling this
+// feature.
+#define IPD_MOTION_ENABLED          0
+
+// Enable (1) or disable (0) the state regulator algorithm
+// for motion control in the motion.c module.  This setting
+// cannot be set when the other XXX_MOTION_ENABLED flags are
+// set.
+//
+// NOTE: The state regulator code is still under development.  
+// Please contact Stefan Engelke in the OpenServo forums for 
+// more information before enabling this feature.
+#define REGULATOR_MOTION_ENABLED    0
+
+// Enable (1) or disable (0) the Luenberg state estimator 
+// algorithm for determining servo speed.  It is a realtime 
+// simulation of the servo behavior with a internal controller 
+// which keeps track of the difference between the simulated 
+// position and the measured one.  This must be enabled when
+// the MOTION_REGULATOR_ENABLED flag is enabled.  
+#define ESTIMATOR_ENABLED           (REGULATOR_MOTION_ENABLED)
+
+// Enable (1) or disable (0) fixed point utility functions in 
+// the math.c module.  Currently these routines are only used
+// by the state estimator and state regulator.
+#define FIXED_MATH_ENABLED          (ESTIMATOR_ENABLED || REGULATOR_ENABLED)
+
+// Enable (1) or disable (0) cubic Hermite curve following motion
+// functions.  These functions allow the OpenServo to be controlled
+// by keypoints along a cubic Hermite curve with each keypoint
+// indicating servo position and velocity at a particular time.
+#define CURVE_MOTION_ENABLED        1
 
 // Enable (1) or disable (0) some test motion code within the
 // main.c module.  This test code can be enabled to test basic
@@ -59,9 +96,112 @@
 // the OpenServo.  It should normally be disabled.
 #define MAIN_MOTION_TEST_ENABLED    0
 
+// Enable (1) or disable (0) standard servo pulse control signaling
+// of the seek position.  As of 2/2/07 this feature is still under
+// active development.  Please visit the OpenServo forums for the
+// current status of this feature.
+#define PULSE_CONTROL_ENABLED       0
+
+// Enable (1) or disable (0) the swapping of PWM output A and B.
+// This swapping must sometimes enabled depending on whether the
+// positive lead to the motor is attached to MOSFET/PWM output A
+// or MOSFET/PWM output B.  This option makes this easy to control
+// within software.
+#define SWAP_PWM_DIRECTION_ENABLED  0
+
 // Perform some sanity check of settings here.
-#if MOTION_PID_ENABLED && MOTION_IPD_ENABLED
-#  error "Conflicting settings for MOTION_PID_ENABLED and MOTION_IPD_ENABLED."
+#if PID_MOTION_ENABLED && (IPD_MOTION_ENABLED || REGULATOR_MOTION_ENABLED)
+#  error "Conflicting configuration settings for PID_MOTION_ENABLED"
+#endif
+#if IPD_MOTION_ENABLED && (PID_MOTION_ENABLED || REGULATOR_MOTION_ENABLED)
+#  error "Conflicting configuration settings for MOTION_IPD_ENABLED"
+#endif
+#if REGULATOR_MOTION_ENABLED && (PID_MOTION_ENABLED || IPD_MOTION_ENABLED)
+#  error "Conflicting configuration settings for REGULATOR_MOTION_ENABLED"
+#endif
+#if REGULATOR_MOTION_ENABLED && !ESTIMATOR_ENABLED
+#  error "Configuration settings for REGULATOR_MOTION_ENABLED requires ESTIMATOR_ENABLED."
+#endif
+#if CURVE_MOTION_ENABLED && PULSE_CONTROL_ENABLED
+#  warning "Conflicting configuration settings for CURVE_MOTION_ENABLED and PULSE_CONTROL_ENABLED"
+#endif
+
+// The known OpenServo hardware types are listed below.
+#define HARDWARE_TYPE_UNKNOWN           0
+#define HARDWARE_TYPE_FUTABA_S3003      1
+#define HARDWARE_TYPE_HITEC_HS_311      2
+#define HARDWARE_TYPE_HITEC_HS_475HB    3
+
+// By default the hardware type is unknown.  This value should be 
+// changed to reflect the hardware type that the code is actually 
+// being compiled for.
+#define HARDWARE_TYPE                   HARDWARE_TYPE_UNKNOWN
+
+// Set configuration values based on HARDWARE_TYPE.
+#if (HARDWARE_TYPE == HARDWARE_TYPE_UNKNOWN)
+
+// By default the PID gains are set to zero because they are the 
+// safest default when implementing an OpenServo on a new hardware.  
+// These defaults should be overriden by specifying the HARDWARE_TYPE
+// above for actual known servo hardware.
+#define DEFAULT_PID_PGAIN               0x0000
+#define DEFAULT_PID_DGAIN               0x0000
+#define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x00
+
+// Specify default mininimum and maximum seek positions.  The OpenServo will
+// not attempt to seek beyond these positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+// Default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0010
+
+#elif (HARDWARE_TYPE == HARDWARE_TYPE_FUTABA_S3003)
+
+// Futaba S3003 hardware default PID gains.
+#define DEFAULT_PID_PGAIN               0x0600
+#define DEFAULT_PID_DGAIN               0x1800
+#define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x01
+
+// Futaba S3003 hardware default mininimum and maximum seek positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+// Futaba S3003 hardware default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0008
+
+#elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_311)
+
+// Hitec HS-311 hardware default PID gains.
+#define DEFAULT_PID_PGAIN               0x0600
+#define DEFAULT_PID_DGAIN               0x1800
+#define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x01
+
+// Hitec HS-311 hardware default mininimum and maximum seek positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+// Hitec HS-311 hardware default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0008
+
+#elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_475HB)
+
+// Hitec HS-475HB hardware default PID gains.
+#define DEFAULT_PID_PGAIN               0x0600
+#define DEFAULT_PID_DGAIN               0x1800
+#define DEFAULT_PID_IGAIN               0x0000
+#define DEFAULT_PID_DEADBAND            0x01
+
+// Hitec HS-475HB hardware default mininimum and maximum seek positions.
+#define DEFAULT_MIN_SEEK                0x0060
+#define DEFAULT_MAX_SEEK                0x03A0
+
+// Hitec HS-475HB hardware default pwm frequency divider.
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0008
+
 #endif
 
 #endif // _OS_ADC_H_

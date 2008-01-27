@@ -7,6 +7,9 @@
  * This Revision: $Id$
  *
  * $Log$
+ * Revision 1.1  2007/03/04 23:10:14  ginge
+ * initial import
+ *
  * Revision 1.6  2007/01/05 19:30:58  harbaum
  * i2c clock bug fix
  *

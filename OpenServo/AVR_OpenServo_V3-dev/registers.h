@@ -65,7 +65,6 @@
 #define REG_SEEK_POSITION_LO        0x21
 #define REG_SEEK_VELOCITY_HI        0x22
 #define REG_SEEK_VELOCITY_LO        0x23
-#define REG_CURVE_RESERVED          0x24
 
 #define REG_CURVE_DELTA_HI          0x24
 #define REG_CURVE_DELTA_LO          0x25
@@ -75,6 +74,8 @@
 #define REG_CURVE_IN_VELOCITY_LO    0x29
 #define REG_CURVE_OUT_VELOCITY_HI   0x2A
 #define REG_CURVE_OUT_VELOCITY_LO   0x2B
+#define REG_CURVE_RESERVED          0x2C
+#define REG_GENERAL_CALL_GROUP_START 0x2D
 #define REG_BANK_SELECT             0x2F
 
 // TWI safe read/write registers.  These registers
@@ -96,7 +97,7 @@
 
 // Define the total number of registers define.  This includes
 // all registers except unused and redirected registers.
-#define REGISTER_COUNT              (MIN_UNUSED_REGISTER + 16)
+#define REGISTER_COUNT              (MIN_UNUSED_REGISTER)
 
 // Define the number of write protect registers.
 #define WRITE_PROTECT_REGISTER_COUNT    (MAX_WRITE_PROTECT_REGISTER - MIN_WRITE_PROTECT_REGISTER + 1)
@@ -118,7 +119,7 @@
 #define FLAGS_HI_RESERVED_00         0x00
 
 #define FLAGS_LO_RESERVED_07         0x07
-#define FLAGS_LO_RESERVED_06         0x06
+#define FLAGS_LO_PWM_BRAKE_ENABLED   0x06
 #define FLAGS_LO_GENERALCALL_START   0x05
 #define FLAGS_LO_GENERALCALL_WAIT    0x04
 #define FLAGS_LO_GENERALCALL_ENABLED 0x03
