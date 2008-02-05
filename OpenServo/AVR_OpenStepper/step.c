@@ -254,7 +254,7 @@ void step_update(uint16_t position, int16_t step_in)
     prev_step_mode = step_mode;
 
     // TODO: Fix me for proper scaling once there is real hardware! Make tunable via register?
-    OCR1A = step * (65530/255); //Update the CTC compare value with the modified value of step.
+    OCR1A = step_in * (65530/255); //Update the CTC compare value with the modified value of step.
 
     // Determine and set the direction: Stop (0), Clockwise (1), Counter-Clockwise (2).
     if (step_in < 0)
