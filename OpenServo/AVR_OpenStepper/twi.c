@@ -68,7 +68,7 @@
 #endif
 
 // Device dependant defines
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
 
 // Overflow state values.
 #define TWI_OVERFLOW_STATE_NONE             (0x00)
@@ -88,9 +88,9 @@
 #define PIN_SDA                             PINB0
 #define PIN_SCL                             PINB2
 
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____ || defined(__AVR_ATtiny84__)
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
 static uint8_t twi_slave_address;
 #endif
 
@@ -416,7 +416,7 @@ twi_slave_init(uint8_t slave_address)
     twi_rxtail = 0;
     twi_rxhead = 0;
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
     // Set the slave address.
     twi_slave_address = slave_address & 0x7f;
 
@@ -443,7 +443,7 @@ twi_slave_init(uint8_t slave_address)
 
     // Start condition interrupt enable.
     USICR |= (1<<USISIE);
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____ || defined(__AVR_ATtiny84__)
 
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Set own TWI slave address.
@@ -486,7 +486,7 @@ uint8_t twi_data_in_receive_buffer(void)
 }
 
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
 
 SIGNAL(SIG_USI_START)
 // Handle the TWI start condition.  This is called when the TWI master initiates
@@ -655,7 +655,7 @@ SIGNAL(SIG_USI_OVERFLOW)
     USISR |= (1<<USIOIF);
 }
 
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____ || defined(__AVR_ATtiny84__)
 
 
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
