@@ -6,11 +6,14 @@
 # USBTINY	- the location of this directory
 # TARGET_ARCH	- gcc -mmcu= option with AVR device type
 # OBJECTS	- the objects in addition to the USBtiny objects
-# FLASH		- command to upload main.hex to flash
-# STACK		- maximum stack size
+# FLASH_CMD	- command to upload main.hex to flash
+# FUSES_CMD	- command to program the fuse bytes
+# STACK		- maximum stack size (optional)
+# FLASH		- flash size (optional)
+# SRAM		- SRAM size (optional)
 # SCHEM		- Postscript version of the schematic to be generated
 #
-# Copyright (C) 2006 Dick Streefland
+# Copyright 2006-2008 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
@@ -19,7 +22,7 @@
 CC	= avr-gcc
 CFLAGS	= -Os -g -Wall -I. -I$(USBTINY)
 ASFLAGS	= -Os -g -Wall -I.
-LDFLAGS	= -g $(LDEXTRAFLAGS)
+LDFLAGS	= -g
 MODULES = crc.o int.o usb.o $(OBJECTS)
 UTIL	= $(USBTINY)/../util
 
@@ -28,26 +31,26 @@ main.hex:
 all:		main.hex $(SCHEM)
 
 clean:
-	rm -f main.bin *.o tags *.sch~ gschem.log *~
+	rm -f main.elf *.o tags *.sch~ gschem.log
 
 clobber:	clean
 	rm -f main.hex $(SCHEM)
 
-main.bin:	$(MODULES)
+main.elf:	$(MODULES)
 	$(LINK.o) -o $@ $(MODULES)
 
-main.hex:	main.bin $(UTIL)/check.py
-	@$(UTIL)/check.py main.bin $(STACK)
-	avr-objcopy -j .text -j .data -O ihex main.bin main.hex
-	./checksize main.bin
-disasm:		main.bin
-	avr-objdump -S main.bin
+main.hex:	main.elf $(UTIL)/check.py
+	@python $(UTIL)/check.py main.elf $(STACK) $(FLASH) $(SRAM)
+	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
+
+disasm:		main.elf
+	avr-objdump -S main.elf
 
 flash:		main.hex
-	$(FLASH)
+	$(FLASH_CMD)
 
-fuse:
-	avrdude -p m8 -U lfuse:w:0x9F:m -U hfuse:w:0xC9:m
+fuses:
+	$(FUSES_CMD)
 
 crc.o:		$(USBTINY)/crc.S $(USBTINY)/def.h usbtiny.h
 	$(COMPILE.c) $(USBTINY)/crc.S
