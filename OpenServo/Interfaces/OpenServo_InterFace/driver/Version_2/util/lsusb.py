@@ -2,7 +2,7 @@
 # ======================================================================
 # lsusb.py - Python version of the lsusb command
 #
-# Copyright (C) 2006 Dick Streefland
+# Copyright 2006-2008 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.

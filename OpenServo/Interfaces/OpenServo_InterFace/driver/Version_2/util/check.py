@@ -2,7 +2,7 @@
 # ======================================================================
 # check.py - Check section sizes and other constraints
 #
-# Copyright (C) 2006 Dick Streefland
+# Copyright 2006-2008 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
@@ -11,12 +11,19 @@
 import os, sys
 
 stacksize = 32
+flashsize = 2048
+ramsize   = 128
+
 if len(sys.argv) > 2:
 	stacksize = int(sys.argv[2])
+if len(sys.argv) > 3:
+	flashsize = int(sys.argv[3])
+if len(sys.argv) > 4:
+	ramsize   = int(sys.argv[4])
 
-max_flash = 8292
-max_sram = 1024 - stacksize
+max_sram = ramsize - stacksize
 
+crc4tab = 0
 for line in os.popen('avr-objdump -ht ' + sys.argv[1]).readlines():
 	a = line.split()
 	if len(a) == 7:
@@ -31,7 +38,7 @@ for line in os.popen('avr-objdump -ht ' + sys.argv[1]).readlines():
 print 'text: %d, data: %d, bss: %d' % (text, data, bss)
 
 status = 0
-overflow = text + data - max_flash
+overflow = text + data - flashsize
 if overflow > 0:
 	print 'ERROR: Flash size limit exceeded by %d bytes.' % overflow
 	status = 1

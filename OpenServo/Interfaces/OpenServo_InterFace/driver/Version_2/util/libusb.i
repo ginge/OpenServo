@@ -1,8 +1,7 @@
 // ======================================================================
 // SWIG interface description for libusb
 //
-// Copyright (C) 2006 Dick Streefland
-// Copyright (C) 2006 Stefan Siegl <stesie@brokenpipe.de>
+// Copyright 2006-2008 Dick Streefland
 //
 // This is free software, licensed under the terms of the GNU General
 // Public License as published by the Free Software Foundation.
@@ -13,10 +12,20 @@
 %{
 
 #include "usb.h"
+#include <errno.h>
 
-void	usb_control_in ( usb_dev_handle* dev, int requesttype,
-	                 int request, int value, int index,
-	                 char* inbuf, int* psize, int timeout )
+static	void	check_status ( int status )
+{
+	if	( status < 0 )
+	{
+		fprintf( stderr, "libusb: %s\n", strerror( errno ) );
+		exit( 1 );
+	}
+}
+
+static	void	usb_control_in ( usb_dev_handle* dev, int requesttype,
+                                 int request, int value, int index,
+                                 char* inbuf, int* psize, int timeout )
 {
 	int	r;
 
@@ -24,23 +33,25 @@ void	usb_control_in ( usb_dev_handle* dev, int requesttype,
 	r = usb_control_msg( dev, USB_ENDPOINT_IN | requesttype, request,
 	                     value, index, inbuf, *psize, timeout );
 	Py_END_ALLOW_THREADS
-	*psize = (r < 0 ? 0 : r);
+	check_status( r );
+	*psize = r;
 }
 
-int	usb_control_out ( usb_dev_handle* dev, int requesttype,
-	                  int request, int value, int index,
-	                  char* outbuf, int sz_outbuf, int timeout )
+static	int	usb_control_out ( usb_dev_handle* dev, int requesttype,
+                                  int request, int value, int index,
+                                  char* outbuf, int bufsize, int timeout )
 {
 	int	r;
 
 	Py_BEGIN_ALLOW_THREADS
 	r = usb_control_msg( dev, USB_ENDPOINT_OUT | requesttype, request,
-	                     value, index, outbuf, sz_outbuf, timeout );
+	                     value, index, outbuf, bufsize, timeout );
 	Py_END_ALLOW_THREADS
+	check_status( r );
 	return r;
 }
 
-void	usb_string ( usb_dev_handle* dev, int index, char* strbuf )
+static	void	usb_string ( usb_dev_handle* dev, int index, char* strbuf )
 {
 	int	r;
 
@@ -59,19 +70,21 @@ void	usb_string ( usb_dev_handle* dev, int index, char* strbuf )
 %include cstring.i
 
 %cstring_output_withsize( char* inbuf, int* psize );
-void	usb_control_in ( usb_dev_handle *dev, int requesttype,
-	                 int request, int value, int index,
-	                 char* inbuf, int* psize, int timeout );
+static	void	usb_control_in ( usb_dev_handle *dev, int requesttype,
+				 int request, int value, int index,
+				 char* inbuf, int* psize, int timeout );
 
-%cstring_input_binary( char* outbuf, int sz_outbuf )
-int	usb_control_out ( usb_dev_handle *dev, int requesttype,
-	                  int request, int value, int index,
-	                  char* outbuf, int sz_outbuf, int timeout );
+%cstring_input_binary( char* outbuf, int bufsize )
+static	int	usb_control_out ( usb_dev_handle *dev, int requesttype,
+				  int request, int value, int index,
+				  char* outbuf, int bufsize, int timeout );
 
 %cstring_bounded_output( char* strbuf, 255 );
-void	usb_string ( usb_dev_handle* dev, int index, char* strbuf );
+static	void	usb_string ( usb_dev_handle* dev, int index, char* strbuf );
 
+typedef unsigned short uint16_t;
 typedef unsigned short u_int16_t;
+typedef unsigned char uint8_t;
 typedef unsigned char u_int8_t;
 
 %include usb.h

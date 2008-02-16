@@ -23,7 +23,7 @@
 
 // The power requirement of the USB device in mA, or 0 when the device
 // is not bus powered:
-#define	USBTINY_MAX_POWER		400
+#define	USBTINY_MAX_POWER		100
 
 // The USB vendor and device IDs. These values should be unique for
 // every distinct device. You can get your own vendor ID from the USB
@@ -68,6 +68,11 @@
 // You need this option to send data from the host to the device in
 // a control transfer.
 #define	USBTINY_CALLBACK_OUT		1
+
+// When this macro is defined as 1, an optimized CRC function is used
+// that calculates the CRC about twice as fast as the standard version,
+// but at the expense of 30 bytes of additional flash memory.
+#define	USBTINY_FAST_CRC		0
 
 // Set the macro USBTINY_ENDPOINT to 1 to add an additional endpoint,
 // according to the values of the three other macros.

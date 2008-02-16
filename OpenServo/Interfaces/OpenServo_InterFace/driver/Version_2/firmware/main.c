@@ -12,7 +12,11 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <util/twi.h>
+#define F_CPU 12000000UL  // 12 MHz
+#include <util/delay.h>
 #include "usb.h"
+
+
 
 enum
 {
@@ -56,6 +60,11 @@ enum
 #define MOSI_MASK       (1 << 3)
 
 #define EXTRA_IO_DDR    PORTD
+
+#define I2CPORT         PORTC
+#define I2CDDR          DDRC
+#define SDA             (0<<PC4)
+#define SCL             (0<<PC5)
 
 #define RESET_DDR       DDRC
 #define RESET_PORT      PORTC
@@ -155,13 +164,12 @@ static	void	spi_rw ( void )
 // Initialise the I2C hardware in AVR
 void i2c_init()
 {
-    // Set the port directions and enable I2C pullups
-    DDRB |= 0<<DDB5;
-    PORTB |= 1<<PB5;
-    DDRC |= (0<<PC4)|(0<<PC5);
-    PORTC|= (1<<PC4);                   // Disable pullups on I2C
-    PORTC|= (1<<PC5);
-    DDRB |= _BV(PB1);                   // I2C led 
+    // Set the port directions and disable I2C pullups
+
+    I2CPORT|=  SDA;                     // Disable pullups on I2C
+    I2CPORT|=  SCL;
+    I2CDDR |=  (SDA) | (SCL);               // Set I2C lines as output
+
     TWCR = 0;                           // Clear the control register
     TWSR &= ~(_BV(TWPS0) | _BV(TWPS1)); // Set the prescaler for twi in the status reegister
     TWBR = 10;                          // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
@@ -173,7 +181,6 @@ void i2c_init()
 // until a timeout peroid of I2C_TIMEOUT
 int i2c_wait_int()
 {
-    ms_counter = 0;
     int i =0;
     while((TWCR & _BV(TWINT)) == 0)
     {
@@ -581,11 +588,19 @@ extern	void	usb_out ( byte_t* data, byte_t len )
 __attribute__((naked))                                                  // suppress redundant SP initialization
 extern int main ( void )
 {
-    DDRD = (1<<0)|(1<<1)|(1<<6)|_BV(PD3);                               // Set the port directions
+    DDRD = (1<<0)|(1<<1);  // Set the port directions
+    PORTB |= _BV(PB2);     // Enable pullup on AVR reset control
+    DDRB   = _BV(PB2);     // Set portb output
+    PORTB |= _BV(PB2);     // set AVR reset high
 
     PORTD |= _BV(PD3);
-    wdt_enable(WDTO_2S);                                                // Enable the watchdog timer
+    wdt_enable(WDTO_2S);   // Enable the watchdog timer
     wdt_reset();
+
+    // We need to pull USB + - low for at least 200ms to force
+    // a renumeration of init
+    PORTC |= _BV(PC0) | _BV(PC1);
+    _delay_ms(200);
 
     usb_init();
     i2c_init();
