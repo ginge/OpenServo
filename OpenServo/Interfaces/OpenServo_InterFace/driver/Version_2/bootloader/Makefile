@@ -11,9 +11,10 @@ BOOTLOADER_ADDRESS = 0x1800
 USBTINY		= ../usbtiny
 TARGET_ARCH	= -mmcu=atmega8
 OBJECTS		= main.o
-FLASH		= avrdude -p m8 -U flash:w:main.hex
+FLASH_CMD	= avrdude -p m8 -U flash:w:main.hex
+FUSES_CMD       =
 STACK		= 32
-SCHEM		= spi.ps
+FLASH           = 8192
+SCHEM		= 
 LDEXTRAFLAGS    = -Wl,--section-start=.text=$(BOOTLOADER_ADDRESS)
-
 include $(USBTINY)/common.mk
