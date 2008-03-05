@@ -16,5 +16,5 @@ STACK		= 32
 FLASH		= 8192
 SRAM		= 1024
 SCHEM		= spi.ps
-LDEXTRAFLAGS    = 
+LDEXTRAFLAGS	= 
 include $(USBTINY)/common.mk
