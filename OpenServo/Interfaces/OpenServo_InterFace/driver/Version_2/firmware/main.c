@@ -38,7 +38,10 @@ enum
     USBI2C_READ = 20,
     USBI2C_WRITE,
     USBI2C_STOP,
-    USBI2C_STATUS
+    USBI2C_STATUS,
+    USBIO_SET_DDR,
+    USBIO_SET_OUT,
+    USBIO_GET_IN
 };
 
 // Status flags for the I2C reading and writing
@@ -92,6 +95,27 @@ static byte_t          i2cstats[32];    // status array buffer
 static byte_t          i2cstatspos;     // status register incremental pointer
 static byte_t          i2cstat;         // status of I2C comms
 static byte_t          i2crecvlen;      // I2C buffer recieve length
+static uint8_t         io_enabled;
+static uint8_t         io_ddr;
+
+typedef struct { 
+    volatile uint8_t *p_ddr; 
+    volatile uint8_t *p_port; 
+    volatile uint8_t *p_pin;
+    uint8_t bit;
+    uint8_t mask; 
+} port_table_type;
+
+static port_table_type port_table[] = { 
+    { &DDRD, &PORTD, &PIND, PD1, 0x00 },   // TX line
+    { &DDRD, &PORTD, &PIND, PD0, 0x00 },   // RX line
+    { &DDRB, &PORTB, &PINB, PB4, 0x00 },   // MISO
+    { &DDRB, &PORTB, &PINB, PB3, 0x00 },   // MOSI
+    { &DDRC, &PORTC, &PINC, PC4, 0x00 },   // SDA
+    { &DDRC, &PORTC, &PINC, PC5, 0x00 }    // SCL
+                                      };
+
+#define PORT_TABLE_IO_COUNT 6
 
 // ----------------------------------------------------------------------
 // Delay exactly <sck_period> times 0.5 microseconds (6 cycles).
@@ -351,6 +375,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
     byte_t      mask;
     byte_t*     addr;
     byte_t      req;
+    uint8_t     x;
 
     // Generic requests
     req = data[1];
@@ -512,6 +537,60 @@ extern	byte_t	usb_setup ( byte_t data[8] )
         cmd0 = 0xc0;
         return 0;	                                   // data will be received by usb_out()
     }
+    // Set an IO line high or low
+    if  ( req == USBIO_SET_DDR )
+    {
+        io_ddr = data[4];                                  // This holds the direction bits
+        io_enabled = data[6];                              // This holds the IO enabled status
+        // Set the port directions
+        for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
+        {
+          if (io_enabled & (1<<x))              // Check bit 0 for IO dir
+          {
+            // io_tx
+            if (io_ddr & (1<<x))             // if set as output
+            {
+                *port_table[x].p_ddr |= _BV(port_table[x].bit);
+            }
+            else                        //input
+            {
+                *port_table[x].p_ddr &= ~_BV((port_table[x].bit));
+            }
+          }
+        }
+        data[0] = 1;                                       // flag all ok
+        return 0;
+    }
+    if  ( req == USBIO_SET_OUT )
+    {
+        // check to make sure it is an output
+        for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
+        {
+            if ((io_enabled & (1<<x)) && (io_ddr & (1<<x)))              // Check bit 0 for IO dir
+            {
+                if ( data[4] & (1<<x) )              // is it high?
+                {
+                    *port_table[x].p_port &= ~_BV((port_table[x].bit));
+                }
+                else
+                {
+                    *port_table[x].p_port |= _BV((port_table[x].bit));
+                }
+            }
+        }
+        data[0] = 1;
+        return 0;
+    }
+    if  ( req == USBIO_GET_IN )
+    {
+        // read anyways, regardless of ststus
+        for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
+        {
+            if (bit_is_clear((port_table[x].p_pin), (port_table[x].bit)))
+                data[0] ^= (1<<x);
+        }
+        return 0;
+    }
     return 0;
 }
 
@@ -584,6 +663,11 @@ extern	void	usb_out ( byte_t* data, byte_t len )
     }
 }
 
+void io_init(void)
+{
+    io_ddr = 0;
+    io_enabled = 0;
+}
 // Main
 __attribute__((naked))                                                  // suppress redundant SP initialization
 extern int main ( void )
@@ -604,6 +688,7 @@ extern int main ( void )
 
     usb_init();
     i2c_init();
+    io_init();
 
     for	( ;; )
     {
