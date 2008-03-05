@@ -183,17 +183,19 @@ int main(void)
 {
     // Initialise hardware
     //Set all ports as inputs apart from the USB
-    PORTB = 0xff;
-    DDRB  = 0;
-    PORTC = 0xfc;         // This is where our jumper pin detection will happen
+    PORTB = 0;
+    DDRB  = _BV(PB3);
+    PORTC = 0;         // This is where our jumper pin detection will happen
     DDRC  = 0;
-    PORTD = 0xfa;
+    PORTD = 0;
     DDRD  = 0x02;
 
 
     // Load the main application if jumper is not set
     // Change this pin to relocate the jumper elsewhere
-    if (!((PINC & (1 << PC5)) == 0))
+    // Take PB3 high
+    PORTB |= (1 << PB3);
+    if (PINB & (1 << PB4))
     {
        init_application();
     }
