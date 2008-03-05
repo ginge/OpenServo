@@ -69,6 +69,8 @@
 // a control transfer.
 #define	USBTINY_CALLBACK_OUT		1
 
+#define	USBTINY_FAST_CRC		1
+
 // Set the macro USBTINY_ENDPOINT to 1 to add an additional endpoint,
 // according to the values of the three other macros.
 #define	USBTINY_ENDPOINT		0
