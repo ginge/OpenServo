@@ -22,7 +22,7 @@
 CC	= avr-gcc
 CFLAGS	= -Os -g -Wall -I. -I$(USBTINY)
 ASFLAGS	= -Os -g -Wall -I.
-LDFLAGS	= -g
+LDFLAGS	= -g $(LDEXTRAFLAGS)
 MODULES = crc.o int.o usb.o $(OBJECTS)
 UTIL	= $(USBTINY)/../util
 
