@@ -64,7 +64,6 @@ volatile uint8_t adc_power_ready;
 volatile uint16_t adc_power_value;
 volatile uint8_t adc_position_ready;
 volatile uint16_t adc_position_value;
-volatile uint8_t adc_voltage_needed;
 volatile uint8_t adc_heartbeat_ready;
 volatile uint8_t adc_backemf_ready;
 volatile uint16_t adc_backemf_value;
@@ -78,8 +77,7 @@ void adc_init(void)
     adc_power_ready = 0;
     adc_power_value = 0;
     adc_position_ready = 0;
-    adc_position_value = 0;
-    adc_voltage_needed = 1;
+    adc_position_value = 0; 
     adc_heartbeat_ready = 0;
     adc_backemf_ready = 0;
     adc_backemf_value = 0;
@@ -157,7 +155,8 @@ SIGNAL(SIG_OUTPUT_COMPARE0A)
 SIGNAL(SIG_ADC)
 // Handles ADC interrupt. This runs as an interrupting self triggering mechanism sampling selected channels
 // When interrupted with position, it moved initiates the power sampling, which when interrupted initiates
-// the other channels in a chain
+// the other channels in a chain. The Back EMF is not sampled as part of the
+// cascade, as this is handled by the backemf module.
 {
     // Read the 10-bit ADC value.
     uint16_t new_value = ADCW;
@@ -198,34 +197,39 @@ SIGNAL(SIG_ADC)
                     (0<<ADLAR) |                                    // Keep high bits right adjusted.
                     ADC_CHANNEL_TEMPERATURE;                        // Temperature as the next channel to sample.
 
-            // Start the ADC of the power channel now
+            // Start the ADC of the temperature channel now
             ADCSRA |= (1<<ADSC);
 
+            break;
 
-            // Check the flag to see if a battery voltage measurement is required.
-            if (adc_voltage_needed)
-            {
-                // Set the ADC multiplexer selection register.
-                ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
-                        (0<<ADLAR) |                                    // Keep high bits right adjusted.
-                        ADC_CHANNEL_BATTERY;                            // Battery voltage as the next channel to sample.
 
-                // Start the ADC of the voltage channel now
-                ADCSRA |= (1<<ADSC);
-            }
+        case ADC_CHANNEL_TEMPERATURE:
+
+            // Save the temperature value
+            adc_temperature_value = new_value;
+
+            // Fag the temperature value as ready
+            adc_temperature_ready = 1;
+
+            // Now sample the battery voltage
+            // Set the ADC multiplexer selection register.
+            ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
+                    (0<<ADLAR) |                                    // Keep high bits right adjusted.
+                    ADC_CHANNEL_BATTERY;                            // Battery voltage as the next channel to sample.
+
+            // Start the ADC of the voltage channel now
+            ADCSRA |= (1<<ADSC);
 
             break;
 
 
         case ADC_CHANNEL_BATTERY:
 
-            // Remove flag
-            adc_voltage_needed = 0;
-
             // Save voltage value to registers
             registers_write_word(REG_VOLTAGE_HI, REG_VOLTAGE_LO, new_value);
 
             break;
+
 
         case ADC_CHANNEL_BACKEMF:
 
@@ -234,15 +238,5 @@ SIGNAL(SIG_ADC)
             adc_backemf_value = new_value;
 
             break;
-
-        case ADC_CHANNEL_TEMPERATURE:
-
-            adc_temperature_ready = 1;
-
-            adc_temperature_value = new_value;
-
-            break;
     }
-    
 }
-
