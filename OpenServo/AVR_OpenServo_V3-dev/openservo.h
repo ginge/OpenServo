@@ -30,6 +30,7 @@
 // Define the device type and subtype.  These values are used so that
 // external TWI clients can query the type of device the servo is.
 #define OPENSERVO_DEVICE_TYPE           1
+// note that if you enable the rolling subtype this value is ignored.
 #define OPENSERVO_DEVICE_SUBTYPE        1
 
 // Define the software major and minor version.  These values are used
