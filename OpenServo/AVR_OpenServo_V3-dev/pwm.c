@@ -44,7 +44,7 @@
 // =========
 //
 // PWM output to the servo motor utilizes Timer/Counter1 in 8-bit mode.
-// Output to the motor is assigned as follows:
+// Output to the motor for the stock v3 is assigned as follows:
 //
 //  PB1/OC1A - PWM_A    - PWM pulse output direction A
 //  PB2/OC1B - PWM_B    - PWM pulse output direction B
@@ -53,9 +53,6 @@
 //  PD4      - SMPLn_B  - BEMF sample enable B
 //  PD7      - SMPLn_A  - BEMF sample enable A
 //
-
- //80% normal
-//#define PWM_MAX 100
 
 // Determine the top value for timer/counter1 from the frequency divider.
 #define PWM_TOP_VALUE(div,pwm_max)      (uint16_t)((uint32_t)(((uint16_t) div << 4) - 1)+(uint32_t)(((((uint32_t) div << 4) - 1)/100)*(100-pwm_max)))
@@ -111,18 +108,18 @@ static void pwm_dir_a(uint8_t pwm_duty)
     if (!pwm_a)
     { // Yes...
 
-        // Set SMPLn_B (PD4) and SMPLn_A (PD7) to high.
-        PORTD |= ((1<<PD4) | (1<<PD7));
+        // Set SMPLn_B (PWM_PIN_SMPLB) and SMPLn_A (PWM_PIN_SMPLA) to high.
+        PWM_CTL_PORT |= ((1<<PWM_PIN_SMPLB) | (1<<PWM_PIN_SMPLA));
 
-        // Set EN_B (PD3) to low.
-        PORTD &= ~(1<<PD3);
+        // Set EN_B (PWM_PIN_ENB) to low.
+        PWM_CTL_PORT &= ~(1<<PWM_PIN_ENB);
 
-        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        // Disable PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) output.
         // NOTE: Actually PWM_A should already be disabled...
         TCCR1A = 0;
 
-        // Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
+        // Make sure PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) are low.
+        PWM_DUTY_PORT &= ~((1<<PWM_DUTY_PWMA) | (1<<PWM_DUTY_PWMB));
 
         // Give the H-bridge time to respond to the above, failure to do so or to wait long
         // enough will result in brownouts as the power is "crowbarred" to varying extents.
@@ -135,11 +132,11 @@ static void pwm_dir_a(uint8_t pwm_duty)
         //
         delay_loop(DELAYLOOP);
 
-        // Enable PWM_A (PB1/OC1A)  output.
+        // Enable PWM_A (PWM_DUTY_PWMA/OC1A)  output.
         TCCR1A |= (1<<COM1A1);
 
-        // Set EN_A (PD2) to high.
-        PORTD |= (1<<PD2);
+        // Set EN_A (PWM_PIN_ENA) to high.
+        PWM_CTL_PORT |= (1<<PWM_PIN_ENA);
 
         // NOTE: The PWM driven state of the H-bridge should not be switched to b-mode or braking
         //       without a suffient delay.
@@ -179,18 +176,18 @@ static void pwm_dir_b(uint8_t pwm_duty)
     if (!pwm_b)
     { // Yes...
 
-        // Set SMPLn_B (PD4) and SMPLn_A (PD7) to high.
-        PORTD |= ((1<<PD4) | (1<<PD7));
+        // Set SMPLn_B (PWM_PIN_SMPLB) and SMPLn_A (PWM_PIN_SMPLA) to high.
+        PWM_CTL_PORT |= ((1<<PWM_PIN_SMPLB) | (1<<PWM_PIN_SMPLA));
 
-        // Set EN_A (PD2) to low.
-        PORTD &= ~(1<<PD2);
+        // Set EN_A (PWM_PIN_ENA) to low.
+        PWM_CTL_PORT &= ~(1<<PWM_PIN_ENA);
 
-        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        // Disable PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) output.
         // NOTE: Actually PWM_B should already be disabled...
         TCCR1A = 0;
 
-        // Make sure PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
+        // Make sure PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) are low.
+        PWM_DUTY_PORT &= ~((1<<PWM_DUTY_PWMA) | (1<<PWM_DUTY_PWMB));
 
         // Give the H-bridge time to respond to the above, failure to do so or to wait long
         // enough will result in brownouts as the power is "crowbarred" to varying extents.
@@ -203,11 +200,11 @@ static void pwm_dir_b(uint8_t pwm_duty)
         //
         delay_loop(DELAYLOOP);
 
-        // Enable PWM_B (PB2/OC1B) output.
+        // Enable PWM_B (PWM_DUTY_PWMB/OC1B) output.
         TCCR1A = (1<<COM1B1);
 
-        // Set EN_B (PD3) to high.
-        PORTD |= (1<<PD3);
+        // Set EN_B (PWM_PIN_ENB) to high.
+        PWM_CTL_PORT |= (1<<PWM_PIN_ENB);
 
         // NOTE: The PWM driven state of the H-bridge should not be switched to a-mode or braking
         //       without a suffient delay.
@@ -260,20 +257,20 @@ void pwm_init(void)
     pwm_div = banks_read_word(POS_PID_BANK, REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
     pwm_max = banks_read_byte(CONFIG_BANK,  REG_PWM_MAX);
 
-    // Set EN_A (PD2) and EN_B (PD3) to low.
-    PORTD &= ~((1<<PD2) | (1<<PD3));
+    // Set EN_A (PWM_PIN_ENA) and EN_B (PWM_PIN_ENB) to low.
+    PWM_CTL_PORT &= ~((1<<PWM_PIN_ENA) | (1<<PWM_PIN_ENB));
 
-    // Set SMPLn_B (PD4) and SMPLn_A (PD7) to high.
-    PORTD |= ((1<<PD4) | (1<<PD7));
+    // Set SMPLn_B (PWM_PIN_SMPLB) and SMPLn_A (PWM_PIN_SMPLA) to high.
+    PWM_CTL_PORT |= ((1<<PWM_PIN_SMPLB) | (1<<PWM_PIN_SMPLA));
 
-    // Enable PD2, PD3, PD4 and PD7 as outputs.
-    DDRD |= ((1<<DDD2) | (1<<DDD3) | (1<<DDD4) | (1<<DDD7));
+    // Enable PWM_PIN_ENA, PWM_PIN_ENB, PWM_PIN_SMPLB and PWM_PIN_SMPLA as outputs.
+    PWM_CTL_DDR |= PWM_CRL_DDR_CONF;
 
-    // Set PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are low.
-    PORTB &= ~((1<<PB1) | (1<<PB2));
+    // Set PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) are low.
+    PWM_DUTY_PORT &= ~((1<<PWM_DUTY_PWMA) | (1<<PWM_DUTY_PWMB));
 
-    // Enable PB1/OC1A and PB2/OC1B as outputs.
-    DDRB |= ((1<<DDB1) | (1<<DDB2));
+    // Enable PWM_DUTY_PWMA/OC1A and PWM_DUTY_PWMB/OC1B as outputs.
+    PWM_DUTY_DDR |= PWM_DUTY_DDR_CONF;
 
     // Reset the timer1 configuration.
     TCNT1 = 0;
@@ -327,8 +324,8 @@ void pwm_update(uint16_t position, int16_t pwm)
        (banks_read_byte(POS_PID_BANK, REG_PWM_MAX) != pwm_max))
     {
 
-        // Hold EN_A (PD2) and EN_B (PD3) low.
-        PORTD &= ~((1<<PD2) | (1<<PD3));
+        // Hold EN_A (PWM_PIN_ENA) and EN_B (PWM_PIN_ENB) low.
+        PWM_CTL_PORT &= ~((1<<PWM_PIN_ENA) | (1<<PWM_PIN_ENB));
 
         // Give the H-bridge time to respond to the above, failure to do so or to wait long
         // enough will result in brownouts as the power is "crowbarred" to varying extents.
@@ -341,8 +338,8 @@ void pwm_update(uint16_t position, int16_t pwm)
         //
         delay_loop(DELAYLOOP);
 
-        // Make sure that PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are held low.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
+        // Make sure that PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) are held low.
+        PWM_DUTY_PORT &= ~((1<<PWM_DUTY_PWMA) | (1<<PWM_DUTY_PWMB));
 
         // Disable OC1A and OC1B outputs.
         TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
@@ -451,14 +448,14 @@ void pwm_stop(void)
     // Are we moving in the A or B direction?
     if (pwm_a || pwm_b)
     {
-        // Make sure that SMPLn_B (PD4) and SMPLn_A (PD7) are held high.
-        PORTD |= ((1<<PD4) | (1<<PD7));
+        // Make sure that SMPLn_B (PWM_PIN_SMPLB) and SMPLn_A (PWM_PIN_SMPLA) are held high.
+        PWM_CTL_PORT |= ((1<<PWM_PIN_SMPLB) | (1<<PWM_PIN_SMPLA));
 
-        // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
+        // Disable PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) output.
         TCCR1A = 0;
 
-        // Make sure that PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) are held low.
-        PORTB &= ~((1<<PB1) | (1<<PB2));
+        // Make sure that PWM_A (PWM_DUTY_PWMA/OC1A) and PWM_B (PWM_DUTY_PWMB/OC1B) are held low.
+        PWM_DUTY_PORT &= ~((1<<PWM_DUTY_PWMA) | (1<<PWM_DUTY_PWMB));
 
         // Before enabling braking (which turns on the "two lower MOSFETS"), introduce
         // sufficient delay to give the H-bridge time to respond to the change of state 
@@ -468,13 +465,13 @@ void pwm_stop(void)
         // Do we want to enable braking?
         if (registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_PWM_BRAKE_ENABLED))
         {
-            // Hold EN_A (PD2) and EN_B (PD3) high.
-            PORTD |= ((1<<PD2) | (1<<PD3));
+            // Hold EN_A (PWM_PIN_ENA) and EN_B (PWM_PIN_ENB) high.
+            PWM_CTL_PORT |= ((1<<PWM_PIN_ENA) | (1<<PWM_PIN_ENB));
         }
         else
         {
-            // Hold EN_A (PD2) and EN_B (PD3) low.
-            PORTD &= ~((1<<PD2) | (1<<PD3));
+            // Hold EN_A (PWM_PIN_ENA) and EN_B (PWM_PIN_ENB) low.
+            PWM_CTL_PORT &= ~((1<<PWM_PIN_ENA) | (1<<PWM_PIN_ENB));
         }
 
         // Reset the A and B direction flags.
