@@ -41,7 +41,7 @@
 #define TWI_CMD_EEPROM_ERASE            0x89        // Erase the EEPROM.
 #define TWI_CMD_PWM_BRAKE_ENABLE        0x8A        // Enable PWM H-bridge braking
 #define TWI_CMD_PWM_BRAKE_DISABLE       0x8B        // Disable PWM H-bridge braking
-#define TWI_CMD_VOLTAGE_READ            0x90        // Starts a ADC on the supply voltage channel
+#define TWI_CMD_RESERVED_FREE           0x90        // Available for use
 #define TWI_CMD_CURVE_MOTION_ENABLE     0x91        // Enable curve motion processing.
 #define TWI_CMD_CURVE_MOTION_DISABLE    0x92        // Disable curve motion processing.
 #define TWI_CMD_CURVE_MOTION_RESET      0x93        // Reset the curve motion buffer.

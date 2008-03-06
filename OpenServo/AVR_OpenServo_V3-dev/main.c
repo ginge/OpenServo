@@ -142,13 +142,6 @@ static void handle_twi_command(void)
 
             break;
 
-        case TWI_CMD_VOLTAGE_READ:
-
-            // Request a voltage reading.
-            adc_read_voltage();
-
-            break;
-
 #if CURVE_MOTION_ENABLED
         case TWI_CMD_CURVE_MOTION_ENABLE:
 
