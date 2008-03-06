@@ -22,19 +22,15 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
 ## Linker flags
 LDFLAGS = $(COMMON)
-LDFLAGS += -nostartfiles -v  -Wl,-Map=ATmega168_OpenServo.map
+LDFLAGS += -v  -Wl,-Map=ATmega168_OpenServo.map
 
 
 ## Intel Hex file production flags
 HEX_FLASH_FLAGS = -R .eeprom
 
-HEX_EEPROM_FLAGS = -j .eeprom
-HEX_EEPROM_FLAGS += --set-section-flags=.eeprom="alloc,load"
-HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
-
 
 ## Objects that must be built in order to link
-OBJECTS = bootcrt.o main.o adc.o registers.o eeprom.o watchdog.o motion.o pid.o power.o twi.o pwm.o seek.o timer.o curve.o pulsectl.o backemf.o banks.o alert.o
+OBJECTS = main.o adc.o registers.o eeprom.o watchdog.o motion.o pid.o power.o twi.o pwm.o seek.o timer.o curve.o pulsectl.o backemf.o banks.o alert.o
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS =
@@ -43,9 +39,6 @@ LINKONLYOBJECTS =
 all: $(TARGET) ATmega168_OpenServo.hex ATmega168_OpenServo.eep ATmega168_OpenServo.lss size
 
 ## Compile
-bootcrt.o: bootcrt.s
-	$(CC) $(INCLUDES) $(ASMFLAGS) -c  $<
-
 main.o: main.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
