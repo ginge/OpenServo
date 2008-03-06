@@ -27,6 +27,8 @@
 #ifndef _OS_CONFIG_H_
 #define _OS_CONFIG_H_ 1
 
+#include "pindefs_OSv3.h"
+
 // Enable (1) or disable (0) checksum verification within the
 // twi.c module.  When enabled the TWI_CMD_CHECKED_TXN command
 // is enabled and basic checksum validation of reads and writes
