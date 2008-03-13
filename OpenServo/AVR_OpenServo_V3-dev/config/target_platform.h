@@ -55,7 +55,7 @@
 // hardware revision. If you want to compile for a different hardware
 // target, such as the OpenServo Version 2, or the OpenStep modules
 // you change this definition.
-#define TARGET_HARDWARE                 TARGET_HARDWARE_RFOPENSTEP
+#define TARGET_HARDWARE                 TARGET_HARDWARE_OSV3
 
 // By default the hardware type is unknown.  This value should be
 // changed to reflect the hardware type that the code is actually
