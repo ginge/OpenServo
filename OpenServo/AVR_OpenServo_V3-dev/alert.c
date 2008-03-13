@@ -44,6 +44,7 @@
 #include "eeprom.h"
 #include "pid.h"
 #include "pwm.h"
+#include "step.h"
 #include "registers.h"
 #include "banks.h"
 #include "alert.h"
@@ -119,8 +120,13 @@ void alert_check(void)
     if (temperature > max_temperature && max_temperature >0)
     {
         alert_setbit(ALERT_OVERTEMP);
+#if PWM_ENABLED
         // Turn off pwm?
         pwm_disable();
+#endif
+#if STEP_ENABLED
+        step_disable();
+#endif
     }
 
     if(throttle >0) throttle--;

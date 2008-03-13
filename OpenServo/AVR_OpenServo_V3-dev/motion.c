@@ -279,7 +279,7 @@ void motion_next(uint16_t delta)
     // The velocity is in position units a millisecond, but we really need the
     // velocity to be measured in position units every 10 milliseconds to match
     // the sample period of the ADC.
-    fvelocity *= 10.0;
+    fvelocity *= (float)HEARTBEAT_INTERVAL_VALUE;
 
     // Update the seek position register.
     registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, float_to_int(fposition));

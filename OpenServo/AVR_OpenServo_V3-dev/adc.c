@@ -47,17 +47,6 @@
 //  ADC3 (PC3) - Temperature
 //  ADC7 (PC7) - Back EMF
 
-// The ADC clock prescaler of 128 is selected to yield a 156.25 KHz ADC clock
-// from an 20 MHz system clock.
-#define ADPS		((1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0))
-
-// The timer clock prescaler of 1024 is selected to yield a 19.531 KHz ADC clock
-// from a 20 MHz system clock.
-#define CSPS		((1<<CS02) | (0<<CS01) | (1<<CS00))
-
-// Define the compare register value to generate a timer interrupt and initiate
-// an ADC sample every 9.984 milliseconds and yield a 100.1603 Hz sample rate.
-#define CRVALUE		195
 
 // Globals used to maintain ADC state and values.
 volatile uint8_t adc_power_ready;
@@ -65,10 +54,14 @@ volatile uint16_t adc_power_value;
 volatile uint8_t adc_position_ready;
 volatile uint16_t adc_position_value;
 volatile uint8_t adc_heartbeat_ready;
+#if BACKEMF_ENABLED
 volatile uint8_t adc_backemf_ready;
 volatile uint16_t adc_backemf_value;
+#endif
+#if TEMPERATURE_ENABLED
 volatile uint8_t adc_temperature_ready;
 volatile uint16_t adc_temperature_value;
+#endif
 
 void adc_init(void)
 // Initialize ADC conversion for reading current monitoring and position.
@@ -79,10 +72,14 @@ void adc_init(void)
     adc_position_ready = 0;
     adc_position_value = 0; 
     adc_heartbeat_ready = 0;
+#if BACKEMF_ENABLED
     adc_backemf_ready = 0;
     adc_backemf_value = 0;
+#endif
+#if TEMPERATURE_ENABLED
     adc_temperature_ready = 0;
     adc_temperature_value = 0;
+#endif
 
     // Make sure ports PC0 (ADC0), PC1 (ADC1) and PC2 (ADC2) are set low.
     PORTC &= ~((1<<PC0) | (1<<PC1) | (1<<PC2));
@@ -195,14 +192,19 @@ SIGNAL(SIG_ADC)
             // Set the ADC multiplexer selection register.
             ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
                     (0<<ADLAR) |                                    // Keep high bits right adjusted.
+#if TEMPERATURE_ENABLED
                     ADC_CHANNEL_TEMPERATURE;                        // Temperature as the next channel to sample.
+#else
+                    ADC_CHANNEL_BATTERY;                            // Sample the battery channel next
+#endif
 
             // Start the ADC of the temperature channel now
             ADCSRA |= (1<<ADSC);
 
+
             break;
 
-
+#if TEMPERATURE_ENABLED
         case ADC_CHANNEL_TEMPERATURE:
 
             // Save the temperature value
@@ -221,7 +223,7 @@ SIGNAL(SIG_ADC)
             ADCSRA |= (1<<ADSC);
 
             break;
-
+#endif
 
         case ADC_CHANNEL_BATTERY:
 
@@ -230,7 +232,7 @@ SIGNAL(SIG_ADC)
 
             break;
 
-
+#if BACKEMF_ENABLED
         case ADC_CHANNEL_BACKEMF:
 
             adc_backemf_ready = 1;
@@ -238,5 +240,6 @@ SIGNAL(SIG_ADC)
             adc_backemf_value = new_value;
 
             break;
+#endif
     }
 }

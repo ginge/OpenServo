@@ -102,9 +102,6 @@
 // Define the number of write protect registers.
 #define WRITE_PROTECT_REGISTER_COUNT    (MAX_WRITE_PROTECT_REGISTER - MIN_WRITE_PROTECT_REGISTER + 1)
 
-// Define the number of banked registers.
-#define BANK_REGISTER_COUNT             (MAX_BANK_REGISTER - MIN_BANK_REGISTER + 1)
-
 //
 // Define the flag register REG_FLAGS_HI and REG_FLAGS_LO bits.
 //

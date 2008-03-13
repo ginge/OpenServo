@@ -28,7 +28,6 @@
 #define _OS_BACKEMF_H_ 1
 
 #include <inttypes.h>
-#define F_CPU 20000000UL
 
 void backemf_init(void);
 void backemf_defaults(void);

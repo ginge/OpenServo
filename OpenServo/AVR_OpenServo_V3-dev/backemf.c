@@ -30,12 +30,12 @@
 */
 
 #include "backemf.h"
+#include "config.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
 #include "openservo.h"
-#include "config.h"
 #include "power.h"
 #include "registers.h"
 #include "banks.h"

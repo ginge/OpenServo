@@ -39,11 +39,14 @@ extern volatile uint16_t adc_power_value;
 extern volatile uint8_t adc_position_ready;
 extern volatile uint16_t adc_position_value;
 extern volatile uint8_t adc_heartbeat_ready;
+#if BACKEMF_ENABLED
 extern volatile uint8_t adc_backemf_ready;
 extern volatile uint16_t adc_backemf_value;
+#endif
+#if TEMPERATURE_ENABLED
 extern volatile uint8_t adc_temperature_ready;
 extern volatile uint16_t adc_temperature_value;
-
+#endif
 
 // In-lines for fast access to power flags and values.
 
@@ -108,6 +111,7 @@ inline static void adc_heartbeat_value_clear_ready(void)
     adc_heartbeat_ready = 0;
 }
 
+#if BACKEMF_ENABLED
 inline static uint16_t adc_get_backemf_value(void)
 // Return the signed 16-bit ADC power value.
 {
@@ -130,7 +134,9 @@ inline static void adc_backemf_value_clear_ready(void)
 {
     adc_backemf_ready = 0;
 }
+#endif
 
+#if TEMPERATURE_ENABLED
 inline static uint16_t adc_get_temperature_value(void)
 // Return the 16-bit ADC temperature value.
 {
@@ -153,5 +159,6 @@ inline static void adc_temperature_value_clear_ready(void)
 {
     adc_temperature_ready = 0;
 }
+#endif
 
 #endif // _OS_ADC_H_

@@ -35,6 +35,7 @@
 #include "openservo.h"
 #include "config.h"
 #include "pwm.h"
+#include "step.h"
 
 void watchdog_init(void)
 // Initialize the watchdog module.
@@ -58,7 +59,12 @@ void watchdog_hard_reset(void)
 // Reset the device using the watchdog timer.
 {
     // Disable PWM to the servo motor.
+#if PWM_ENABLED
     pwm_disable();
+#endif
+#if STEP_ENABLED
+    step_disable();
+#endif
     cli();
     // Enable the watchdog.
     WDTCSR = (1<<WDIF) |                                     // Reset any interrupt.

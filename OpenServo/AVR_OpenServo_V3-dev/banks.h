@@ -92,14 +92,18 @@
 
 #define REG_GENERAL_CALL_GROUP      0x20
 #define REG_BRAKE_STRENGTH          0x21
+#if (BACKEMF_ENABLED)
 // Delay in ms for the back emf spike collapse
 #define REG_EMF_COLLAPSE_DELAY      0x2A
 // This is 41us * n us delay for back emf charging cap
 #define REG_EMF_CHARGE_TIME         0x2B
-
+#endif
+#if (STEP_ENABLED)
+#define REG_STEP_MODE               0x2C
+#endif
 
 #define CONFIG_SAVE_MIN             0x00
-#define CONFIG_SAVE_MAX             0x2B 
+#define CONFIG_SAVE_MAX             0x2C 
 #define CONFIG_SAVE_COUNT (CONFIG_SAVE_MAX - CONFIG_SAVE_MIN + 1)
 
 // Bank 2
@@ -113,6 +117,9 @@
 
 // Define the number of redirect registers.
 #define REDIRECT_REGISTER_COUNT         (MAX_REDIRECT_REGISTER - MIN_REDIRECT_REGISTER + 1)
+
+// Define the number of banked registers.
+#define BANK_REGISTER_COUNT             (MAX_BANK_REGISTER - MIN_BANK_REGISTER + 1)
 
 // Bank functions.
 

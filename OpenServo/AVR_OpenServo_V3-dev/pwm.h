@@ -30,6 +30,7 @@
 #ifndef _OS_PWM_H_
 #define _OS_PWM_H_ 1
 
+#if PWM_ENH_ENABLED
 #include "registers.h"
 
 void pwm_registers_defaults(void);
@@ -74,5 +75,7 @@ inline static void pwm_brake_disable(void)
     // Disable hardware brake.
     registers_write_byte(REG_FLAGS_LO, flags_lo & ~(1<<FLAGS_LO_GENERALCALL_ENABLED));
 }
-
+#else
+#include "pwm-std.h"
+#endif
 #endif // _OS_PWM_H_

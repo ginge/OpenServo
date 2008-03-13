@@ -32,6 +32,7 @@
 #include "eeprom.h"
 #include "pid.h"
 #include "pwm.h"
+#include "step.h"
 #include "registers.h"
 #include "banks.h"
 
@@ -71,8 +72,14 @@ void registers_defaults(void)
 {
     // Initialize read/write protected registers to defaults.
 
+#if PWM_ENABLED
     // Call the PWM module to initialize the PWM related default values.
     pwm_registers_defaults();
+#endif
+#if STEP_ENABLED
+    step_registers_defaults();
+#endif
+
 
     // Call the PID module to initialize the PID related default values.
     pid_registers_defaults();

@@ -35,6 +35,7 @@
 #include "motion.h"
 #include "pid.h"
 #include "power.h"
+#include "step.h"
 #include "pwm.h"
 #include "seek.h"
 #include "pulsectl.h"
@@ -88,16 +89,27 @@ static void handle_twi_command(void)
             break;
 
         case TWI_CMD_PWM_ENABLE:
-
+#if PWM_STD_ENABLED || PWM_ENH_ENABLED
             // Enable PWM to the servo motor.
             pwm_enable();
+#endif
+#if STEP_ENABLED
+            // Enable Stepper motor control.
+            step_enable();
+#endif
 
             break;
 
         case TWI_CMD_PWM_DISABLE:
-
+#if PWM_STD_ENABLED || PWM_ENH_ENABLED
             // Disable PWM to the servo motor.
             pwm_disable();
+#endif
+
+#if STEP_ENABLED
+            // Enable Stepper motor control.
+            step_disable();
+#endif
 
             break;
 
@@ -199,14 +211,16 @@ static void handle_twi_command(void)
             break;
 
         case TWI_CMD_PWM_BRAKE_ENABLE:
-
+#if PWM_ENH_ENABLED
             pwm_brake_enable();
+#endif
 
             break;
 
         case TWI_CMD_PWM_BRAKE_DISABLE:
-
+#if PWM_ENH_ENABLED
             pwm_brake_disable();
+#endif
 
             break;
 
@@ -229,8 +243,15 @@ int main (void)
     // First, initialize registers that control servo operation.
     registers_init();
 
+#if PWM_STD_ENABLED || PWM_ENH_ENABLED
     // Initialize the PWM module.
     pwm_init();
+#endif
+
+#if STEP_ENABLED
+    // Initialise the stepper motor
+    step_init();
+#endif
 
     // Initialize the ADC module.
     adc_init();
@@ -282,7 +303,13 @@ int main (void)
     // XXX Enable PWM and writing.  I do this for now to make development and
     // XXX tuning a bit easier.  Constantly manually setting these values to
     // XXX turn the servo on and write the gain values get's to be a pain.
+#if PWM_STD_ENABLED || PWM_ENH_ENABLED
     pwm_enable();
+#endif
+#if STEP_ENABLED
+    step_enable();
+#endif
+
     registers_write_enable();
 
     // This is the main processing loop for the servo.  It basically looks
@@ -359,12 +386,18 @@ int main (void)
             // Trigger the adc sampling hardware. This triggers the position and temperature sample
             adc_start(ADC_CHANNEL_POSITION);
 
+#if TEMPERATURE_ENABLED
             // Wait for the samples to complete
             while(!adc_position_value_is_ready() && !adc_power_value_is_ready() && !adc_temperature_value_is_ready())
                 ;;
 
             // Save temperature value to registers
             registers_write_word(REG_TEMPERATURE_HI, REG_TEMPERATURE_LO, (uint16_t)adc_get_temperature_value());
+
+#else
+            while(!adc_position_value_is_ready() && !adc_power_value_is_ready())
+                ;;
+#endif
 
             // Get the new power value.
             uint16_t power = adc_get_power_value();
@@ -396,9 +429,17 @@ int main (void)
             // Allow any alerts to modify the PWM value.
             pwm = alert_pwm_throttle(pwm);
 
+#if PWM_STD_ENABLED || PWM_ENH_ENABLED
             // Update the servo movement as indicated by the PWM value.
             // Sanity checks are performed against the position value.
             pwm_update(position, pwm);
+#endif
+
+#if STEP_ENABLED
+            // Update the stepper motor as indicated by the PWM value.
+            // Sanity checks are performed against the position value.
+            step_update(position, pwm);
+#endif
 
         }
 
