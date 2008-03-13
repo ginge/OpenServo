@@ -63,17 +63,17 @@ static int16_t previous_position;
 
 #define FILTER_SHIFT 1
 
-static int32_t filter_reg = 0;
+static int32_t filter_reg_pos = 0;
+static int32_t filter_reg_emf = 0;
 
-static int16_t filter_update(int16_t input)
+static int16_t filter_update(int16_t input, int32_t *filter_source)
 {
     // Update the filter with the current input.
-    filter_reg = filter_reg - (filter_reg >> FILTER_SHIFT) + input;
+    *filter_source = *filter_source - (*filter_source >> FILTER_SHIFT) + input;
 
     // Scale output for unity gain.
-    return (int16_t) (filter_reg >> FILTER_SHIFT);
+    return (int16_t) (*filter_source >> FILTER_SHIFT);
 }
-
 void pid_init(void)
 // Initialize the PID algorithm module.
 {
@@ -124,11 +124,26 @@ int16_t pid_position_to_pwm(int16_t current_position)
     static uint16_t p_gain;
 
     // Filter the current position thru a digital low-pass filter.
-    filtered_position = filter_update(current_position);
+    filtered_position = filter_update(current_position, &filter_reg_pos);
 
+#if BACKEMF_ENABLED
+    int16_t sign;
+    // Use the filtered position to determine velocity.
+    sign = filtered_position - previous_position;
+    if (sign < 0)
+        sign = -1;
+    else
+        sign = 1;
+
+    current_velocity  = sign * filter_update(banks_read_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO), &filter_reg_emf);
+
+    previous_position = filtered_position;
+
+#else
     // Use the filtered position to determine velocity.
     current_velocity = filtered_position - previous_position;
     previous_position = filtered_position;
+#endif
 
     // Get the seek position and velocity.
     seek_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
