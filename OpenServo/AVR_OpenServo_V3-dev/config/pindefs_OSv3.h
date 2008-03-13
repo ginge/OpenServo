@@ -32,7 +32,7 @@
  * The configuration file below controls which elements are enabled 
  * for this platform. Each option overrides the default so we need 
  * not include them all.
- * /
+ */
 // You can swap these to change the type of hardware output and switch
 // between the stepper controller and the standard H-Bridge.
 #define PWM_STD_ENABLED   0
