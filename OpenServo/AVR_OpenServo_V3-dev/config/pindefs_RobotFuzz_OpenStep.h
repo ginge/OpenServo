@@ -81,7 +81,7 @@
 #define STEP_PORT                   PORTD
 #define STEP_PORT_DDR               DDRD
 #define STEP_PORT_DDR_MASK          ((1<<DDD7) | (1<<DDD6 ) | (1<<DDD5 ) | (1<<DDD4))
-#define STEP_PORT_MASK              0x0F
+#define STEP_PORT_MASK              0xF0
 
 
 /*
