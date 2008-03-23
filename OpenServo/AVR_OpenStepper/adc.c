@@ -74,9 +74,9 @@
 //
 
 // Defines for the power and position channels.
-#define ADC_CHANNEL_POWER       0
-#define ADC_CHANNEL_POSITION    1
-#define ADC_CHANNEL_VOLTAGE     2
+//#define ADC_CHANNEL_POWER       0
+#define ADC_CHANNEL_POSITION    7
+//#define ADC_CHANNEL_VOLTAGE     2
 
 // The ADC clock prescaler of 64 is selected to yield a 125 KHz ADC clock
 // from an 8 MHz system clock.
@@ -117,21 +117,21 @@ void adc_init(void)
     // Initialize ADC registers to yield a 125KHz clock.
     //
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
     // Make sure port PB4 (ADC3) and PB5 (ADC0) are set as input.
-    PORTB &= ~((1<<PB4) | (1<<PB5));
+    PORTA &= ~(1<<PA7);
 
     // Disable digital input for ADC3 and ADC0 to reduce power consumption.
-    DIDR0 |= (1<<ADC3D) | (1<<ADC0D);
+    DIDR0 |= (1<<ADC7D);
 
     // Set the ADC multiplexer selection register.
-    ADMUX = (0<<REFS2) | (0<<REFS1) | (0<<REFS0) |          // Select VCC as voltage reference.
-            (0<<MUX3) | (0<<MUX2) | (1<<MUX1) | (1<<MUX0) | // Select ADC3 (PB3), no gain.
+    ADMUX = (0<<REFS1) | (0<<REFS0) |          // Select VCC as voltage reference.
+            ADC_CHANNEL_POSITION | // Select ADC3 (PB3), no gain.
             (0<<ADLAR);                                     // Keep high bits right adjusted.
 
     // Set the ADC control and status register B.
     ADCSRB = (0<<BIN) |                                     // Gain working in unipolar mode.
-             (0<<IPR) |                                     // No input polarity reversal.
+/*             (0<<IPR) |                                     // No input polarity reversal.*/
              (0<<ADTS2) | (1<<ADTS1) | (1<<ADTS0);          // Timer/Counter0 Compare Match A.
 
     // Set the ADC control and status register A.
@@ -140,7 +140,7 @@ void adc_init(void)
              (1<<ADATE) |                                   // Start auto triggering.
              (1<<ADIE) |                                    // Activate ADC conversion complete interrupt.
              ADPS;											// Prescale -- see above.
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85____ || defined(__AVR_ATtiny84__)
 
 #if defined(__AVR_ATmega8__)
     // Make sure ports PC0 (ADC0), PC1 (ADC1) and PC2 (ADC2) are set low.
@@ -166,14 +166,14 @@ void adc_init(void)
 
 #if defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
     // Make sure ports PC0 (ADC0), PC1 (ADC1) and PC2 (ADC2) are set low.
-    PORTC &= ~((1<<PC0) | (1<<PC1) | (1<<PC2));
+//     PORTC &= ~(1<<PC2);
 
     // Disable digital input for ADC0, ADC1 and ADC2 to reduce power consumption.
-    DIDR0 |= (1<<ADC2D) | (1<<ADC1D) |(1<<ADC0D);
+//     DIDR0 |= (1<<ADC2D) | (1<<ADC1D) |(1<<ADC0D);
 
     // Set the ADC multiplexer selection register.
     ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
-            (0<<MUX3) | (0<<MUX2) | (1<<MUX1) | (0<<MUX0) | // Select ADC2 (PC2) as analog input.
+            ADC_CHANNEL_POSITION | // Select ADC7 (PC7) as analog input.
             (0<<ADLAR);                                     // Keep high bits right adjusted.
 
     // Set the ADC control and status register B.
@@ -181,13 +181,13 @@ void adc_init(void)
 
     // Set the ADC control and status register A.
     ADCSRA = (1<<ADEN) |                                    // Enable ADC.
-             (0<<ADSC) |                                    // Don's start yet, will be auto triggered.
+             (1<<ADSC) |                                    // Don's start yet, will be auto triggered.
              (1<<ADATE) |                                   // Start auto triggering.
              (1<<ADIE) |                                    // Activate ADC conversion complete interrupt.
              ADPS;											// Prescale -- see above.
 #endif // __AVR_ATmega88__ || __AVR_ATmega168__
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
     // Set timer/counter0 control register A.
     TCCR0A = (0<<COM0A1) | (0<<COM0A0) |                    // Disconnect OCOA.
              (0<<COM0B1) | (0<<COM0B0) |                    // Disconnect OCOB.
@@ -199,13 +199,13 @@ void adc_init(void)
              CSPS;											// Timer clock prescale -- see above.
 
     // Set the timer/counter0 interrupt masks.
-    TIMSK = (1<<OCIE0A) |                                   // Interrupt on compare match A.
+    TIMSK0 = (1<<OCIE0A) |                                   // Interrupt on compare match A.
             (0<<OCIE0B) |                                   // No interrupt on compare match B.
             (0<<TOIE0);                                     // No interrupt on overflow.
 
     // Set the compare match A value which initiates an ADC sample.
     OCR0A = CRVALUE;
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85__
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85__ || defined(__AVR_ATtiny84__)
 
 #if defined(__AVR_ATmega8__)
     // Set timer/counter0 control register.
@@ -240,7 +240,7 @@ void adc_init(void)
 }
 
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__) || defined(__AVR_ATtiny84__)
 
 SIGNAL(SIG_OUTPUT_COMPARE0A)
 // Handles timer/counter0 compare match A.
@@ -249,7 +249,7 @@ SIGNAL(SIG_OUTPUT_COMPARE0A)
     if (adc_channel == ADC_CHANNEL_POSITION) timer_increment();
 }
 
-#endif // __AVR_ATtiny45__ || __AVR_ATtiny85__ || __AVR_ATmega88__ || __AVR_ATmega168__
+#endif // __AVR_ATtiny45__ || __AVR_ATtiny85__ || __AVR_ATmega88__ || __AVR_ATmega168__ || defined(__AVR_ATtiny84__)
 
 #if defined(__AVR_ATmega8__)
 
@@ -294,7 +294,7 @@ SIGNAL(SIG_ADC)
             adc_position_ready = 1;
 
             // Switch to power for the next reading.
-            adc_channel = ADC_CHANNEL_POWER;
+            adc_channel = ADC_CHANNEL_POSITION;
 
 #if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
             // Set the ADC multiplexer selection register.
@@ -309,7 +309,7 @@ SIGNAL(SIG_ADC)
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
             // Set the ADC multiplexer selection register.
             ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
-                    (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (0<<MUX0) | // Select ADC0 (PC0) as analog input.
+                    ADC_CHANNEL_POSITION | // Select ADC7 (PC7) as analog input.
                     (0<<ADLAR);                                     // Keep high bits right adjusted.
 
             // Start the ADC of the power channel now
@@ -318,14 +318,13 @@ SIGNAL(SIG_ADC)
 
             break;
 
-
-        case ADC_CHANNEL_POWER:
-
-            // Save the new power value.
-            adc_power_value = new_value;
-
-            // Flag the power value as ready.
-            adc_power_ready = 1;
+//         case ADC_CHANNEL_POWER:
+// 
+//             // Save the new power value.
+//             adc_power_value = new_value;
+// 
+//             // Flag the power value as ready.
+//             adc_power_ready = 1;
 
 
 #if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
@@ -341,52 +340,6 @@ SIGNAL(SIG_ADC)
             break;
 #endif         
             
-#if defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega168__)
-
-            if (adc_voltage_needed)
-            {
-                // Switch to voltage for the next reading.
-                adc_channel = ADC_CHANNEL_VOLTAGE;
-
-                // Set the ADC multiplexer selection register.
-                ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
-                        (0<<MUX3) | (0<<MUX2) | (0<<MUX1) | (1<<MUX0) | // Select ADC1 (PC1) as analog input.
-                        (0<<ADLAR);                                     // Keep high bits right adjusted.
-
-                // Start the ADC of the voltage channel now
-                ADCSRA |= (1<<ADSC);   
-            } 
-            else 
-            {
-                // Switch to position for the next reading.
-                adc_channel = ADC_CHANNEL_POSITION;
-
-                // Set the ADC multiplexer selection register.
-                ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
-                        (0<<MUX3) | (0<<MUX2) | (1<<MUX1) | (0<<MUX0) | // Select ADC2 (PC2) as analog input.
-                        (0<<ADLAR);                                     // Keep high bits right adjusted.
-            }
-
-            break;
-
-        
-        case ADC_CHANNEL_VOLTAGE:
-            
-            // Remove flag
-            adc_voltage_needed = 0;            
-
-            // Save voltage value to registers
-            registers_write_word(REG_VOLTAGE_HI, REG_VOLTAGE_LO, new_value);
-
-            // Switch to position for the next reading.
-            adc_channel = ADC_CHANNEL_POSITION;
-
-            // Set the ADC multiplexer selection register.
-            ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
-                    (0<<MUX3) | (0<<MUX2) | (1<<MUX1) | (0<<MUX0) | // Select ADC2 (PC2) as analog input.
-                    (0<<ADLAR);                                     // Keep high bits right adjusted.
-            break;
-#endif
             
 
     }
