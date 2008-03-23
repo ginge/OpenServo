@@ -49,12 +49,31 @@
 //    PA3 -> 2A
 //    PA2 -> 2B
 
-#define STEP_PORT PORTA
-#define STEP_MASK 0x10         // TODO: recalculate me!!
+// #define STEP_PORT PORTA
+// #define STEP_MASK ((1<<DDA3) | (1<<DDA2 ) | (1<<DDA1 ) | (1<<DDA0))         // TODO: recalculate me!!
 
-// setup DDR for port from above setup
-#define DDRPORT DDRA
-#define DDRMASK 0x0F           // TODO: recalculate me!!
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
+
+#define STEP_PORT                   PORTA
+#define STEP_PORT_DDR_MASK          ((1<<DDA3) | (1<<DDA2 ) | (1<<DDA1 ) | (1<<DDA0))
+#define STEP_PORT_DDR               DDRA
+#define STEP_PORT_MASK              0x0F
+
+#else
+
+#define STEP_PORT                   PORTD
+#define STEP_PORT_DDR               DDRD
+#define STEP_PORT_DDR_MASK          ((1<<DDD3) | (1<<DDD2 ) | (1<<DDD1 ) | (1<<DDD0))
+#define STEP_PORT_MASK              0x0F
+
+#endif
+
+
+// Determine the top value for timer/counter1 from the frequency divider.
+#define PWM_TOP_VALUE(div)      ((uint16_t) div << 4) - 1;
+
+// Determines the compare value associated with the duty cycle for timer/counter1.
+#define PWM_OCRN_VALUE(div,pwm) (uint16_t) (((uint32_t) pwm * (((uint32_t) div << 4) - 1)) / 255)
 
 // Define our step modes
 // This allows us to skip certain sections of the step table by 
@@ -76,11 +95,21 @@
 #define STEP_MODE_DUAL   1
 #define STEP_MODE_M400   2
 
+#define R_STOP              0
+#define R_CLOCKWISE         1
+#define R_COUNTER_CLOCKWISE 2
+
 // Keep the current step available through context switches
 static uint8_t direction;
 
 static uint8_t offset;
 static uint8_t step_incrementor;
+
+// Pwm frequency divider value.
+static uint16_t pwm_div;
+
+//Tacking of the current step in the step table
+static int8_t current_step;
 
 //
 // ATtiny84
@@ -159,19 +188,20 @@ void step_registers_defaults(void)
 // Initialize the Stepping algorithm related register values.  This is done
 // here to keep the Stepping related code in a single file.
 {
-    //Default step mode: Dual Phase
-    direction = 0;
+    //Default step mode: 400 step
+    direction = R_STOP;
     registers_write_byte(REG_STEP_MODE, STEP_MODE_M400);
+    registers_write_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO, DEFAULT_PWM_FREQ_DIVIDER);
 }
 
 void step_init(void)
 // Initialize the Step module for controlling a stepper motor.
 {
-    // Set motor outputs 1A (PA1), 1B (PA0), 2A (PA3), and 2B (PA2) to low.
-    PORTA &= ~(1<<(STEP_PORT & STEP_MASK));
-
     // Enable port a pins as outputs.
-    DDRA |= DDRMASK;
+    STEP_PORT_DDR |= STEP_PORT_DDR_MASK;
+
+    // Set motor outputs 1A (PA1), 1B (PA0), 2A (PA3), and 2B (PA2) to low.
+    STEP_PORT &= ~(STEP_PORT_MASK);
 
     // Reset the timer1 configuration.
     TCNT1 = 0;
@@ -195,6 +225,7 @@ void step_init(void)
     // Update the step value
     uint8_t step_mode = registers_read_byte(REG_STEP_MODE);
 
+    // Setup the step mode
     switch (step_mode)
     {
         case STEP_MODE_SINGLE:
@@ -214,9 +245,10 @@ void step_init(void)
             step_incrementor = STEP_SING_INC;
     }
 
-// The following code is the initialization of an array which
-// represents the stepping sequence to be used.  The mode selection determines 
-// on which line in the table to start.
+    // Initialize the pwm frequency divider value.
+    pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+
+    current_step = 0;
 }
 
 void step_update(uint16_t position, int16_t step_in)
@@ -228,6 +260,14 @@ void step_update(uint16_t position, int16_t step_in)
     uint16_t max_position;
     static uint8_t prev_step_mode;
     uint8_t step_mode = registers_read_byte(REG_STEP_MODE);
+
+    // Check to see if the pwm divider changed
+    if (registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div)
+    {
+        // Update the pwm frequency divider value.
+        pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+
+    }
 
     min_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
     max_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
@@ -245,7 +285,8 @@ void step_update(uint16_t position, int16_t step_in)
     // Determine if Stepping is disabled in the registers.
     if (!(registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_STEP_ENABLED))) step_in = 0;
 
-    //Where are we changing the timer?
+    // Enable the timer mask
+    TIMSK1 |= (1 << OCIE1A);
 
     // Check to see if the step mode has changed in the registers on the fly
     if (prev_step_mode != step_mode)
@@ -253,23 +294,25 @@ void step_update(uint16_t position, int16_t step_in)
 
     prev_step_mode = step_mode;
 
-    // TODO: Fix me for proper scaling once there is real hardware! Make tunable via register?
-    OCR1A = step_in * (65530/255); //Update the CTC compare value with the modified value of step.
+    // Calculate our duty cycle value
+    uint16_t duty_cycle = PWM_OCRN_VALUE(pwm_div, step_in);
 
     // Determine and set the direction: Stop (0), Clockwise (1), Counter-Clockwise (2).
     if (step_in < 0)
     {
         // Less than zero. Set the direction to clockwise.
-        direction =  1; //DIRECTION = 1
+        direction =  R_CLOCKWISE;
+        OCR1A = -(65535 + duty_cycle); // duty_cycle will be negative!
     }
     else if (step_in > 0)
     {
         // More than zero. Set the direction to counter-clockwise.
-        direction = 2; //DIRECTION = 2
+        direction = R_COUNTER_CLOCKWISE; //DIRECTION = 2
+        OCR1A = 65535 - duty_cycle; //Update the CTC compare value with the modified value of step.
     }
     else
     {
-        // Stop all stepping output to the motor by setting motor outputs 1A (PA1), 1B (PA0), 2A (PA3), and 2B (PA2) to low.
+        // Stop all stepping output to the motor by setting motor outputs to low.
         step_stop();
     }
 }
@@ -278,39 +321,47 @@ void step_stop(void)
 // Stop all stepping signals to the motor.
 {
     //  Disable outputs and set the Step Register to zero.  This will make the motor come to a stop.
-    direction = 0; //DIRECTION = 0
-    PORTA &= ~(1<<(STEP_PORT & STEP_MASK));
+    direction = R_STOP; //DIRECTION = 0
+    // TODO
+//     uint8_t brake = registers_read_byte(
+    // Check if we are braking or full stopping
+//     if (!brake)
+//         PORTA &= ~(1<<(STEP_PORT & STEP_MASK));
     //Disable CTC interrupt to save cpu cycles
-    TIMSK1 |= (0 << OCIE1A);
+    TIMSK1 &= ~(1<< OCIE1A);
 }
 
-ISR(TIM1_COMPA_vect)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
+ISR(SIG_OUTPUT_COMPARE1A)
+#else
+ISR(TIMER1_COMPA_vect)
+#endif
 // Interrupt overflow routine using Compare to trigger output on the port
 {
-    static uint8_t current_step;
 
     // We wait until Timer 1 reaches the time set by the step_value, then increment/decrement the step. 
-    if (direction == 1) // Clockwise
+    if (direction == R_CLOCKWISE) // Clockwise
     {
         // Set the appropriate pins based on the Current Step in the sequence.
-        PORTA |= step_sequence[current_step + offset];
+        STEP_PORT = ((step_sequence[current_step + offset]) | (STEP_PORT & ~STEP_PORT_MASK));
 
         // Add the incremental value to the accumulated table index
         current_step += step_incrementor + 1;
 
         // Check for table overflows
-        if (current_step > sizeof(step_sequence)) current_step = 0;
+        if (current_step > sizeof(step_sequence)-1) current_step = 0;
+
     }
-    else if (direction == 2) // Counter-clockwise
+    else if (direction == R_COUNTER_CLOCKWISE) // Counter-clockwise
     {
         // Set the appropriate pins based on the Current Step in the sequence.
-        PORTA |= step_sequence[current_step - offset];
+        STEP_PORT = ((step_sequence[current_step - offset]) | (STEP_PORT & ~STEP_PORT_MASK));
 
         // Going backwards through the table, so remove the incremted index
-        current_step -= step_incrementor - 1;
+        current_step -= step_incrementor + 1;
 
-        // Check for underflow
-        if (current_step < 0) current_step = 0;
+        // Check for underflow reset back to the end of the step table
+        if (current_step < 0) current_step = (sizeof(step_sequence)-1);
     }
     else //Stopped
     {

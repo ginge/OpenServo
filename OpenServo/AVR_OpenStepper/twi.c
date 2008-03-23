@@ -78,15 +78,15 @@
 #define TWI_OVERFLOW_STATE_PR_ACK_TX        (0x04)
 #define TWI_OVERFLOW_STATE_DATA_TX          (0x05)
 
-#define DDR_USI                             DDRB
-#define DD_SDA                              DDB0
-#define DD_SCL                              DDB2
-#define PORT_USI                            PORTB
-#define P_SDA                               PB0
-#define P_SCL                               PB2
-#define PIN_USI                             PINB
-#define PIN_SDA                             PINB0
-#define PIN_SCL                             PINB2
+#define DDR_USI                             DDRA
+#define DD_SDA                              DDA6
+#define DD_SCL                              DDA4
+#define PORT_USI                            PORTA
+#define P_SDA                               PA6
+#define P_SCL                               PA4
+#define PIN_USI                             PINA
+#define PIN_SDA                             PINA6
+#define PIN_SCL                             PINA4
 
 #endif // __AVR_ATtiny45__ || __AVR_ATtiny85____ || defined(__AVR_ATtiny84__)
 

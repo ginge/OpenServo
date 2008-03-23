@@ -49,6 +49,17 @@ void watchdog_init(void)
     WDTCR = 0x00;
 #endif
 
+#if defined(__AVR_ATtiny184__)
+        // Clear WDRF in MCUSR.
+    MCUSR = 0x00;
+
+    // Write logical one to WDCE and WDE.
+    WDTCR |= (1<<WDCE) | (1<<WDE);
+
+    // Turn off WDT.
+    WDTCR = 0x00;
+#endif
+
 #if defined(__AVR_ATmega8__)
     // Write logical one to WDCE and WDE.
     WDTCR |= (1<<WDCE) | (1<<WDE);
@@ -76,7 +87,7 @@ void watchdog_hard_reset(void)
     // Disable Stepping output to the motor.
     step_disable();
 
-#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) 
     // Enable the watchdog.
     WDTCR = (1<<WDIF) |                                     // Reset any interrupt.
             (0<<WDIE) |                                     // Disable interrupt.
