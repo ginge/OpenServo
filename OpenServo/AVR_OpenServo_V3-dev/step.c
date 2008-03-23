@@ -91,6 +91,8 @@ static uint8_t step_incrementor;
 // Pwm frequency divider value.
 static uint16_t pwm_div;
 
+static int8_t current_step;
+
 //
 // ATtiny84
 // =========
@@ -176,11 +178,11 @@ void step_registers_defaults(void)
 void step_init(void)
 // Initialize the Step module for controlling a stepper motor.
 {
-    // Set motor outputs 1A (PA1), 1B (PA0), 2A (PA3), and 2B (PA2) to low.
-    STEP_PORT = (STEP_PORT & STEP_PORT_MASK);
-
     // Enable port a pins as outputs.
     STEP_PORT_DDR |= STEP_PORT_DDR_MASK;
+
+    // Set motor outputs 1A (PA1), 1B (PA0), 2A (PA3), and 2B (PA2) to low.
+    STEP_PORT &= ~(STEP_PORT_MASK);
 
     // Reset the timer1 configuration.
     TCNT1 = 0;
@@ -204,6 +206,7 @@ void step_init(void)
     // Update the step value
     uint8_t step_mode = registers_read_byte(REG_STEP_MODE);
 
+    // Setup the step mode
     switch (step_mode)
     {
         case STEP_MODE_SINGLE:
@@ -225,6 +228,8 @@ void step_init(void)
 
     // Initialize the pwm frequency divider value.
     pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+
+    current_step = 0;
 }
 
 void step_update(uint16_t position, int16_t step_in)
@@ -237,16 +242,14 @@ void step_update(uint16_t position, int16_t step_in)
     static uint8_t prev_step_mode;
     uint8_t step_mode = registers_read_byte(REG_STEP_MODE);
 
-    // TODO: check to see if the pwm divider changed
+    // Check to see if the pwm divider changed
     if (registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div)
     {
                 // Update the pwm frequency divider value.
         pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
 
-        // Update the timer top value.
-        ICR1 = PWM_TOP_VALUE(pwm_div);
     }
-    
+
     min_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
     max_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
@@ -273,7 +276,7 @@ void step_update(uint16_t position, int16_t step_in)
 
     prev_step_mode = step_mode;
 
-    // TODO: Fix me for proper scaling once there is real hardware! Make tunable via register? This should be a value between -255 and +255 from pid.c alternatively change pid.c to make it work in a diferent range of values.
+    // Calculate our duty cycle value
     uint16_t duty_cycle = PWM_OCRN_VALUE(pwm_div, step_in);
 
     // Determine and set the direction: Stop (0), Clockwise (1), Counter-Clockwise (2).
@@ -281,17 +284,17 @@ void step_update(uint16_t position, int16_t step_in)
     {
         // Less than zero. Set the direction to clockwise.
         direction =  R_CLOCKWISE; //DIRECTION = 1
-        OCR1A = (uint8_t) -duty_cycle; //Update the CTC compare value with the modified value of step.
+        OCR1A = -(655335 + duty_cycle); // duty_cycle will be negative!
     }
     else if (step_in > 0)
     {
         // More than zero. Set the direction to counter-clockwise.
         direction = R_COUNTER_CLOCKWISE; //DIRECTION = 2
-        OCR1A = (uint8_t) duty_cycle; //Update the CTC compare value with the modified value of step.
+        OCR1A = 65535 - duty_cycle; //Update the CTC compare value with the modified value of step.
     }
     else
     {
-        // Stop all stepping output to the motor by setting motor outputs 1A (PA1), 1B (PA0), 2A (PA3), and 2B (PA2) to low.
+        // Stop all stepping output to the motor by setting motor outputs to low.
         step_stop();
     }
 }
@@ -317,7 +320,6 @@ ISR(TIMER1_COMPA_vect)
 #endif
 // Interrupt overflow routine using Compare to trigger output on the port
 {
-    static int8_t current_step;
 
     // We wait until Timer 1 reaches the time set by the step_value, then increment/decrement the step. 
     if (direction == R_CLOCKWISE) // Clockwise
@@ -329,7 +331,7 @@ ISR(TIMER1_COMPA_vect)
         current_step += step_incrementor + 1;
 
         // Check for table overflows
-        if (current_step > sizeof(step_sequence)) current_step = 0;
+        if (current_step > sizeof(step_sequence)-1) current_step = 0;
     }
     else if (direction == R_COUNTER_CLOCKWISE) // Counter-clockwise
     {
@@ -337,7 +339,7 @@ ISR(TIMER1_COMPA_vect)
         STEP_PORT |= step_sequence[current_step - offset];
 
         // Going backwards through the table, so remove the incremted index
-        current_step -= step_incrementor - 1;
+        current_step -= step_incrementor + 1;
 
         // Check for underflow reset back to the end of the step table
         if (current_step < 0) current_step = (sizeof(step_sequence)-1);
