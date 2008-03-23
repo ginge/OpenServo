@@ -252,9 +252,7 @@ void step_init(void)
 }
 
 void step_update(uint16_t position, int16_t step_in)
-//  Update the timer delay that trigers a step.  The delay time is determined by the step value, which represents a percentage of the maximum delay.  
-//  The farther the step value is from zero, the shorter the delay.  Maximum delay for this application is 65535 cycles.
-// JAY! this is -255 to +255 as defined in pid.c we need to rethink this!
+//  Update the timer delay that trigers a step.  The delay time is determined by the step value, which represents a value of the maximum delay.
 {
     uint16_t min_position;
     uint16_t max_position;

@@ -43,15 +43,6 @@
 
 #if (STEP_ENABLED)
 
-// Define the connected pins for this AVR
-// Please ensure the motor is connected as follows for this setup:
-//    AVR | Motor
-//    --------- 
-//    PA1 -> 1A
-//    PA0 -> 1B
-//    PA3 -> 2A
-//    PA2 -> 2B
-
 // Determine the top value for timer/counter1 from the frequency divider.
 #define PWM_TOP_VALUE(div)      ((uint16_t) div << 4) - 1;
 
@@ -233,9 +224,8 @@ void step_init(void)
 }
 
 void step_update(uint16_t position, int16_t step_in)
-//  Update the timer delay that trigers a step.  The delay time is determined by the step value, which represents a percentage of the maximum delay.  
-//  The farther the step value is from zero, the shorter the delay.  Maximum delay for this application is 65535 cycles.
-// JAY! this is -255 to +255 as defined in pid.c we need to rethink this!
+//  Update the timer delay that trigers a step.  The delay time is determined by the step value, which represents a value of the maximum delay.
+//  The farther the step value is from zero, the longer the delay.
 {
     uint16_t min_position;
     uint16_t max_position;
