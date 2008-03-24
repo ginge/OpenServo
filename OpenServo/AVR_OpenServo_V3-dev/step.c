@@ -43,9 +43,6 @@
 
 #if (STEP_ENABLED)
 
-// Determine the top value for timer/counter1 from the frequency divider.
-#define PWM_TOP_VALUE(div)      ((uint16_t) div << 4) - 1;
-
 // Determines the compare value associated with the duty cycle for timer/counter1.
 #define PWM_OCRN_VALUE(div,pwm) (uint16_t) (((uint32_t) pwm * (((uint32_t) div << 4) - 1)) / 255)
 
@@ -231,14 +228,18 @@ void step_update(uint16_t position, int16_t step_in)
     uint16_t max_position;
     static uint8_t prev_step_mode;
     uint8_t step_mode = registers_read_byte(REG_STEP_MODE);
+    // Pwm frequency divider value.
+    uint16_t pwm_div;
+    uint16_t duty_cycle;
 
-    // Check to see if the pwm divider changed
-    if (registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div)
-    {
-                // Update the pwm frequency divider value.
-        pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+    // Update the pwm frequency divider value.
+    pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
 
-    }
+    // Check to see if the step mode has changed in the registers on the fly
+    if (prev_step_mode != step_mode)
+        step_init();
+
+    prev_step_mode = step_mode;
 
     min_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
     max_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
@@ -254,32 +255,30 @@ void step_update(uint16_t position, int16_t step_in)
     if ((position > max_position) && (step_in > 0)) step_in = 0;
 
     // Determine if Stepping is disabled in the registers.
-    // TODO: Change to generic term FLAGS_LO_MOTOR_OUT_ENABLED
-    if (!(registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_PWM_ENABLED))) step_in = 0;
+    if (!(registers_read_byte(REG_FLAGS_LO) & (1<<FLAGS_LO_STEP_ENABLED))) step_in = 0;
 
     // Enable the timer mask
     TIMSK1 |= (1 << OCIE1A);
-
-    // Check to see if the step mode has changed in the registers on the fly
-    if (prev_step_mode != step_mode)
-       step_init();
-
-    prev_step_mode = step_mode;
-
-    // Calculate our duty cycle value
-    uint16_t duty_cycle = PWM_OCRN_VALUE(pwm_div, step_in);
 
     // Determine and set the direction: Stop (0), Clockwise (1), Counter-Clockwise (2).
     if (step_in < 0)
     {
         // Less than zero. Set the direction to clockwise.
-        direction =  R_CLOCKWISE; //DIRECTION = 1
-        OCR1A = -(655335 + duty_cycle); // duty_cycle will be negative!
+        direction =  R_CLOCKWISE;
+
+        // Calculate our duty cycle value
+        duty_cycle = PWM_OCRN_VALUE(pwm_div, -step_in);
+
+        OCR1A = -(65535 + duty_cycle); // duty_cycle will be negative!
     }
     else if (step_in > 0)
     {
         // More than zero. Set the direction to counter-clockwise.
         direction = R_COUNTER_CLOCKWISE; //DIRECTION = 2
+
+        // Calculate our duty cycle value
+        duty_cycle = PWM_OCRN_VALUE(pwm_div, step_in);
+
         OCR1A = 65535 - duty_cycle; //Update the CTC compare value with the modified value of step.
     }
     else

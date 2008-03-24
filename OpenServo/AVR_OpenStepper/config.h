@@ -102,6 +102,7 @@
 // current status of this feature.
 #define PULSE_CONTROL_ENABLED       0
 
+#define STEP_ENABLED                1
 // Enable (1) or disable (0) the swapping of PWM output A and B.
 // This swapping must sometimes enabled depending on whether the
 // positive lead to the motor is attached to MOSFET/PWM output A
@@ -135,7 +136,7 @@
 // By default the hardware type is unknown.  This value should be 
 // changed to reflect the hardware type that the code is actually 
 // being compiled for.
-#define HARDWARE_TYPE                   HARDWARE_TYPE_UNKNOWN
+#define HARDWARE_TYPE                   HARDWARE_TYPE_FUTABA_S3003
 
 // Set configuration values based on HARDWARE_TYPE.
 #if (HARDWARE_TYPE == HARDWARE_TYPE_UNKNOWN)
@@ -170,7 +171,7 @@
 #define DEFAULT_MAX_SEEK                0x03A0
 
 // Futaba S3003 hardware default pwm frequency divider.
-#define DEFAULT_PWM_FREQ_DIVIDER        0x0008
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0400
 
 #elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_311)
 
