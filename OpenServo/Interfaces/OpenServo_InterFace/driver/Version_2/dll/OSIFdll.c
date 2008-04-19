@@ -25,8 +25,9 @@ http://www.gnu.org/licenses/gpl.txt
 #include <stdlib.h>
 #include <string.h>
 
+#define DEBUG_OUT
 
-/* write a set of bytes to the OSIF_usb device */
+/* Perform a setup data transfer without a full usb transfer */
 int OSIF_USB_write(usb_dev_handle *handle, int request, int value, int index) {
     if(usb_control_msg(handle, USB_CTRL_OUT, request,
        value, index, NULL, 0, 1000) < 0) {
@@ -39,7 +40,7 @@ int OSIF_USB_write(usb_dev_handle *handle, int request, int value, int index) {
 /* read a set of bytes from the OSIF_usb device */
 int OSIF_USB_read(usb_dev_handle *handle, unsigned char cmd, void *data, int len) {
     int nBytes;
-
+\
     /* send control request and accept return value */
     nBytes = usb_control_msg(handle,
         USB_CTRL_IN, 
@@ -114,21 +115,33 @@ EXPORT int OSIF_init(void)
 #endif
                 // For each interface we are going to send the powerup/powerdown sequence
                 // This sets the ports on the AVR to allow very fast I2C comms
-                if (usb_control_msg(handle, USB_CTRL_IN, 
-                    USBTINY_POWERUP,
-                    20, 1, 0, 0, 
-                    500) <1) {
+//                if (usb_control_msg(handle, USB_CTRL_IN, 
+//                    USBTINY_POWERUP,
+//                    20, 1, 0, 0, 
+//                    500) <1) {
 
-                    }
-                if (usb_control_msg(handle, USB_CTRL_IN, 
-                    USBTINY_POWERDOWN,
-                    0, 0, 0, 0, 
-                    500) <1) {
-                    }
+//                    }
+//                if (usb_control_msg(handle, USB_CTRL_IN, 
+//                    USBTINY_POWERDOWN,
+//                    0, 0, 0, 0, 
+//                    500) <1) {
+//                    }
+
+                  usb_set_configuration(handle, dev->config->bConfigurationValue);
+
+#ifndef WIN
+                 /* Get exclusive access to interface 0. Does not work under windows. */
+                 ret = usb_claim_interface(handle, 0);
+
+                 if (ret != 0) {
+                     fprintf(stderr, "claimUSB error: %s\n", usb_strerror());
+                 }
+#endif
 
                 break;
             }
         }
+
     }
 
     if(!handle || adapter_count < 0) {
@@ -136,14 +149,6 @@ EXPORT int OSIF_init(void)
         return -1;
     }
 
-#ifndef WIN
-    /* Get exclusive access to interface 0. Does not work under windows. */
-    ret = usb_claim_interface(handle, 0);
-
-    if (ret != 0) {
-        fprintf(stderr, "claimUSB error: %s\n", usb_strerror());
-    }
-#endif
     return 0;
 }
 
@@ -175,8 +180,8 @@ EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char 
     usb_dev_handle *handle;
     handle = get_adapter_handle(adapter);
     char msg[65];
-    char newbuf[255];
-    char tmpbuf[255];
+    char newbuf[1024];
+    char tmpbuf[1024];
     int n=0;
 
     if (check_params( servo )<0)
@@ -192,7 +197,7 @@ EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char 
 
     msg[0] = addr;
 
-    //sprintf(newbuf, "data ");
+    sprintf( newbuf, "");
     for (n=0; n<buflen;n++)
     {
         msg[n+1]=data[n];
@@ -202,7 +207,8 @@ EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char 
 #ifdef DEBUG_OUT
     printf("adapter %d, servo %d, addr %d, %s, buflen %d, msg %s\n",adapter,servo,addr,newbuf, buflen,msg);
 #endif
-    if (write_data( handle, servo, msg, buflen+1 ) <0 ) { return -1; }
+
+    if (write_data( handle, servo, msg, buflen+1, STOP_ON ) <0 ) { return -1; }
 
     if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
         fprintf(stderr, "write command status failed %d\n",OSIF_USB_get_status(handle));
@@ -226,20 +232,38 @@ EXPORT int OSIF_read(int adapter, int servo, unsigned char addr, unsigned char *
         return -1;
     }
 
-    if (write_data( handle, servo, &addr, 1 ) <0 ) { return -1; }
-
-    if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
-        fprintf(stderr, "write command status failed\n");
-        return -1;
+    if (write_data( handle, servo, &addr, 1, STOP_OFF ) <0 ) { 
+      printf( "write error: OSIF_read\n");
+      return -1; 
     }
 
-    if (read_data( handle, servo, data, buflen ) <0 ) { return -1; }
+      if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
+          fprintf(stderr, "write command status failed\n");
+          return -1;
+      }
+
+    if (read_data( handle, servo, data, buflen, STOP_ON ) <0 ) { return -1; }
 
     if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
         fprintf(stderr, "read data status failed\n");
         return -1;
     }
 
+#ifdef DEBUG_OUT
+    int n;
+    char tmpbuf[1024];
+    char newbuf[1024];
+    sprintf( newbuf, "");
+    for (n=0; n<buflen;n++)
+    {
+        sprintf( tmpbuf, "0x%02x ", data[n]);
+        strcat(newbuf, tmpbuf);	
+    }
+
+    printf("adapter %d, servo %d, addr %d, %s, buflen %d\n",adapter,servo,addr,newbuf, buflen);
+
+    printf("read okay\n");
+#endif
     return 1;
 }
 
@@ -255,7 +279,7 @@ EXPORT int OSIF_readonly(int adapter, int servo, unsigned char * data, size_t bu
         return -1;
     }
 
-    if (read_data( handle, servo, data, buflen ) <0 ) { return -1; }
+    if (read_data( handle, servo, data, buflen, STOP_ON ) <0 ) { return -1; }
 
     if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
         fprintf(stderr, "read data status failed\n");
@@ -277,10 +301,10 @@ EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
 
     *dev_count = 0;
     //search all addresses for a response
-    for (i=0x02; i<=MAX_I2C_DEVICES; i++) 
+    for (i=0x00; i<MAX_I2C_DEVICES; i++) 
     {
         addr=0x00;
-        if (write_data( handle, i, &addr, 1 ) <0 ) { return -1; }
+        if (write_data( handle, i, &addr, 1, STOP_OFF ) <0 ) { return -1; }
 
         if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
 #ifdef DEBUG_OUT
@@ -291,7 +315,7 @@ EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
         {
             printf("found device 0x%02x\n", i);
             devices[*dev_count] = i;
-            *dev_count+=1;
+            *dev_count++;
 #ifdef DEBUG_OUT
             printf ("%x\n", *dev_count);
 #endif
@@ -321,7 +345,7 @@ EXPORT bool OSIF_probe(int adapter, int servo )
         return -1;
     }
 
-    if (write_data( handle, servo, &addr, 1 ) <0 ) { return false; }
+    if (write_data( handle, servo, &addr, 1, STOP_ON ) <0 ) { return false; }
 
     if(OSIF_USB_get_status(handle) == STATUS_ADDRESS_ACK)
     {
@@ -346,7 +370,7 @@ EXPORT int OSIF_command(int adapter, int servo, unsigned char command)
         return -1;
     }
 
-    if (write_data( handle, servo, &command, 1 ) <0 ) { return -1; }
+    if (write_data( handle, servo, &command, 1, STOP_ON ) <0 ) { return -1; }
 
     if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
         fprintf(stderr, "write command status failed\n");
@@ -362,7 +386,7 @@ EXPORT int OSIF_command(int adapter, int servo, unsigned char command)
 EXPORT int OSIF_get_adapter_count(void)
 {
 #ifdef DEBUG_OUT	
-    printf( "adapter count %d\n", adapter_count);
+    printf( "adapter count %d\n", adapter_count+1);
 #endif
     return adapter_count;
 }
@@ -371,6 +395,7 @@ EXPORT int OSIF_get_adapter_count(void)
 EXPORT int OSIF_get_adapter_name(int adapter, char* name)
 {
     strcpy( name, adapters[adapter].adapter_name );
+    return 1;
 }
 
 /** Check the validity of the options **/
@@ -384,7 +409,7 @@ int check_params( int val )
 }
 
 /** Get the handle of the selected adapter **/
-usb_dev_handle * get_adapter_handle(int adapter_no )
+usb_dev_handle * get_adapter_handle(int adapter_no)
 {
     if (adapter_no > adapter_count )
     {
@@ -392,4 +417,68 @@ usb_dev_handle * get_adapter_handle(int adapter_no )
     }
 
     return adapters[adapter_no].adapter_handle;
+}
+
+
+EXPORT int OSIF_io_set_ddr(int adapter_no, int ddr, int enabled)
+{
+    usb_dev_handle *handle;
+    handle = get_adapter_handle(adapter_no);
+
+    if (usb_control_msg(handle, USB_CTRL_OUT, 
+        USBIO_SET_DDR,
+        ddr, enabled, 0, 0, 1000) <1)
+    {
+        fprintf(stderr, "w_io_ddr_USB error: %s\n", usb_strerror());
+        return -1;
+    }
+
+#ifdef DEBUG_OUT
+    printf( "Command Sent\n" );
+#endif
+}
+
+EXPORT int OSIF_io_set_out(int adapter_no, int io)
+{
+    usb_dev_handle *handle;
+    handle = get_adapter_handle(adapter_no);
+
+    if (usb_control_msg(handle, USB_CTRL_OUT, 
+        USBIO_SET_OUT,
+        0, io, 0, 0, 
+        1000) <1) 
+    {
+        fprintf(stderr, "w_io_USB error: %s\n", usb_strerror());
+        return -1;
+    }
+}
+
+EXPORT int OSIF_io_get_in(int adapter_no, int io)
+{
+    usb_dev_handle *handle;
+    handle = get_adapter_handle(adapter_no);
+
+    if (usb_control_msg(handle, USB_CTRL_IN, 
+        USBIO_GET_IN,
+        0, io, 0, 0,
+        1000) <1) 
+    {
+        fprintf(stderr, "r_io_USB error: %s\n", usb_strerror());
+        return -1;
+    }
+}
+
+EXPORT int OSIF_set_bitrate(int adapter_no, int bitrate)
+{
+    usb_dev_handle *handle;
+    handle = get_adapter_handle(adapter_no);
+
+    if (usb_control_msg(handle, USB_CTRL_IN,
+        USBI2C_SET_BITRATE,
+        0, bitrate, 0, 0,
+        1000) <1)
+    {
+        fprintf(stderr, "w_bitrate_USB error: %s\n", usb_strerror());
+        return -1;
+    }
 }
