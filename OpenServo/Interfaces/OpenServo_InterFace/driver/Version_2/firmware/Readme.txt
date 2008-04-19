@@ -2,9 +2,13 @@ OpenServo Interface  (OSIF) Firmware version 1.06
 
 Copyright 2008 Barry Carter RobotFuzz www.robotfuzz.com
 
-This is the core firmware for the OpenServo InterFace (OSIF) It allows for software USB to serial, USB to I2C and Usb to SPI.
+This is the core firmware for the OpenServo InterFace (OSIF) It allows for USB to I2C and USB GPIO control
 
 Changelog:
+1.06
+Changed the default I2C speed to 100khz and added support functions to change this value.
+Added support for GPIOs using spare pin.
+
 1.05
 Added return logic to allow for a non critical error to halt the OSIF. Upgraded to USBtiny 1.3
 
