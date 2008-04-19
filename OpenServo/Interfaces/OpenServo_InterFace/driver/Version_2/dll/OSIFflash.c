@@ -112,19 +112,24 @@ int OSIF_bootloader_init(int adapter, int servo, char * filename)
             else 
             {
                 //page bad
-                if (page_fail_cnt==2) 
+                if ( OSIF_verify_page(adapter, servo, page[i], verbuf) <=0 )
                 {
-                    printf("Verify FAIL. Page sent twice. ABORTING\n");
-                    return -1;
+                    if (page_fail_cnt==2) 
+                    {
+                        printf("Verify FAIL. Page sent twice. ABORTING\n");
+                        return -1;
+                    }
+                    printf("Verify FAIL. Resending page\n");
+                    i--;
+                    page_fail_cnt++;
+                    continue;
                 }
-                printf("Verify FAIL. Resending page\n");
-                i--;
-                page_fail_cnt++;
-                continue;
+                else { 
+                    printf("verify OK second pass\n"); 
+                }
             }
         }
         reg_addr+=(PAGE_SIZE);
-        usleep(100);
     }
 
     OSIF_bootloader_reboot(adapter);
@@ -177,7 +182,7 @@ int OSIF_verify_page(int adapter, int servo, unsigned char *reg_addr, unsigned c
     }
     int n;
 
-    printf( "write:\n");
+/*    printf( "write:\n");
     for( n=0; n<PAGE_SIZE;n++)
     {
         printf( "0x%02x ", page[n]);
@@ -190,10 +195,26 @@ int OSIF_verify_page(int adapter, int servo, unsigned char *reg_addr, unsigned c
         printf( "0x%02x ", read_page[n]);
     }
     printf("\n");
+*/
+    int j=0;
 
-    //compare the strings
-    if( strncmp(&read_page[0], &page[0], PAGE_SIZE) != 0) { return -1; }
+    for(n=0; n<PAGE_SIZE; n++)
+    {
+        if (j>5)
+        {
+            printf("\n");
+            j=0;
+        }
+        if( read_page[n] != page[n]) 
+        {
+            printf("\n Page fault at page byte %d |0x%02x 0x%02x|\n", n, page[n], read_page[n]);
 
+            return -1; 
+        }
+        printf("|0x%02x 0x%02x|", (unsigned char)page[n], read_page[n]);
+        j++;   
+    }
+    printf("\n\n");
     return 1;
 }
 
