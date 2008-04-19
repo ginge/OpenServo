@@ -62,6 +62,13 @@ http://www.gnu.org/licenses/gpl.txt
 #define USBI2C_WRITE                  21 // write to i2c bus
 #define USBI2C_STOP                   22 // send stop condition
 #define USBI2C_STAT                   23 // get stats from i2c action
+#define USBI2C_SET_BITRATE            24
+#define USBIO_SET_DDR                 30
+#define USBIO_SET_OUT                 31
+#define USBIO_GET_IN                  32
+
+#define STOP_ON 1
+#define STOP_OFF 0
 
 struct usb_bus      *bus;
 struct usb_device   *dev;
@@ -82,8 +89,8 @@ void OSIF_USB_get_func(usb_dev_handle *handle );
 void OSIF_USB_set(usb_dev_handle *handle, unsigned char cmd, int value);
 int  OSIF_USB_get_status(usb_dev_handle *handle);
 
-int  write_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t len);
-int  read_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t buflen);
+int  write_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t len, int stop);
+int  read_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t buflen, int stop);
 usb_dev_handle *get_adapter_handle(int adapter_no);
 
 int check_params( int val );
