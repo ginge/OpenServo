@@ -34,7 +34,9 @@
 #define _OS_STEP_H_ 1
 
 #if STEP_ENABLED
+#include <avr/io.h>
 #include "registers.h"
+#include "config.h"
 
 void step_registers_defaults(void);
 void step_init(void);
@@ -59,6 +61,16 @@ inline static void step_disable(void)
 
     // Stop now!
     step_stop();
+}
+
+inline static void step_enable_bridge(void)
+{
+    STEP_ENABLE_PORT |= (1<<STEP_ENABLE_PIN);
+}
+
+inline static void step_disable_bridge(void)
+{
+    STEP_ENABLE_PORT &= ~(1<<STEP_ENABLE_PIN);
 }
 #endif
 #endif // _OS_STEP_H_
