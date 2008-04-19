@@ -32,7 +32,7 @@
  * and Stepper motor control. The configuration file below controls which
  * elements are enabled for this platform. Each option overrides the default
  * so we need not include them all.
- * /
+ */
 
 // You can swap these to change the type of hardware output and switch
 // between the stepper controller and the standard H-Bridge.
@@ -83,6 +83,13 @@
 #define STEP_PORT_DDR_MASK          ((1<<DDD7) | (1<<DDD6 ) | (1<<DDD5 ) | (1<<DDD4))
 #define STEP_PORT_MASK              0xF0
 
+// Does this step control circuit have an enable line?
+#define STEP_ENABLE_BRIDGE_PIN      1
+
+// define our enable pins
+#define STEP_ENABLE_PORT            PORTC
+#define STEP_ENABLE_DDR             DDRC
+#define STEP_ENABLE_PIN             PC3
 
 /*
  * ADC Clock defines
@@ -90,14 +97,14 @@
 
 // The ADC clock prescaler of 128 is selected to yield a 156.25 KHz ADC clock
 // from an 20 MHz system clock.
-#define ADPS		((1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0))
+#define ADPS        ((1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0))
 
 // The timer clock prescaler of 1024 is selected to yield a 19.531 KHz ADC clock
 // from a 20 MHz system clock.
-#define CSPS		((1<<CS02) | (0<<CS01) | (1<<CS00))
+#define CSPS        ((1<<CS02) | (0<<CS01) | (1<<CS00))
 
 // Define the compare register value to generate a timer interrupt and initiate
 // an ADC sample every 9.984 milliseconds and yield a 100.1603 Hz sample rate.
-#define CRVALUE		195
+#define CRVALUE     195
 
 #endif
