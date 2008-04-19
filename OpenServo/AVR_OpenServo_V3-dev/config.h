@@ -193,9 +193,9 @@
 #define HEARTBEAT_INTERVAL_VALUE  10
 #endif
 
-// Set a CPU speed. Assume 20mhz
+// Set a CPU speed. Assume 8mhz
 #ifndef F_CPU 
-#define F_CPU 20000000L
+#define F_CPU 8000000L
 #endif
 
 #endif // _OS_ADC_H_
