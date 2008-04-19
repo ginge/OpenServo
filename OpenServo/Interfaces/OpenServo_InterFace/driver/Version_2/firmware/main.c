@@ -8,15 +8,28 @@
 // This is free software, licensed under the terms of the GNU General
 // Public License as published by the Free Software Foundation.
 // ======================================================================
-
 #include <avr/io.h>
 #include <avr/wdt.h>
+#include <avr/interrupt.h>
+#include <avr/pgmspace.h>
+#include <avr/eeprom.h>
+
 #include <util/twi.h>
 #define F_CPU 12000000UL  // 12 MHz
 #include <util/delay.h>
+#if defined(OBDEV)
+// use avrusb library
+#include "../usbdrv/usbdrv.h"
+#include "../usbdrv/oddebug.h"
+typedef unsigned char   byte_t;
+typedef unsigned int    uint_t;
+#define usb_init()  usbInit()
+#define usb_poll()  usbPoll()
+#else
+// use usbtiny library 
 #include "usb.h"
-
-
+#include "usbtiny.h"
+#endif
 
 enum
 {
@@ -39,7 +52,8 @@ enum
     USBI2C_WRITE,
     USBI2C_STOP,
     USBI2C_STATUS,
-    USBIO_SET_DDR,
+    USBI2C_SET_BITRATE,
+    USBIO_SET_DDR = 30,
     USBIO_SET_OUT,
     USBIO_GET_IN
 };
@@ -79,7 +93,7 @@ enum
 #define PIN             PINB
 #define MISO_MASK       (1 << 4)
 
-#define I2C_TIMEOUT     6000
+#define I2C_TIMEOUT     600
 
 // Local data
 static byte_t          sck_period;      // SCK period in microseconds (1..250)
@@ -121,7 +135,7 @@ static port_table_type port_table[] = {
 // Delay exactly <sck_period> times 0.5 microseconds (6 cycles).
 // ----------------------------------------------------------------------
 __attribute__((always_inline))
-        static	void	delay ( void )
+static void delay(void)
 {
     asm volatile(
             "	mov	__tmp_reg__,%0	\n"
@@ -133,20 +147,20 @@ __attribute__((always_inline))
 }
 
 // Issue one SPI command.
-static	void	spi ( byte_t* cmd, byte_t* res )
+static void spi(byte_t* cmd, byte_t* res)
 {
     byte_t	i;
     byte_t	c;
     byte_t	r;
     byte_t	mask;
 
-    for	( i = 0; i < 4; i++ )
+    for (i = 0; i < 4; i++)
     {
         c = *cmd++;
         r = 0;
-        for	( mask = 0x80; mask; mask >>= 1 )
+        for(mask = 0x80; mask; mask >>= 1)
         {
-            if	( c & mask )
+            if (c & mask)
             {
                 PORT |= MOSI_MASK;
             }
@@ -154,7 +168,7 @@ static	void	spi ( byte_t* cmd, byte_t* res )
             PORT |= SCK_MASK;
             delay();
             r <<= 1;
-            if	( PIN & MISO_MASK )
+            if (PIN & MISO_MASK)
             {
                 r++;
             }
@@ -166,50 +180,62 @@ static	void	spi ( byte_t* cmd, byte_t* res )
 }
 
 // Create and issue a read or write SPI command.
-static	void	spi_rw ( void )
+static void spi_rw (void)
 {
-    uint_t	a;
+    uint_t a;
 
     a = address++;
-    if	( cmd0 & 0x80 )
-    {	// eeprom
+    if (cmd0 & 0x80)
+    { // eeprom
         a <<= 1;
     }
     cmd[0] = cmd0;
-    if	( a & 1 )
+    if (a & 1)
     {
         cmd[0] |= 0x08;
     }
     cmd[1] = a >> 9;
     cmd[2] = a >> 1;
-    spi( cmd, res );
+    spi(cmd, res);
+}
+
+// Calculate the new bitrate from an input khz
+int i2c_bitrate_set(uint16_t bitrate_set)
+{
+    uint8_t bitrate;
+
+    // br scl = cpu / (16 + 2(TWBR)) . 4 ^TWPS
+    bitrate = ((F_CPU/1000l)/bitrate_set);
+    if(bitrate >= 16)
+        bitrate = (bitrate-16)/2;
+
+    return bitrate;
 }
 
 // Initialise the I2C hardware in AVR
 void i2c_init()
 {
     // Set the port directions and disable I2C pullups
-
     I2CPORT|=  SDA;                     // Disable pullups on I2C
     I2CPORT|=  SCL;
     I2CDDR |=  (SDA) | (SCL);               // Set I2C lines as output
 
     TWCR = 0;                           // Clear the control register
     TWSR &= ~(_BV(TWPS0) | _BV(TWPS1)); // Set the prescaler for twi in the status reegister
-    TWBR = 10;                          // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
+
+    TWBR = i2c_bitrate_set(100);        // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
     TWCR |= _BV(TWEN);                  // Enable I2C in control register
 }
 
 // Wait for the interupt flag to clear in the TWI hardware
 // If locks because the interrupt didn't clear, we loop
 // until a timeout peroid of I2C_TIMEOUT
-int i2c_wait_int()
+static inline int i2c_wait_int()
 {
-    int i =0;
+    int i = 0;
     while((TWCR & _BV(TWINT)) == 0)
     {
-        i++;
-        if (i>I2C_TIMEOUT)
+        if (i++ > I2C_TIMEOUT)
             return -1;
     }
 
@@ -217,7 +243,7 @@ int i2c_wait_int()
 }
 
 // Send one byte of data over I2C
-int i2c_send ( byte_t sendbyte )
+static inline int i2c_send (byte_t sendbyte)
 {
     TWDR = sendbyte;                            // Fill Data register
     TWCR |= _BV(TWINT);                         // Send the byte
@@ -339,7 +365,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     return 1;
 }
 
-int i2c_read_bytes(byte_t *data,byte_t len)
+static inline int i2c_read_bytes(byte_t *data,byte_t len)
 {
     byte_t i;
     int read;
@@ -368,9 +394,16 @@ int i2c_read_bytes(byte_t *data,byte_t len)
     return 0;
 }
 
-// Handle a non-standard SETUP packet over USB
-extern	byte_t	usb_setup ( byte_t data[8] )
+#if defined( OBDEV )
+USB_PUBLIC uchar usbFunctionSetup(uchar data[8])
 {
+    static uchar replyBuf[4];
+    usbMsgPtr = replyBuf;
+#else
+// Handle a non-standard SETUP packet over USB
+extern byte_t usb_setup(byte_t data[8])
+{
+#endif
     byte_t      bit;
     byte_t      mask;
     byte_t*     addr;
@@ -379,14 +412,21 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 
     // Generic requests
     req = data[1];
-    if      ( req == USBTINY_ECHO )
+    if (req == USBTINY_ECHO)
     {
         return 8;
+    }
+
+    // Request a new I2C bitrate in case of high speed errors.
+    if (req == USBI2C_SET_BITRATE)
+    {
+        TWBR = i2c_bitrate_set((uint16_t)((data[4] << 8) | data[5]));
+        return 0;
     }
     // I2C requests
 
     // Send the stop command over the I2C bus
-    if ( req == USBI2C_STOP)
+    if (req == USBI2C_STOP)
     {
         if((i2cstat & (I2C_READ | I2C_WRITE)) != 0)  // Send the stop signal if we are reading or writing
         {
@@ -398,7 +438,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
         return 1;
     }
     // Handle a status read request
-    else if ( req == USBI2C_STATUS)
+    else if (req == USBI2C_STATUS)
     {
         i2cstat |= I2C_STATUS | I2C_PACKET;           // Update the status flag to enable I2C status data
         i2cstatspos = 0;                              // Reset the int pointer to the data position
@@ -596,7 +636,11 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 
 
 // Handle an IN packet over USB
-extern	byte_t	usb_in ( byte_t* data, byte_t len )
+#if defined (OBDEV)
+uchar usbFunctionRead( uchar *data, uchar len )
+#else
+extern  byte_t  usb_in ( byte_t* data, byte_t len )
+#endif
 {
     byte_t	i;
     if((i2cstat & I2C_PACKET) != 0)                           // Make sure we are in packet reading more in the status register
@@ -613,7 +657,7 @@ extern	byte_t	usb_in ( byte_t* data, byte_t len )
     }
     else                                                      // SPI mode read
     {
-        for	( i = 0; i < len; i++ )                       // For each byte send the spi
+        for (i = 0; i < len; i++)                       // For each byte send the spi
         {
             spi_rw();
             data[i] = res[3];
@@ -623,7 +667,11 @@ extern	byte_t	usb_in ( byte_t* data, byte_t len )
 }
 
 // Handle an OUT packet over USB
-extern	void	usb_out ( byte_t* data, byte_t len )
+#if defined(OBDEV)
+uchar usbFunctionWrite(uchar *data, uchar len)
+#else
+extern void usb_out (byte_t* data, byte_t len)
+#endif
 {
     byte_t	i;
     uint_t	usec;
@@ -632,8 +680,8 @@ extern	void	usb_out ( byte_t* data, byte_t len )
     {
         for	( i = 0; i < len; i++ )
         {
-            int TWSRtmp = i2c_send ( data[i] );                      // Send the data over I2C
-            if(TWSRtmp != TW_MT_DATA_ACK 
+            int TWSRtmp = i2c_send(data[i]);                      // Send the data over I2C
+            if(TWSRtmp != TW_MT_DATA_ACK
                        && TWSRtmp != TW_MT_DATA_NACK
                        && TWSRtmp != -1)                                // Check for an NACK in TWSR
             {
@@ -645,22 +693,25 @@ extern	void	usb_out ( byte_t* data, byte_t len )
     }
     else                                                                // SPI write
     {
-        for	( i = 0; i < len; i++ )
+        for (i = 0; i < len; i++)
         {
             cmd[3] = data[i];
             spi_rw();
             cmd[0] ^= 0x60;	                                        // turn write into read
-            for	( usec = 0; usec < timeout; usec += 32 * sck_period )
+            for (usec = 0; usec < timeout; usec += 32 * sck_period)
             {	                                                        // when timeout > 0, poll until byte is written
-                spi( cmd, res );                                        // Send the SPI packet
+                spi(cmd, res);                                        // Send the SPI packet
                 r = res[3];
-                if	( r == cmd[3] && r != poll1 && r != poll2 )
+                if (r == cmd[3] && r != poll1 && r != poll2)
                 {
                     break;
                 }
             }
         }
     }
+#if defined(OBDEV)
+    return len;
+#endif
 }
 
 void io_init(void)
