@@ -126,10 +126,10 @@ void write_page(int address, unsigned char *page, int page_size) {
     retval = usb_control_msg(usbhandle, 
                              USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, 
                              USBTINYBL_FUNC_WRITE, address, 0, 
-                             (char *)page, page_size, 5000);
+                             (char *)page, page_size, 10000);
 
     if (retval != page_size) {
-        fprintf(stderr, "Error: wrong byte count in read_page: %d !\n", retval);
+        fprintf(stderr, "Error: wrong byte count in write_page: %d !\n", retval);
         exit(1);
     }
 }
@@ -142,7 +142,7 @@ void read_page(int address, unsigned char *page, int page_size)
     retval = usb_control_msg(usbhandle, 
                              USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
                              USBTINYBL_FUNC_READ, address, 0, 
-                             (char *)page, page_size, 5000);
+                             (char *)page, page_size, 10000);
     printf("page %d\n",address);
 
     if (retval != page_size) 
