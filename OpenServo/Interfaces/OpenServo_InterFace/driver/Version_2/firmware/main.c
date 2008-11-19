@@ -48,16 +48,19 @@ enum
     USBTINY_FLASH_WRITE,    // write flash (wIndex:address, wValue:timeout)
     USBTINY_EEPROM_READ,    // read eeprom (wIndex:address)
     USBTINY_EEPROM_WRITE,   // write eeprom (wIndex:address, wValue:timeout)
-    USBI2C_READ = 20,
-    USBI2C_WRITE,
-    USBI2C_STOP,
+    // I2C requests
+    USBI2C_READ = 20,       // read from i2c (wValue:address)
+    USBI2C_WRITE,           // write to i2c (wValue:address)
+    USBI2C_STOP,            // i2c stop (wValue:address)
     USBI2C_STATUS,
     USBI2C_SET_BITRATE,
+    // GPIO Requests
     USBIO_SET_DDR = 30,
     USBIO_SET_OUT,
     USBIO_GET_IN,
-    SER_READ,
-    SER_WRITE
+    // Serial Requests
+    USBSER_READ = 40,
+    USBSER_WRITE
 };
 
 // Status flags for the I2C reading and writing
@@ -84,7 +87,8 @@ enum
 #define I2CDDR          DDRC
 #define SDA             (0<<PC4)
 #define SCL             (0<<PC5)
-
+#define SDA_O           (1<<PC4)
+#define SCL_O           (1<<PC5)
 #define RESET_DDR       DDRC
 #define RESET_PORT      PORTC
 #define RESET_PIN       (1 << 4)
@@ -97,6 +101,7 @@ enum
 
 #define I2C_TIMEOUT     6000000ul
 
+#define TWSRMASK        0xF8
 
 //USART Buffer and Baudrate Definitions
 #define UART_PACKET_HD_SIZE 4
@@ -129,6 +134,8 @@ static byte_t          i2crecvlen;      // I2C buffer recieve length
 static uint8_t         io_enabled;
 static uint8_t         io_ddr;
 static byte_t          modestat; // USB to serial mode
+
+static byte_t          start_hack;
 
 static unsigned char UART_RxBuf[UART_RX_BUFFER_SIZE];
 static volatile unsigned char UART_RxHead;
@@ -234,31 +241,36 @@ static void spi_rw (void)
 }
 
 // Calculate the new bitrate from an input khz
-int i2c_bitrate_set(uint16_t bitrate_set)
+int i2c_bitrate_set(int twbr_set, int twps_set)
 {
-    uint8_t bitrate;
+    if (twps_set == 4) // TWPS 4
+    {
+        TWSR &= ~(_BV(TWPS0));
+        TWSR |= _BV(TWPS0); // Set the prescaler for twi in the status reegister
+    }
+    else //\ TWPS 1
+    {
+        TWSR &= ~(_BV(TWPS0) | _BV(TWPS1)); // Set the prescaler for twi in the status reegister
+    } 
 
-    // br scl = cpu / (16 + 2(TWBR)) . 4 ^TWPS
-    bitrate = ((F_CPU/1000l)/bitrate_set);
-    if(bitrate >= 16)
-        bitrate = (bitrate-16)/2;
+    TWBR = twbr_set;        // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
 
-    return bitrate;
+    return 1;
 }
 
 // Initialise the I2C hardware in AVR
 void i2c_init()
 {
     // Set the port directions and disable I2C pullups
-    I2CPORT|=  SDA;                     // Disable pullups on I2C
-    I2CPORT|=  SCL;
-    I2CDDR |=  (SDA) | (SCL);               // Set I2C lines as output
+    I2CPORT|=  SDA_O;                     // Disable pullups on I2C
+    I2CPORT|=  SCL_O;
+    I2CDDR |=  (SDA_O) | (SCL_O);           // Set I2C lines as output
 
     TWCR = 0;                           // Clear the control register
-    TWSR &= ~(_BV(TWPS0) | _BV(TWPS1)); // Set the prescaler for twi in the status reegister
-
-    TWBR = i2c_bitrate_set(100);        // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
+    i2c_bitrate_set(10, 1);          // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
     TWCR |= _BV(TWEN);                  // Enable I2C in control register
+
+    start_hack=0;
 }
 
 // Wait for the interupt flag to clear in the TWI hardware
@@ -282,7 +294,7 @@ static inline int i2c_send (byte_t sendbyte)
     TWDR = sendbyte;                            // Fill Data register
     TWCR |= _BV(TWINT);                         // Send the byte
     if (i2c_wait_int() <0) return -1;           // Wait for the byte to send
-    return TWSR;                                // Return the status
+    return TWSR & TWSRMASK;                                // Return the status
 }
 
 // Read one byte over I2C
@@ -297,11 +309,39 @@ static inline void i2c_stop(void)
 {
     TWCR |= _BV(TWINT) | _BV(TWSTO);            // Send the stop bit
 }
+/*
+    start_hack=1;
+    if (start_hack==1)
+    {
+        _delay_us(40);
+        I2CDDR |= (SCL_O) | (SDA_O);
+         TWCR &= ~_BV(TWEN);                  // Enable I2C in control register
+        I2CPORT |= SCL_O;                   // scl low
+        I2CPORT |= SDA_O;                   // scl low
+        _delay_us(10);
+         I2CPORT &= ~SCL_O;
+         _delay_us(20);
+         I2CPORT &= ~SDA_O;
+         _delay_us(20);
+         I2CPORT |= SCL_O;                   // scl low
+//         I2CPORT &= ~SDA_O;
+        _delay_us(10);
+        I2CPORT &= ~SCL_O;
+        _delay_us(8);
+        //         I2CPORT |= SCL_O;
+//        ret = 1;
+        TWCR = 0; 
+        TWCR |=_BV(TWEN);                  // Enable I2C in control register
+    }
+}
+*/
 
 // Send the Start condition
 static inline int i2c_start(void)
 {
+    
     TWCR |= _BV(TWINT) | _BV(TWSTA);            // Send the I2C start command
+
     return i2c_wait_int();                      // and wait for it to complete
 }
 
@@ -320,13 +360,13 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         data[0] = TW_BUS_ERROR;                            // return an error
         return 0;
     }
-    i2cstats[0x01] = TWSR;                                 // update the status array with the returned status
+    i2cstats[0x01] = TWSR & TWSRMASK;                                 // update the status array with the returned status
     int TWSRtmp = 0;
 
     // Start sending the I2C packet by following the normal I2C protocol sequence of Start data Stop
     // This USB control packet will contain the I2C address only so this function generates a start 
     // followed by the device address
-    if(TWSR == TW_START || TWSR == TW_REP_START)           // If the start completed
+    if((TWSR & TWSRMASK) == TW_START || (TWSR & TWSRMASK) == TW_REP_START)           // If the start completed
     {
         if(direction == USBI2C_READ)
         {
@@ -345,7 +385,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     else                                                   // The start failed. Error handle
     {
         TWCR = _BV(TWINT) | _BV(TWEN);                     // disable all commands in the control register
-        data[0] = i2cstats[0x00] = TWSR;                   // Store the return status in the status array
+        data[0] = i2cstats[0x00] = (TWSR & TWSRMASK);                   // Store the return status in the status array
         if(direction == USBI2C_READ)
             i2cstat &= ~(I2C_READ | I2C_PACKET | I2C_READ_ON); // Disable the flags for reading
         else
@@ -409,7 +449,7 @@ static inline int i2c_read_bytes(byte_t *data,byte_t len)
         read = i2c_read();
         if (read < 0) return -1;
         data[i] = (byte_t)read;                            // Store the byte in the status register
-        int TWSRtmp = TWSR;                                // Store the return status 
+        int TWSRtmp = (TWSR & TWSRMASK);                                // Store the return status
         i2cstats[0x08+i] = TWSRtmp;                        // Store the return status in the status array
         if(i2crecvlen > 0)
             i2crecvlen--;
@@ -454,8 +494,9 @@ extern byte_t usb_setup(byte_t data[8])
     // Request a new I2C bitrate in case of high speed errors.
     if (req == USBI2C_SET_BITRATE)
     {
-        TWBR = i2c_bitrate_set((uint16_t)((data[4] << 8) | data[5]));
-        return 0;
+        i2c_bitrate_set(data[2], data[4]);
+        data[0] = 1;
+        return 1;
     }
     // I2C requests
 
@@ -551,7 +592,7 @@ extern byte_t usb_setup(byte_t data[8])
     if	( req == USBTINY_POWERUP )
     {
         TWCR = 0;                                         // Disable I2C
-        TWSR = 0;                                         // Clear the status register
+        TWSR = (0 & 0X03);                                         // Clear the status register
         sck_period = data[2];                             // Store the clock period
         mask = DDRMASK;                                   // setup the port mask
         RESET_DDR |= RESET_PIN;                           // Set the port direction for the reset line
@@ -665,12 +706,12 @@ extern byte_t usb_setup(byte_t data[8])
         }
         return 0;
     }
-    if (req == SER_READ)
+    if (req == USBSER_READ)
     {
-        modestat = SER_READ;
+        modestat = USBSER_READ;
         return 0xff;
     }
-    if (req == SER_WRITE)
+    if (req == USBSER_WRITE)
     {
         return 0;
     }
@@ -699,7 +740,7 @@ extern  byte_t  usb_in ( byte_t* data, byte_t len )
             if (i2c_read_bytes(data, len) < 0) return 0;
         }
     }
-    else if (modestat == SER_READ)
+    else if (modestat == USBSER_READ)
     {
 /*        for (i = 0; i < len; i++)
         {
@@ -743,7 +784,7 @@ extern void usb_out (byte_t* data, byte_t len)
             }
         }
     }
-    else if (modestat == SER_WRITE)
+    else if (modestat == USBSER_WRITE)
     {
         uart_puts((char *)data);
     }
@@ -1026,8 +1067,8 @@ extern int main ( void )
 
     // We need to pull USB + - low for at least 200ms to force
     // a renumeration of init
-    PORTC |= _BV(PC0) | _BV(PC1);
-    _delay_ms(200);
+     PORTC &= ~(_BV(PC0) | _BV(PC1));
+     _delay_ms(200);
 
     usb_init();
     i2c_init();
@@ -1039,7 +1080,8 @@ extern int main ( void )
         wdt_reset();
 
         // If there is an error on the bus store the status and reinitialise I2C hardware
-        if(TWSR == TW_BUS_ERROR){
+        if((TWSR & TWSRMASK) == TW_BUS_ERROR)
+        {
             i2cstats[0x06]++;
             i2c_init();
         }
