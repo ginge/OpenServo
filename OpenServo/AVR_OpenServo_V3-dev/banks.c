@@ -73,9 +73,6 @@ void banks_init(void)
     // Reset the bank selection to 0
     registers_write_byte(REG_BANK_SELECT,0);
 
-    //initialise the alert registers
-    alert_init();
-
     // Restore the read/write protected registers from EEPROM.  If the
     // EEPROM fails checksum this function will return zero and the
     // read/write protected registers should be initialized to defaults.
@@ -94,7 +91,9 @@ void banks_defaults(void)
 
     // Default TWI address.
     banks_write_byte(POS_PID_BANK, REG_TWI_ADDRESS, REG_DEFAULT_TWI_ADDR);
+#if ALERT_ENABLED
     alert_defaults();
+#endif
 #if BACKEMF_ENABLED
     backemf_defaults();
 #endif

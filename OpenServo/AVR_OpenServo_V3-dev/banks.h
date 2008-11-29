@@ -81,6 +81,7 @@
 #define REG_PWM_FREQ_DIVIDER_LO     0x0E
 #define REG_PWM_MAX                 0x0F
 
+#if (ALERT_ENABLED)
 #define ALERT_CURR_MAX_LIMIT_HI     0x10
 #define ALERT_CURR_MAX_LIMIT_LO     0x11
 #define ALERT_VOLT_MAX_LIMIT_HI     0x12
@@ -89,6 +90,12 @@
 #define ALERT_VOLT_MIN_LIMIT_LO     0x15
 #define ALERT_TEMP_MAX_LIMIT_HI     0x16
 #define ALERT_TEMP_MAX_LIMIT_LO     0x17
+// A mask containing alert sources that cause an interrupt on int(n)
+#define REG_ALERT_CAUSES_INT        0x1E
+// This is a mask bit used to disable the alerts individually
+// over just zeroing the above. Masks are defined in alert.h
+#define REG_ALERT_ENABLE            0x1F
+#endif
 
 #define REG_GENERAL_CALL_GROUP      0x20
 #define REG_BRAKE_STRENGTH          0x21
