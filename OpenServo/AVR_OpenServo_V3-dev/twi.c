@@ -80,6 +80,10 @@ static volatile uint8_t twi_rxtail;
 static uint8_t twi_rxbuf[TWI_RX_BUFFER_SIZE];
 
 #if TWI_CHECKED_ENABLED
+// For checked writing send in the format of  [i2c addr][0x81][data length][data address][data]...[data] [checksum value] [checksum value]
+// For a checked read use  [i2c_addr][0x81][data length][data address] SLA+R [data][data]...[checksum value]
+// Checksum is defined as data length + data_address + data[n]
+// To verify a write was successful, write the header above, and see if it nacks. nack is failure of checksum.
 static uint8_t twi_chk_count;            // current byte in transaction
 static uint8_t twi_chk_count_target;     // How many bytes are we reading/writing
 static uint8_t twi_chk_sum;              // Accumulator for checksum
@@ -612,16 +616,28 @@ SIGNAL(SIG_TWI)
         case TWI_SRX_GEN_DATA_ACK:
 
             // Write the data.
-            twi_write_data(TWDR);
-
-            // Next data byte will be received and ACK will be returned.
-            TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
-                   (1<<TWIE) |                          // Keep the TWI interrupt enabled.
-                   (0<<TWSTA) |                         // Don't generate start condition.
-                   (0<<TWSTO) |                         // Don't generate stop condition.
-                   (1<<TWINT) |                         // Clear the TWI interrupt.
-                   (1<<TWEA) |                          // Acknowledge the data.
-                   (0<<TWWC);                           //
+            if (twi_write_data(TWDR) == TWI_ACK)
+            {
+                // Next data byte will be received and ACK will be returned.
+                TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
+                       (1<<TWIE) |                          // Keep the TWI interrupt enabled.
+                       (0<<TWSTA) |                         // Don't generate start condition.
+                       (0<<TWSTO) |                         // Don't generate stop condition.
+                       (1<<TWINT) |                         // Clear the TWI interrupt.
+                       (1<<TWEA) |                          // Acknowledge the data.
+                       (0<<TWWC);                           //
+            }
+            else
+            {
+                // Next data byte will not be received and NACK will be returned.
+                TWCR = (1<<TWEN) |                          // Keep the TWI interface enabled.
+                       (1<<TWIE) |                          // Keep the TWI interrupt enabled.
+                       (0<<TWSTA) |                         // Don't generate start condition.
+                       (0<<TWSTO) |                         // Don't generate stop condition.
+                       (1<<TWINT) |                         // Clear the TWI interrupt.
+                       (0<<TWEA) |                          // Don't Acknowledge the data.
+                       (0<<TWWC);                           //
+            }
 
             break;
 
@@ -638,7 +654,7 @@ SIGNAL(SIG_TWI)
                     (0<<TWSTA) |                             // Don't generate start condition.
                     (0<<TWSTO) |                             // Don't generate stop condition.
                     (1<<TWINT) |                             // Clear the TWI interrupt.
-                    (1<<TWEA) |                              // Acknowledge the data.
+                    (0<<TWEA) |                              // Acknowledge the data.
                     (0<<TWWC);                               //
 
             break;
