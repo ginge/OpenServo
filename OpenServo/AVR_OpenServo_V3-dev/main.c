@@ -68,7 +68,7 @@ static void config_pin_defaults(void)
     DDRD = (1<<DDD7) | (0<<DDD6) | (0<<DDD5) | (1<<DDD4) |
            (1<<DDD3) | (1<<DDD2) | (0<<DDD1) | (0<<DDD0);
     PORTD = (1<<PORTD7) | (1<<PORTD6) | (1<<PORTD5) | (1<<PORTD4) |
-            (0<<PORTD3) | (0<<PORTD2) | (1<<PORTD1) | (1<<PORTD0);
+            (0<<PORTD3) | (0<<PORTD2) | (0<<PORTD1) | (0<<PORTD0);
 }
 
 
@@ -276,6 +276,11 @@ int main (void)
     backemf_init();
 #endif
 
+#if ALERT_ENABLED
+    //initialise the alert registers
+    alert_init();
+#endif
+
     // Initialize the TWI slave module.
     twi_slave_init(banks_read_byte(POS_PID_BANK, REG_TWI_ADDRESS));
 
@@ -423,8 +428,10 @@ int main (void)
             // Call the PID algorithm module to get a new PWM value.
             pwm = pid_position_to_pwm(position);
 
+#if ALERT_ENABLED
             // Update the alert status registers and do any throttling
             alert_check();
+#endif
 
             // Allow any alerts to modify the PWM value.
             pwm = alert_pwm_throttle(pwm);
