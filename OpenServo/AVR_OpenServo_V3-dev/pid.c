@@ -31,6 +31,7 @@
 #include "pid.h"
 #include "registers.h"
 #include "banks.h"
+#include "filter.h"
 
 // The minimum and maximum servo position as defined by 10-bit ADC values.
 #define MIN_POSITION            (0)
@@ -44,36 +45,11 @@
 static int16_t previous_seek;
 static int16_t previous_position;
 
-//
-// Digital Lowpass Filter Implementation
-//
-// See: A Simple Software Lowpass Filter Suits Embedded-system Applications
-// http://www.edn.com/article/CA6335310.html
-//
-// k    Bandwidth (Normalized to 1Hz)   Rise Time (samples)
-// 1    0.1197                          3
-// 2    0.0466                          8
-// 3    0.0217                          16
-// 4    0.0104                          34
-// 5    0.0051                          69
-// 6    0.0026                          140
-// 7    0.0012                          280
-// 8    0.0007                          561
-//
-
-#define FILTER_SHIFT 1
-
 static int32_t filter_reg_pos = 0;
+#if BACKEMF_ENABLED
 static int32_t filter_reg_emf = 0;
+#endif
 
-static int16_t filter_update(int16_t input, int32_t *filter_source)
-{
-    // Update the filter with the current input.
-    *filter_source = *filter_source - (*filter_source >> FILTER_SHIFT) + input;
-
-    // Scale output for unity gain.
-    return (int16_t) (*filter_source >> FILTER_SHIFT);
-}
 void pid_init(void)
 // Initialize the PID algorithm module.
 {
@@ -186,9 +162,6 @@ int16_t pid_position_to_pwm(int16_t current_position)
     // The proportional component to the PID is the position error.
     p_component = seek_position - current_position;
 
-    // The derivative component to the PID is the velocity.
-    d_component = seek_velocity - current_velocity;
-
     // Get the proportional, derivative and integral gains.
     p_gain = banks_read_word(POS_PID_BANK, REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
     d_gain = banks_read_word(POS_PID_BANK, REG_PID_DGAIN_HI, REG_PID_DGAIN_LO);
@@ -201,7 +174,13 @@ int16_t pid_position_to_pwm(int16_t current_position)
     {
         // Apply the proportional component of the PWM output.
         pwm_output += (int32_t) p_component * (int32_t) p_gain;
+
+        // Reset the speed portion of the motion to zero when in deadband. Stops D error increasing.
+        seek_velocity = 0;
     }
+
+    // The derivative component to the PID is the velocity.
+    d_component = seek_velocity - current_velocity;
 
     // Apply the derivative component of the PWM output.
     pwm_output += (int32_t) d_component * (int32_t) d_gain;
