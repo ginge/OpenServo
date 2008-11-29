@@ -165,6 +165,14 @@
 #define TEMPERATURE_ENABLED         1
 #endif
 
+// Enable (1) or disable (0) the Alert based system.
+#ifndef ALERT_ENABLED
+#define ALERT_ENABLED               1
+#endif
+
+#ifndef ALERT_INTN_ENABLED
+#define ALERT_INTN_ENABLED          0
+#endif
 
 /*
  * ADC Clock defines
