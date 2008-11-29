@@ -31,13 +31,17 @@
 #define ALERT_OVERVOLT  1
 #define ALERT_UNDERVOLT 2
 #define ALERT_OVERTEMP  3
-
+#define ALERT_POSITION_REACHED 4
 
 // Alert functions.
 void alert_init(void);
 void alert_defaults(void);
 void alert_check(void);
 uint16_t alert_pwm_throttle(uint16_t pwm);
+void alert_int_low(void);
+void alert_int_high(uint8_t bit);
+uint8_t alert_is_enabled(uint8_t bit);
+void alert_clearbit(uint8_t bit);
 void alert_setbit(uint8_t bit);
 
 #endif // _OS_ALERT_H_
