@@ -31,9 +31,11 @@
 #include "openservo.h"
 #include "config.h"
 #include "registers.h"
+#include "banks.h"
 #include "pulsectl.h"
 #include "pwm.h"
 #include "timer.h"
+#include "filter.h"
 
 #if PULSE_CONTROL_ENABLED
 
@@ -43,7 +45,7 @@
 
 // The timer clock prescaler of 8 is selected to yield a 1MHz ADC clock
 // from an 8 MHz system clock.
-#define CSPS        ((0<<CS22) | (1<<CS21) | (0<<CS20))
+//#define CSPS        ((0<<CS22) | (1<<CS21) | (0<<CS20))
 
 // Globals used for pulse measurement.
 static volatile uint8_t overflow_count;
@@ -51,35 +53,8 @@ static volatile uint8_t pulse_flag;
 static volatile uint16_t pulse_time;
 static volatile uint16_t pulse_duration;
 
-//
-// Digital Lowpass Filter Implementation
-//
-// See: A Simple Software Lowpass Filter Suits Embedded-system Applications
-// http://www.edn.com/article/CA6335310.html
-//
-// k    Bandwidth (Normalized to 1Hz)   Rise Time (samples)
-// 1    0.1197                          3
-// 2    0.0466                          8
-// 3    0.0217                          16
-// 4    0.0104                          34
-// 5    0.0051                          69
-// 6    0.0026                          140
-// 7    0.0012                          280
-// 8    0.0007                          561
-//
-
-#define FILTER_SHIFT 3
-
-static int32_t filter_reg = 0;
-
-static int16_t filter_update(int16_t input)
-{
-    // Update the filter with the current input.
-    filter_reg = filter_reg - (filter_reg >> FILTER_SHIFT) + input;
-
-    // Scale output for unity gain.
-    return (int16_t) (filter_reg >> FILTER_SHIFT);
-}
+// Hold the running filter value
+static int32_t filter_reg_pulse = 0;
 
 void pulse_control_init(void)
 // Initialize servo pulse control.
@@ -130,7 +105,7 @@ void pulse_control_update(void)
             if (pulse_position > MAX_POSITION) pulse_position = MAX_POSITION;
 
             // Apply a low pass filter to the pulse position.
-            pulse_position = filter_update(pulse_position);
+            pulse_position = filter_update(pulse_position, &filter_reg_pulse);
 
             // Are we reversing the seek sense?
             if (registers_read_byte(REG_REVERSE_SEEK) != 0)
