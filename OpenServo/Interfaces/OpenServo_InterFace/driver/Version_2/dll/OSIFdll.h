@@ -20,11 +20,13 @@ http://www.gnu.org/licenses/gpl.txt
 
 */
 
+/* stop recursion */
 #ifndef OSIF_DLL_H
-#define OSIF_DLL_H     //stop recursion
+#define OSIF_DLL_H
+
 
 /*
-you must define one of these. They are in the Makefile
+If you intend to rebuild this dll, you must define one of these. They are in the Makefile
 for windows define WIN and BUILD_DLL to build dll
 for windows to link against .a define WIN
 for linux and Mac BUILD_STATIC_LINKER to generate shared .so library run ldconfig after copying to /lib/
@@ -53,14 +55,21 @@ for linux and Mac BUILD_STATIC_LINKER to generate shared .so library run ldconfi
 #endif
 
 #include "OSIFlib.h"
+
+/* The current firmware version */
+#define LIB_VERSION_MAJOR 0
+#define LIB_VERSION_MINOR 9
+
 /**
   All function return <0 for error and >0 for success
     Function arguments:
-    adapter: adapter number starting from 0
-    servo:   address of device on the I2C bus
-    addr:    start address of data read/write
-    data:    pointer to unsigned char containing read bytes/bytes to write
-    buflen:  length of data to read/write
+    adapter:  adapter number starting from 0
+    i2c_addr: address of device on the I2C bus
+    addr:     start address of data read/write
+    data:     pointer to unsigned char containing read bytes/bytes to write
+    buflen:   length of data to read/write
+	stop_off: STOP_ON will send a stop bit after the transaction, STOP_OFF will now.
+
 **/
 
 
@@ -70,31 +79,51 @@ EXPORT int OSIF_init(void);
 /** De-Initialise the OSIF USB interface **/
 EXPORT int OSIF_deinit(void);
 
-/** read from the I2C device at address addr **/
-EXPORT int OSIF_read(int adapter, int servo, unsigned char addr, unsigned char * data, size_t buflen );
+/** Return the OSIF library version as integer for compatibility checks **/
+EXPORT int OSIF_get_libversion(unsigned char * data);
+
+/** read from the I2C device at address addr does an initial register selection **/
+EXPORT int OSIF_read(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen );
+
+/** read from the I2C device at address addr optional stop bit**/
+EXPORT int OSIF_read_data(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen, int issue_stop );
 
 /** perform a I2C read without the register select write **/
-EXPORT int OSIF_readonly(int adapter, int servo, unsigned char * data, size_t buflen );
+EXPORT int OSIF_readonly(int adapter_no, int i2c_addr, unsigned char * data, size_t buflen, int issue_stop);
 
 /** Write data to the I2C device at addr **/
-EXPORT int OSIF_write(int adapter, int servo, unsigned char addr, unsigned char * data, size_t buflen );
+EXPORT int OSIF_write(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen );
+
+/** Write data to the I2C device at addr with an option to specify the stop bit status STOP_ON and STOP_OFF **/
+EXPORT int OSIF_writedata(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen, int issue_stop );
+
+/** Write data to the I2C device at addr **/
+EXPORT int OSIF_writeonly(int adapter_no, int i2c_addr, unsigned char * data, size_t buflen, int issue_stop );
 
 /** Scan the I2C bus for devices. Fills pointer *devices with 1d array of devices on bus and *dev_count with number found **/
-EXPORT int OSIF_scan(int adapter, int *devices, int *dev_count );
+EXPORT int OSIF_scan(int adapter_no, int *devices, int *dev_count );
 
-/** returns true if a device is found at address servo **/
-EXPORT bool OSIF_probe(int adapter, int servo );
+/** returns true if a device is found at address i2c_addr **/
+EXPORT bool OSIF_probe(int adapter_no, int i2c_addr );
 
-/** Send a command to the OpenServo. See website for commands **/
-EXPORT int OSIF_command(int adapter, int servo, unsigned char command);
+/** Send a command to the device. **/
+EXPORT int OSIF_command(int adapter_no, int i2c_addr, unsigned char command);
 
 /** Flash the application portion with new firmware. bootloader_addr is normally 0x7f **/
-EXPORT int OSIF_reflash(int adapter, int servo, int bootloader_addr, char *filename);
+EXPORT int OSIF_reflash(int adapter_no, int i2c_addr, int bootloader_addr, char *filename);
 
 /** Returns the friendly name of the connected adapter **/
-EXPORT int OSIF_get_adapter_name(int adapter, char* name);
+EXPORT int OSIF_get_adapter_name(int adapter_no, char* name);
 
 /** Returns number of connected OSIF adapters **/
 EXPORT int OSIF_get_adapter_count(void);
+
+EXPORT int OSIF_set_bitrate(int adapter_no, int bitrate);
+
+/** Disable the I2C module on the selected OSIF adapter **/
+EXPORT int OSIF_disable_i2c(int adapter_no);
+
+/** Enable the I2C module on the selected OSIF adapter **/
+EXPORT int OSIF_enable_i2c(int adapter_no);
 
 #endif
