@@ -24,13 +24,6 @@
     $Id$
 */
 
-/*
- * Edit history:
- *
- *     26 Jan 2008        Retrofitted as much as possible of the H-bridge
- *                        "anti-[partial]-crobaring fix" from the code for
- *                        the V3 board to here (the code for the V2 board).
- */
 #include <inttypes.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
