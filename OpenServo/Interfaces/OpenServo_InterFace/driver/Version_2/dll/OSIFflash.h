@@ -32,7 +32,7 @@ http://www.gnu.org/licenses/gpl.txt
 #define OS_RESET 0x80
 
 #define MAX_BOOTLDR_SIZE 8192
-#define PAGE_SIZE 128
+#define PAGE_SIZE 64
 #define MAX_I2C_DEVICES 128
 
 //structure to store loaded bootload pages

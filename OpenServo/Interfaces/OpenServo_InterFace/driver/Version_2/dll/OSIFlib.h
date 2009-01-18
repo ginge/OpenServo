@@ -58,17 +58,23 @@ http://www.gnu.org/licenses/gpl.txt
 #define USBTINY_FLASH_WRITE           10 // write flash (wIndex:address, wValue:timeout)
 #define USBTINY_EEPROM_READ           11 // read eeprom (wIndex:address)
 #define USBTINY_EEPROM_WRITE          12 // write eeprom (wIndex:address, wValue:timeout)
+// I2C requests
 #define USBI2C_READ                   20 // read from i2c bus
 #define USBI2C_WRITE                  21 // write to i2c bus
 #define USBI2C_STOP                   22 // send stop condition
 #define USBI2C_STAT                   23 // get stats from i2c action
 #define USBI2C_SET_BITRATE            24
+// GPIO requests
 #define USBIO_SET_DDR                 30
 #define USBIO_SET_OUT                 31
 #define USBIO_GET_IN                  32
+// USB Serial requests
+//
 
 #define STOP_ON 1
 #define STOP_OFF 0
+
+#define MAX_ADAPTERS 127
 
 struct usb_bus      *bus;
 struct usb_device   *dev;
@@ -80,17 +86,26 @@ typedef struct adap_t
     char adapter_name[255];
 } adapter_t;
 
-adapter_t adapters[127];
+adapter_t adapters[MAX_ADAPTERS];
 int adapter_count;
+
+typedef struct gpio_state_t
+{
+    int output_state;
+    int ddr;
+    int enabled;
+} gpios_t;
+
+gpios_t gpio_state[MAX_ADAPTERS];
 
 int  OSIF_USB_write(usb_dev_handle *handle, int request, int value, int index);
 int  OSIF_USB_read(usb_dev_handle *handle, unsigned char cmd, void *data, int len);
 void OSIF_USB_get_func(usb_dev_handle *handle );
 void OSIF_USB_set(usb_dev_handle *handle, unsigned char cmd, int value);
-int  OSIF_USB_get_status(usb_dev_handle *handle);
+int  OSIF_USB_get_status(usb_dev_handle *handle, char *status);
 
-int  write_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t len, int stop);
-int  read_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t buflen, int stop);
+int  write_data( usb_dev_handle *thandle, int servo, unsigned char * data, int len, int stop);
+int  read_data( usb_dev_handle *thandle, int servo, unsigned char * data, int buflen, int stop);
 usb_dev_handle *get_adapter_handle(int adapter_no);
 
 int check_params( int val );

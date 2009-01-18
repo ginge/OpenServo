@@ -92,7 +92,7 @@ int OSIF_bootloader_init(int adapter, int servo, char * filename)
             return -1;
         }
 
-        if(usb_control_msg(handle, USB_CTRL_IN, 
+        if(usb_control_msg(handle, USB_CTRL_IN,
                             USBI2C_STOP,
                             0, 0, 0, 0, 
                             1000) > 0) 
@@ -103,7 +103,7 @@ int OSIF_bootloader_init(int adapter, int servo, char * filename)
         //assign some memory for the verify
         memcpy( &verbuf, &page[i][2], PAGE_SIZE );
         //only verify from page 2. lower portion is the bootloader
-        if ( i>2) 
+        if ( i>1)
         {
             if ( OSIF_verify_page(adapter, servo, page[i], verbuf )>0) {
                 printf("verify OK\n");
@@ -176,7 +176,8 @@ int OSIF_verify_page(int adapter, int servo, unsigned char *reg_addr, unsigned c
         fprintf(stderr, "USB error: %s\n", usb_strerror());
         return -1;
     }
-    if(OSIF_USB_get_status(handle) != STATUS_ADDRESS_ACK) {
+    char status[255];
+    if(OSIF_USB_get_status(handle,status) <0) {
         fprintf(stderr, "read data status failed\n");
         return -1;
     }
@@ -207,7 +208,7 @@ int OSIF_verify_page(int adapter, int servo, unsigned char *reg_addr, unsigned c
         }
         if( read_page[n] != page[n]) 
         {
-            printf("\n Page fault at page byte %d |0x%02x 0x%02x|\n", n, page[n], read_page[n]);
+            printf("\n Page fault at page byte %d |0x%02x 0x%02x| %02x\n", n, page[n], read_page[n], servo);
 
             return -1; 
         }

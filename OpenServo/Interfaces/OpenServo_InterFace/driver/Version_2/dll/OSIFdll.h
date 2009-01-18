@@ -83,22 +83,22 @@ EXPORT int OSIF_deinit(void);
 EXPORT int OSIF_get_libversion(unsigned char * data);
 
 /** read from the I2C device at address addr does an initial register selection **/
-EXPORT int OSIF_read(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen );
+EXPORT int OSIF_read(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, int buflen );
 
 /** read from the I2C device at address addr optional stop bit**/
-EXPORT int OSIF_read_data(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen, int issue_stop );
+EXPORT int OSIF_read_data(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, int buflen, int issue_stop );
 
 /** perform a I2C read without the register select write **/
-EXPORT int OSIF_readonly(int adapter_no, int i2c_addr, unsigned char * data, size_t buflen, int issue_stop);
+EXPORT int OSIF_readonly(int adapter_no, int i2c_addr, unsigned char * data, int buflen, int issue_stop);
 
 /** Write data to the I2C device at addr **/
-EXPORT int OSIF_write(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen );
+EXPORT int OSIF_write(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, int buflen);
 
 /** Write data to the I2C device at addr with an option to specify the stop bit status STOP_ON and STOP_OFF **/
-EXPORT int OSIF_writedata(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen, int issue_stop );
+EXPORT int OSIF_write_data(int adapter_no, int i2c_addr, unsigned char addr, unsigned char * data, int buflen, int issue_stop );
 
 /** Write data to the I2C device at addr **/
-EXPORT int OSIF_writeonly(int adapter_no, int i2c_addr, unsigned char * data, size_t buflen, int issue_stop );
+EXPORT int OSIF_writeonly(int adapter_no, int i2c_addr, unsigned char * data, int buflen, int issue_stop );
 
 /** Scan the I2C bus for devices. Fills pointer *devices with 1d array of devices on bus and *dev_count with number found **/
 EXPORT int OSIF_scan(int adapter_no, int *devices, int *dev_count );
@@ -118,6 +118,7 @@ EXPORT int OSIF_get_adapter_name(int adapter_no, char* name);
 /** Returns number of connected OSIF adapters **/
 EXPORT int OSIF_get_adapter_count(void);
 
+/** set the bitrate (in HZ) **/
 EXPORT int OSIF_set_bitrate(int adapter_no, int bitrate);
 
 /** Disable the I2C module on the selected OSIF adapter **/
@@ -125,5 +126,21 @@ EXPORT int OSIF_disable_i2c(int adapter_no);
 
 /** Enable the I2C module on the selected OSIF adapter **/
 EXPORT int OSIF_enable_i2c(int adapter_no);
+
+/** Set a Data Direction (DDR) on a GPIO pin **/
+EXPORT int OSIF_io_set_ddr(int adapter_no, int ddr, int enabled);
+
+/** GPIO Control function to set pin high or low **/
+EXPORT int OSIF_io_set_out(int adapter_no, int io);
+
+/** GPIO Control function to read the status of all gpio pins **/
+EXPORT int OSIF_io_get_in(int adapter_no);
+
+/** Shortcut functions to update one pin only **/
+EXPORT int OSIF_io_set_out1(int adapter_no, int gpio, int state);
+
+/** get the current pin states. THIS IS NOT suitable for asking the osif what pins
+    are set when this lib loaded, OSIF doesn't know that. **/
+EXPORT int OSIF_io_get_current(int adapter_no);
 
 #endif

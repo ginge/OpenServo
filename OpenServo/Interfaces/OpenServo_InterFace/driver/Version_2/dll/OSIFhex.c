@@ -30,8 +30,6 @@
 /* some ansi prototypes.. maybe ought to make a .h file */
 
 /* this loads an intel hex file into the memory[] array */
-//int ParseIHexLine( const char *line, unsigned char *data );
-// int load_file(char *filename, int *memory, int *maxaddr);
 
 
 /* this writes a part of memory[] to an intel hex file */

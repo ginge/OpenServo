@@ -25,12 +25,12 @@ http://www.gnu.org/licenses/gpl.txt
 #include <stdlib.h>
 #include <string.h>
 
-int write_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t len, int stop)
+int write_data( usb_dev_handle *thandle, int i2c_addr, unsigned char * data, int len, int stop)
 {
     /* write one byte register address to chip */
     if (usb_control_msg(thandle, USB_CTRL_OUT, 
         USBI2C_WRITE,
-        0, servo, data, len, 
+        0, i2c_addr, data, len,
         1000) <1) 
     {
         fprintf(stderr, "wUSB error: %s\n", usb_strerror());
@@ -44,15 +44,17 @@ int write_data( usb_dev_handle *thandle, int servo, unsigned char * data, size_t
     return 1;
 }
 
-int read_data(usb_dev_handle *thandle, int servo, unsigned char * data, size_t buflen, int stop)
+int read_data(usb_dev_handle *thandle, int i2c_addr, unsigned char * data, int buflen, int stop)
 {
     if(usb_control_msg(thandle, 
        USB_CTRL_IN, 
        USBI2C_READ,
-       0, servo, data, buflen, 
+       0, i2c_addr, data, buflen,
        1000) <1) 
     {
-        fprintf(stderr, "rUSB error: %s\n", usb_strerror());
+        char status[100];
+        OSIF_USB_get_status(thandle, status);
+        fprintf(stderr, "rUSB error: %s i2caddr 0x%02x buflen %d\n", usb_strerror(), i2c_addr, buflen);
         return -1;
     }
 

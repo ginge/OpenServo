@@ -278,7 +278,7 @@ EXPORT int OSIF_write_data(int adapter, int i2c_addr, unsigned char addr, unsign
 }
 
 /** Shortcut to the above function. This will always send a stop at the end of the write **/
-EXPORT int OSIF_write(int adapter, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen )
+EXPORT int OSIF_write(int adapter, int i2c_addr, unsigned char addr, unsigned char * data, int buflen )
 {
 	return OSIF_write_data(adapter, i2c_addr, addr, data, buflen, STOP_ON );
 }
@@ -303,7 +303,7 @@ EXPORT int OSIF_write(int adapter, int i2c_addr, unsigned char addr, unsigned ch
 
 	returns: <0 error 1 success
 **/
-EXPORT int OSIF_writeonly(int adapter, int i2c_addr, unsigned char * data, size_t buflen, int issue_stop )
+EXPORT int OSIF_writeonly(int adapter, int i2c_addr, unsigned char * data, int buflen, int issue_stop )
 {
     usb_dev_handle *handle;
     handle = get_adapter_handle(adapter);
@@ -362,7 +362,7 @@ EXPORT int OSIF_writeonly(int adapter, int i2c_addr, unsigned char * data, size_
 
 	returns: <0 error 1 success
 **/
-EXPORT int OSIF_read_data(int adapter, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen, int issue_stop )
+EXPORT int OSIF_read_data(int adapter, int i2c_addr, unsigned char addr, unsigned char * data, int buflen, int issue_stop )
 {
     usb_dev_handle *handle;
     handle = get_adapter_handle(adapter);
@@ -410,7 +410,7 @@ EXPORT int OSIF_read_data(int adapter, int i2c_addr, unsigned char addr, unsigne
 }
 
 /** Shortcut to the above function with an I2C stop bit **/
-EXPORT int OSIF_read(int adapter, int i2c_addr, unsigned char addr, unsigned char * data, size_t buflen)
+EXPORT int OSIF_read(int adapter, int i2c_addr, unsigned char addr, unsigned char * data, int buflen)
 {
 	return OSIF_read_data(adapter, i2c_addr, addr, data, buflen, STOP_ON);
 }
@@ -433,7 +433,7 @@ EXPORT int OSIF_read(int adapter, int i2c_addr, unsigned char addr, unsigned cha
 
 	returns: <0 error 1 success
  **/
-EXPORT int OSIF_readonly(int adapter, int i2c_addr, unsigned char * data, size_t buflen, int issue_stop )
+EXPORT int OSIF_readonly(int adapter, int i2c_addr, unsigned char * data, int buflen, int issue_stop )
 {
     usb_dev_handle *handle;
     handle = get_adapter_handle(adapter);
