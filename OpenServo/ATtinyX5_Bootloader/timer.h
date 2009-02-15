@@ -27,6 +27,9 @@
 #ifndef _TIMER_H_
 #define _TIMER_H_ 1
 
+#ifdef __AVR_ATtiny84__
+#define TIFR TIFR0
+#endif
 
 static inline void timer_init(void)
 {
@@ -47,6 +50,7 @@ static inline void timer_deinit(void)
     TCCR0A = 0;
     TCCR0B = 0;
     TCNT0 = 0;
+
     TIFR = (1<<OCF0A) | (1<<OCF0B) | (1<<TOV0);
 }
 
