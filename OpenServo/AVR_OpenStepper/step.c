@@ -103,7 +103,7 @@ static uint8_t offset;
 static uint8_t step_incrementor;
 
 //Tacking of the current step in the step table
-static int8_t current_step;
+volatile static int8_t current_step;
 
 //
 // ATtiny84
