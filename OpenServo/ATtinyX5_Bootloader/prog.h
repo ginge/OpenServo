@@ -109,7 +109,7 @@
 //   ..
 //   87     21C0-21FF   EEPROM
 
-#ifdef __AVR_ATtiny85__
+#if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
 
 // Flash/EEPROM Page Information
 #define FLASH_PAGE_COUNT        (128)

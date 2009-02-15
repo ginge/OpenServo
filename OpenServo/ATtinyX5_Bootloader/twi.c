@@ -43,6 +43,18 @@
     #define PIN_SDA             PINB0
     #define PIN_SCL             PINB2
 #endif
+#if defined(__AVR_ATtiny84__)
+    #define DDR_USI             DDRA
+    #define DD_SDA              DDA6
+    #define DD_SCL              DDA4
+    #define PORT_USI            PORTA
+    #define P_SDA               PA6
+    #define P_SCL               PA4
+    #define PIN_USI             PINA
+    #define PIN_SDA             PINA6
+    #define PIN_SCL             PINA4
+#endif
+
 
 // TWI write states.
 #define TWI_WRITE_ADDR_HI_BYTE              (0x00)
@@ -105,7 +117,6 @@ BOOTLOADER_SECTION void twi_init(void)
     USICR |= (1<<USISIE);
 }
 
-
 BOOTLOADER_SECTION void twi_deinit(void)
 // De-initialise USI.
 {
@@ -118,7 +129,6 @@ BOOTLOADER_SECTION void twi_deinit(void)
     USICR = 0x00;
     USISR = 0xF0;
 }
-
 
 BOOTLOADER_SECTION void twi_check_conditions(void)
 // Checks for TWI start condition.
