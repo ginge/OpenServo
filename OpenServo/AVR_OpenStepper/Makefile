@@ -4,8 +4,9 @@
 
 ## General Flags
 PROJECT = ATmega168_OpenServo
+#MCU = atmega168
 MCU = attiny84
-TARGET = ATmega168_OpenServo.elf
+TARGET = ATmega168_OpenServo
 CC = avr-gcc
 
 ## Options common to compile, link and assembly rules
@@ -13,7 +14,7 @@ COMMON = -mmcu=$(MCU)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
-CFLAGS += -Wall -Os -fsigned-char
+CFLAGS += -Wall -Os -fsigned-char -g
 CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d
 
 ## Assembly specific flags
@@ -24,6 +25,10 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 LDFLAGS = $(COMMON)
 LDFLAGS += -nostartfiles -v  -Wl,-Map=ATmega168_OpenServo.map
 
+# path to your VMLAB project directory in WINE
+VMLABDIR = ~/.wine/drive_c/avr/
+# location path of avr-objcopy which supports the coff-avr option
+OBJCOPYCOFF=~/Downloads/opt/cdk4avr/bin/avr-objcopy
 
 ## Objects that must be built in order to link
 OBJECTS = bootcrt.o main.o adc.o registers.o eeprom.o watchdog.o motion.o math.o ipd.o pid.o regulator.o power.o twi.o step.o estimator.o seek.o timer.o curve.o pulsectl.o
@@ -32,7 +37,7 @@ OBJECTS = bootcrt.o main.o adc.o registers.o eeprom.o watchdog.o motion.o math.o
 LINKONLYOBJECTS =
 
 ## Build
-all: $(TARGET) ATmega168_OpenServo.hex ATmega168_OpenServo.lss size
+all: $(TARGET).elf ATmega168_OpenServo.hex ATmega168_OpenServo.lss size
 
 ## Compile
 bootcrt.o: bootcrt.s
@@ -93,18 +98,18 @@ seek.o: seek.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
 ##Link
-$(TARGET): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) $(LINKONLYOBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET)
+$(TARGET).elf: $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) $(LINKONLYOBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET).elf
 
-%.hex: $(TARGET)
+%.hex: $(TARGET).elf
 	avr-objcopy -O ihex $(HEX_FLASH_FLAGS)  $< $@
 
-%.lss: $(TARGET)
+%.lss: $(TARGET).elf
 	avr-objdump -h -S $< > $@
 
-size: ${TARGET}
+size: ${TARGET}.elf
 	@echo
-	@avr-size ${TARGET}
+	@avr-size ${TARGET}.elf
 
 ## Clean target
 .PHONY: clean
@@ -114,4 +119,16 @@ clean:
 
 ## Other dependencies
 -include $(shell mkdir dep 2>/dev/null) $(wildcard dep/*)
+
+COFFCONVERT=$(OBJCOPYCOFF) --debugging \
+--change-section-address .data-0x800000 \
+--change-section-address .bss-0x800000 \
+--change-section-address .noinit-0x800000 \
+--change-section-address .eeprom-0x810000 
+
+coff: $(TARGET).elf
+	$(COFFCONVERT) -O coff-avr $< $(TARGET).cof
+	cp -f *.c $(VMLABDIR)
+	cp -f $(TARGET).hex $(VMLABDIR)
+	cp -f $(TARGET).cof $(VMLABDIR)
 
