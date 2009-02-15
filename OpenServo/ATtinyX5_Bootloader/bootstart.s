@@ -53,13 +53,16 @@ __init:
 	/* Clear out MCUSR. */
 	out _SFR_IO_ADDR(MCUSR), r1 
 
+#if !defined(__AVR_ATtiny84__)
+//#define WDTCR WDTSR
+//#endif
 	/* Disable watchdog. */
 	in r16, _SFR_IO_ADDR(WDTCR)
 	ori r16, (1<<WDCE)|(1<<WDE)
 	out _SFR_IO_ADDR(WDTCR), r16
 	clr r16
 	out _SFR_IO_ADDR(WDTCR), r16
-
+#endif	
 	/* Configure stack. */
 	ldi r28,lo8(__stack)
 	ldi r29,hi8(__stack)
