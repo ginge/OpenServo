@@ -475,7 +475,6 @@ EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
     int i;
     int res;
     char addr;
-    int lc=0;
     handle = get_adapter_handle(adapter);
 
     *dev_count = 0;
@@ -489,20 +488,18 @@ EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
         char status[255];
         if(OSIF_USB_get_status(handle, status) <0) {
 #ifdef DEBUG_OUT
-            //printf("No device at 0x%02x\n", i );
+            printf("No device at 0x%02x\n", i );
 #endif
         }
         else
         {
-            printf("Found device at address 0x%02x\n", i);
-            devices[*dev_count] = i;
-            *dev_count++;
-            lc++;
+            printf("Found device at address 0x%02x, dc %d\n", i, *dev_count);
+            devices[lc] = i;
+            (*dev_count)++;
 #ifdef DEBUG_OUT
-            printf ("OSIF_scan: dev count %d, %d\n", *dev_count, lc);
+            printf ("OSIF_scan: dev count %d\n", *dev_count);
 #endif
         }
-        *dev_count = lc;
 #ifndef WIN
 /*          usleep(1000); */
 #else
