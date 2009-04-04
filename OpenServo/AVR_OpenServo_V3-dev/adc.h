@@ -34,11 +34,14 @@ void adc_init(void);
 void adc_start(uint8_t channel);
 
 // Declare externally so in-lines work.
+#if CURRENT_ENABLED
 extern volatile uint8_t adc_power_ready;
 extern volatile uint16_t adc_power_value;
+#endif
+#if ADC_POSITION_ENABLED
 extern volatile uint8_t adc_position_ready;
 extern volatile uint16_t adc_position_value;
-extern volatile uint8_t adc_heartbeat_ready;
+#endif
 #if BACKEMF_ENABLED
 extern volatile uint8_t adc_backemf_ready;
 extern volatile uint16_t adc_backemf_value;
@@ -49,7 +52,7 @@ extern volatile uint16_t adc_temperature_value;
 #endif
 
 // In-lines for fast access to power flags and values.
-
+#if CURRENT_ENABLED
 inline static uint16_t adc_get_power_value(void)
 // Return the signed 16-bit ADC power value.
 {
@@ -72,9 +75,10 @@ inline static void adc_power_value_clear_ready(void)
 {
     adc_power_ready = 0;
 }
-
+#endif
 // In-lines for fast access to position flags and values.
 
+#if ADC_POSITION_ENABLED
 inline static uint16_t adc_get_position_value(void)
 // Return the 16-bit ADC position value.
 {
@@ -97,19 +101,7 @@ inline static void adc_position_value_clear_ready(void)
 {
     adc_position_ready = 0;
 }
-
-inline static uint8_t adc_heartbeat_is_ready(void)
-// Return the ADC position value ready flag.
-{
-    // Return the value ready flag.
-    return adc_heartbeat_ready;
-}
-
-inline static void adc_heartbeat_value_clear_ready(void)
-// Clear the ready ADC power value ready flag.
-{
-    adc_heartbeat_ready = 0;
-}
+#endif
 
 #if BACKEMF_ENABLED
 inline static uint16_t adc_get_backemf_value(void)

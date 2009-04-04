@@ -62,7 +62,9 @@ inline static void step_disable(void)
     // Stop now!
     step_stop();
 }
+#endif  // keep these available as they are used in pwm-std.c
 
+#if STEP_ENABLED || STEP_ENABLE_BRIDGE_PIN
 inline static void step_enable_bridge(void)
 {
     STEP_ENABLE_PORT |= (1<<STEP_ENABLE_PIN);

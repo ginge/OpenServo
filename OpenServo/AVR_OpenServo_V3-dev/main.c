@@ -46,6 +46,7 @@
 #include "backemf.h"
 #include "alert.h"
 #include "banks.h"
+#include "heartbeat.h"
 
 static void config_pin_defaults(void)
 // Configure pins to their default states to conform to recommendation that all
@@ -321,8 +322,8 @@ int main (void)
     // for new position, power or TWI commands to be processed.
     for (;;)
     {
-        // Is thr system heartbat ready?
-        if (adc_heartbeat_is_ready())
+        // Is the system heartbeat ready?
+        if (heartbeat_is_ready())
         {
             int16_t pwm;
             int16_t position;
@@ -331,7 +332,7 @@ int main (void)
             static int16_t new_seek_position;
 
             // Clear the heartbeat flag
-            adc_heartbeat_value_clear_ready();
+            heartbeat_value_clear_ready();
 
 #if PULSE_CONTROL_ENABLED
             // Give pulse control a chance to update the seek position.
@@ -388,21 +389,23 @@ int main (void)
                 banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, 0);
             }
 #endif
-            // Trigger the adc sampling hardware. This triggers the position and temperature sample
-            adc_start(ADC_CHANNEL_POSITION);
 
-#if TEMPERATURE_ENABLED
+#if ADC_ENABLED
+            // Trigger the adc sampling hardware. This triggers the position and temperature sample
+            adc_start(ADC_FIRST_CHANNEL);
+#endif
+
             // Wait for the samples to complete
-            while(!adc_position_value_is_ready() && !adc_power_value_is_ready() && !adc_temperature_value_is_ready())
+#if TEMPERATURE_ENABLED
+            while(!adc_temperature_value_is_ready())
                 ;;
 
             // Save temperature value to registers
             registers_write_word(REG_TEMPERATURE_HI, REG_TEMPERATURE_LO, (uint16_t)adc_get_temperature_value());
-
-#else
-            while(!adc_position_value_is_ready() && !adc_power_value_is_ready())
-                ;;
 #endif
+#if CURRENT_ENABLED
+            while(!adc_power_value_is_ready())
+                ;;
 
             // Get the new power value.
             uint16_t power = adc_get_power_value();
@@ -410,6 +413,11 @@ int main (void)
             // Update the power value for reporting.
             power_update(power);
 
+#endif
+#if ADC_POSITION_ENABLED
+            while(!adc_position_value_is_ready())
+                ;;
+#endif
 #if BACKEMF_ENABLED
             // Quick and dirty check to see if pwm is active
             if (pwm_a || pwm_b)
@@ -422,8 +430,13 @@ int main (void)
             }
 #endif
 
-            // Get the new position value.
+#if ADC_POSITION_ENABLED
+            // Get the new position value from the ADC module.
             position = (int16_t) adc_get_position_value();
+#else
+            // Get the position value from an external module.
+            position = (int16_t) get_position_value();
+#endif
 
             // Call the PID algorithm module to get a new PWM value.
             pwm = pid_position_to_pwm(position);

@@ -77,7 +77,6 @@
  * Provide defaults for the enabled modules to allow it to be overridden by a specific platform config file
  */
 
-
 // Enable (1) or disable (0) checksum verification within the
 // twi.c module.  When enabled the TWI_CMD_CHECKED_TXN command
 // is enabled and basic checksum validation of reads and writes
@@ -127,19 +126,11 @@
 #define ROLLING_SUBTYPE             1
 #endif
 
-// Enable (1) or disable (0) the back EMF speed measurement module
-// Enabling this function introduces an off period of the PWM
-// output which means you will need to recalibrate the PID and PWM
-// module variables.
-#ifndef BACKEMF_ENABLED
-#define BACKEMF_ENABLED             1
-#endif
-
 // Enable (1) or disable (0) The Standard PWM module. The 
 // "standard" PWM module is the same used in the Version 2 OpenServo
 // and the most compatible
 #ifndef PWM_STD_ENABLED
-#define PWM_STD_ENABLED             0
+#define PWM_STD_ENABLED             1
 #endif
 
 // Enable (1) or disable (0) The Enhanced Version 3 style PWM 
@@ -160,11 +151,6 @@
 #define STEP_ENABLED                0
 #endif
 
-// Enable (1) or disable (0) The board mounted thermometer.
-#ifndef TEMPERATURE_ENABLED
-#define TEMPERATURE_ENABLED         1
-#endif
-
 // Enable (1) or disable (0) the Alert based system.
 #ifndef ALERT_ENABLED
 #define ALERT_ENABLED               1
@@ -174,6 +160,57 @@
 #define ALERT_INTN_ENABLED          0
 #endif
 
+/*
+ * ADC Channels that can be enabled or disabled
+ */
+
+// Enable (1) or disable (0) the built in ADC module. You may
+// not need or even support movement via a pot. You may want
+// to enable the encoder module.
+ #ifdef ADC_CHANNEL_POSITION
+ #define ADC_POSITION_ENABLED       1
+ #endif
+
+// Enable (1) or disable (0) the back EMF speed measurement module
+// Enabling this function introduces an off period of the PWM
+// output which means you will need to recalibrate the PID and PWM
+// module variables.
+#ifdef ADC_CHANNEL_BACKEMF
+#define BACKEMF_ENABLED             1
+#endif
+
+// Enable (1) or disable (0) The board mounted thermometer.
+#ifdef ADC_CHANNEL_TEMPERATURE
+#define TEMPERATURE_ENABLED         1
+#endif
+
+// Enable (1) or disable (0) the power measurement
+#ifdef ADC_CHANNEL_CURRENT
+#define CURRENT_ENABLED             1
+#endif
+
+// Enable (1) or disable (0) the battery measurement
+#ifdef ADC_CHANNEL_BATTERY
+#define BATTERY_ENABLED             1
+#endif
+
+// Check to make sure that all ADC channels are not disable
+#if !ADC_POSITION_ENABLED && !BACKEMF_ENABLED && !TEMPERATURE_ENABLED && !CURRENT_ENABLED && !BATTERY_ENABLED
+#define ADC_ENABLED                 0
+#else
+#define ADC_ENABLED                 1
+#endif
+
+// determine the fist ADC channel to start samples on
+
+// Sets the ADC hardware to start sampling the position channel
+// Override this define in the conf files if you dont use the adc channel for
+// positioning. i.e encoders
+#if ADC_ENABLED
+// set the first ADC channel to the position is none is defaulted
+#if ADC_POSITION_ENABLED
+#define ADC_FIRST_CHANNEL ADC_CHANNEL_POSITION
+#endif
 /*
  * ADC Clock defines
  */
@@ -195,6 +232,8 @@
 #ifndef CRVALUE 
 #define CRVALUE		78
 #endif
+
+#endif //ADC_ENABLED
 
 // Define the frequency of the system heartbeat.
 #ifndef HEARTBEAT_INTERVAL_VALUE 

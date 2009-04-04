@@ -36,7 +36,7 @@ HEX_FLASH_FLAGS = -R .eeprom
 
 
 ## Objects that must be built in order to link
-OBJECTS = main.o adc.o registers.o eeprom.o watchdog.o motion.o pid.o power.o twi.o pwm.o seek.o timer.o curve.o pulsectl.o backemf.o banks.o alert.o step.o pwm-std.o filter.o
+OBJECTS = main.o adc.o registers.o eeprom.o watchdog.o motion.o pid.o power.o twi.o pwm.o seek.o timer.o curve.o pulsectl.o backemf.o banks.o alert.o step.o pwm-std.o filter.o heartbeat.o
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS =
@@ -104,6 +104,9 @@ alert.o: alert.c
 
 step.o: step.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
+
+heartbeat.o: heartbeat.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 ##Link
 $(TARGET).elf: $(OBJECTS)

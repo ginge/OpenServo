@@ -1,24 +1,25 @@
 /*
+    Copyright (c) 2009 Barry Carter <barry.carter@gmail.com>
     Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
 
-    Permission is hereby granted, free of charge, to any person 
-    obtaining a copy of this software and associated documentation 
-    files (the "Software"), to deal in the Software without 
-    restriction, including without limitation the rights to use, copy, 
-    modify, merge, publish, distribute, sublicense, and/or sell copies 
-    of the Software, and to permit persons to whom the Software is 
+    Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
     furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be 
+    The above copyright notice and this permission notice shall be
     included in all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 
     $Id$
@@ -47,7 +48,7 @@
 // ATmega168
 // =========
 //
-// PWM output to the servo motor utilizes Timer/Counter1 in 8-bit mode.  
+// PWM output to the servo motor utilizes Timer/Counter1 in 8-bit mode.
 // Output to the motor is assigned as follows:
 //
 //  OC1A (PB1) - Servo PWM output direction A
@@ -55,8 +56,8 @@
 //
 
 // Determine the top value for timer/counter1 from the frequency divider.
-//#define PWM_TOP_VALUE(div)      ((uint16_t) div << 4) - 1;
-#define PWM_TOP_VALUE(div,pwm_max)      (uint16_t)((uint32_t)(((uint16_t) div << 4) - 1)+(uint32_t)(((((uint32_t) div << 4) - 1)/100)*(100-pwm_max)))
+#define PWM_TOP_VALUE(div,tmp)      ((uint16_t) div << 4) - 1;
+//#define PWM_TOP_VALUE(div,pwm_max)      (uint16_t)((uint32_t)(((uint16_t) div << 4) - 1)+(uint32_t)(((((uint32_t) div << 4) - 1)/100)*(100-pwm_max)))
 
 
 // Determines the compare value associated with the duty cycle for timer/counter1.
@@ -108,6 +109,7 @@ static void pwm_dir_a(uint8_t pwm_duty)
         // NOTE: Actually PWM_A should already be disabled...
         TCCR1A &= ~((1<<COM1A1) | (1<<COM1B1));
 
+        OCR1B = 0;
         OCR1A = duty_cycle;
 
         // Yes. Make sure PB1 and PB2 are zero.
@@ -158,7 +160,7 @@ static void pwm_dir_b(uint8_t pwm_duty)
         // Disable PWM_A (PB1/OC1A) and PWM_B (PB2/OC1B) output.
         // NOTE: Actually PWM_B should already be disabled...
        TCCR1A &= ~((1<<COM1A1) | (1<<COM1B1));
-
+       OCR1A = 0;
        OCR1B = duty_cycle;
 
        // Yes. Make sure PB1 and PB2 are zero.
@@ -193,14 +195,14 @@ static void pwm_dir_b(uint8_t pwm_duty)
 
 
 void pwm_registers_defaults(void)
-// Initialize the PWM algorithm related register values.  This is done 
-// here to keep the PWM related code in a single file.  
+// Initialize the PWM algorithm related register values.  This is done
+// here to keep the PWM related code in a single file.
 {
     // PWM divider is a value between 1 and 1024.  This divides the fundamental
-    // PWM frequency (500 kHz for 8MHz clock, 1250 kHz for 20MHz clock) by a 
-    // constant value to produce a PWM frequency suitable to drive a motor.  A 
-    // small motor with low inductance and impedance such as those found in an 
-    // RC servo will my typically use a divider value between 16 and 64.  A larger 
+    // PWM frequency (500 kHz for 8MHz clock, 1250 kHz for 20MHz clock) by a
+    // constant value to produce a PWM frequency suitable to drive a motor.  A
+    // small motor with low inductance and impedance such as those found in an
+    // RC servo will my typically use a divider value between 16 and 64.  A larger
     // motor with higher inductance and impedance may require a greater divider.
     banks_write_word(POS_PID_BANK, REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO, DEFAULT_PWM_FREQ_DIVIDER);
 
@@ -254,6 +256,14 @@ void pwm_init(void)
     // Update the pwm values.
     registers_write_byte(REG_PWM_DIRA, 0);
     registers_write_byte(REG_PWM_DIRB, 0);
+
+#if STEP_ENABLE_BRIDGE_PIN
+    // Set enable pin as output
+    STEP_ENABLE_DDR |= (1<<STEP_ENABLE_PIN);
+
+    step_enable_bridge();
+#endif
+
 }
 
 
@@ -269,12 +279,12 @@ void pwm_update(uint16_t position, int16_t pwm)
     uint16_t min_position;
     uint16_t max_position;
 
-    // Quick check to see if the frequency divider changed.  If so we need to 
-    // configure a new top value for timer/counter1.  This value should only 
+    // Quick check to see if the frequency divider changed.  If so we need to
+    // configure a new top value for timer/counter1.  This value should only
     // change infrequently so we aren't too elegant in how we handle updating
     // the value.  However, we need to be careful that we don't configure the
     // top to a value lower than the counter and compare values.
-    if (registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div)
+    if (banks_read_word(CONFIG_BANK, REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO) != pwm_div)
     {
         // Disable OC1A and OC1B outputs.
         TCCR1A &= ~((1<<COM1A1) | (1<<COM1A0));
@@ -290,7 +300,7 @@ void pwm_update(uint16_t position, int16_t pwm)
         pwm_b = 0;
 
         // Update the pwm frequency divider value.
-        pwm_div = registers_read_word(REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
+        pwm_div = banks_read_word(CONFIG_BANK, REG_PWM_FREQ_DIVIDER_HI, REG_PWM_FREQ_DIVIDER_LO);
 
         // Update the timer top value.
         ICR1 = PWM_TOP_VALUE(pwm_div, pwm_max);
@@ -302,13 +312,13 @@ void pwm_update(uint16_t position, int16_t pwm)
     }
 
     // Are we reversing the seek sense?
-    if (registers_read_byte(REG_REVERSE_SEEK) != 0)
+    if (banks_read_byte(CONFIG_BANK, REG_REVERSE_SEEK) != 0)
     {
         // Yes. Swap the minimum and maximum position.
 
         // Get the minimum and maximum seek position.
-        min_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
-        max_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
+        min_position = banks_read_word(CONFIG_BANK, REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
+        max_position = banks_read_word(CONFIG_BANK, REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
 
         // Make sure these values are sane 10-bit values.
         if (min_position > 0x3ff) min_position = 0x3ff;
@@ -323,8 +333,8 @@ void pwm_update(uint16_t position, int16_t pwm)
         // No. Use the minimum and maximum position as is.
 
         // Get the minimum and maximum seek position.
-        min_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
-        max_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
+        min_position = banks_read_word(CONFIG_BANK, REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
+        max_position = banks_read_word(CONFIG_BANK, REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
         // Make sure these values are sane 10-bit values.
         if (min_position > 0x3ff) min_position = 0x3ff;
