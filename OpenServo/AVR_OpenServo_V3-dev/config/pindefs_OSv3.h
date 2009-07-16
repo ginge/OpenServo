@@ -30,7 +30,7 @@
  * Configuration file for the OpenServo Version 3 module, which has 
  * independant PWM driver control and back EMF support.
  * The configuration file below controls which elements are enabled 
- * for this platform. Each option overrides the default so we need 
+ * for this platform. Most options override the defaults so we need
  * not include them all.
  */
 // You can swap these to change the type of hardware output and switch
@@ -39,13 +39,17 @@
 #define PWM_ENH_ENABLED   1
 #define STEP_ENABLED      0
 
-// This is entirely optional, but is on by deault.
+/* This is entirely optional, but is on by deault. This will cause
+ * a slight slowdown of your motor as it switches it off every x ms
+ * to do a sample of the power. Be sure to define PWM_PIN_SMPLx
+ * and use enhanced PWM.
+ */
 #define BACKEMF_ENABLED   1
 
 /*
-* Config for the PWM control output pins
-* These include the bridge enable and PWM sample enable pins
-*/
+ * Config for the PWM control output pins
+ * These include the bridge enable and PWM sample enable pins
+ */
 //  PB1/OC1A - PWM_A    - PWM pulse output direction A
 //  PB2/OC1B - PWM_B    - PWM pulse output direction B
 //  PD2      - EN_A     - PWM enable direction A
@@ -62,8 +66,8 @@
 #define PWM_PIN_ENB       PD3
 
 /*
-* Configs for the PWM output pins
-*/
+ * Configs for the PWM output pins
+ */
 #define PWM_DUTY_PORT     PORTB
 #define PWM_DUTY_DDR      DDRB
 #define PWM_DUTY_DDR_CONF ((1<<DDB1) | (1<<DDB2))
@@ -71,8 +75,8 @@
 #define PWM_DUTY_PWMB     PB2
 
 /*
-* ADC
-*/
+ * ADC
+ */
 // Defines for the power and position channels.
 // The channel the connection is on should be defined here
 //  ADC0 (PC0) - Motor Current
@@ -91,8 +95,8 @@
 #define ADC_DIGITAL                 (1<<ADC0D) | (1<<ADC1D) | (1<<ADC2D) | (1<<ADC3D)
 
 /*
-// RC PWM input defines
-*/
+ * RC PWM input defines
+ */
 #define RCPULSE_PORT                PORTB
 #define RCPULSE_PIN                 PINB
 #define RCPULSE_DDR                 DDRB
@@ -116,5 +120,14 @@
 // an ADC sample every 9.984 milliseconds and yield a 100.1603 Hz sample rate.
 #define CRVALUE		195
 
+/*
+ * Alert Interrupt pin definitions
+ */
+// First enable the module
+#define ALERT_INTN_ENABLED          1
+#define ALERT_INTN_PORT             PORTB
+#define ALERT_INTN_DDR              DDRB
+#define ALERT_INTN_DDR_CONF         (1<<DDB4)
+#define ALERT_INTN_PIN              PB4
 
 #endif

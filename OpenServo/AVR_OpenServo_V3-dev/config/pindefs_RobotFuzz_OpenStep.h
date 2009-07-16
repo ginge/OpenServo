@@ -34,11 +34,18 @@
  * so we need not include them all.
  */
 
+// Define if you are in step mode or servo mode
+#define SERVO_MODE 0
+#define STEP_MODE 1
+
+// Choose your option here
+#define CURRENT_MODE SERVO_MODE
+
 // You can swap these to change the type of hardware output and switch
 // between the stepper controller and the standard H-Bridge.
-#define PWM_STD_ENABLED       0
+#define PWM_STD_ENABLED       1 // (CURRENT_MODE == SERVO_MODE ? 1 : 0)
 #define PWM_ENH_ENABLED       0
-#define STEP_ENABLED          1
+#define STEP_ENABLED          0 // (CURRENT_MODE == STEP_MODE ? 1 : 0)
 #define PULSE_CONTROL_ENABLED 0
 
 // We should never enable this for this hardware
@@ -75,18 +82,29 @@
 #define RCPULSE INPUT_PIN_I         PINB0
 #define RCPULSE_INT_PIN             PCINT0
 
+#if CURRENT_MODE == SERVO_MODE
 /*
- * Stepper motor defines
- */
+* Configs for the PWM output pins
+*/
+#define PWM_DUTY_PORT               PORTB
+#define PWM_DUTY_DDR                DDRB
+#define PWM_DUTY_DDR_CONF           ((1<<DDB1) | (1<<DDB2))
+#define PWM_DUTY_PWMA               PB1
+#define PWM_DUTY_PWMB               PB2
+
+#else //steper motor define
+
 #define STEP_PORT                   PORTD
 #define STEP_PORT_DDR               DDRD
-#define STEP_PORT_DDR_MASK          ((1<<DDD7) | (1<<DDD6 ) | (1<<DDD5 ) | (1<<DDD4))
+#define STEP_PORT_DDR_MASK          ((1<<DDD7) | (1<<DDD6) | (1<<DDD5) | (1<<DDD4))
 #define STEP_PORT_MASK              0xF0
 
-// Does this step control circuit have an enable line?
-#define STEP_ENABLE_BRIDGE_PIN      1
+#endif
 
-// define our enable pins
+/*
+* Enable bridge pins (still used in standard servo mode)
+*/
+#define STEP_ENABLE_BRIDGE_PIN      1
 #define STEP_ENABLE_PORT            PORTC
 #define STEP_ENABLE_DDR             DDRC
 #define STEP_ENABLE_PIN             PC3

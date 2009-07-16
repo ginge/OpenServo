@@ -24,8 +24,8 @@
     $Id$
 */
 
-#ifndef _OS_TARGET_PLATORM_H_
-#define _OS_TARGET_PLATORM_H_
+#ifndef _OS_TARGET_PLATFORM_H_
+#define _OS_TARGET_PLATFORM_H_
 
 /*
  * The hardware you will be using the OpenServo on is defined below

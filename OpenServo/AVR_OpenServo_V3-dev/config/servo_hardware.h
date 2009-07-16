@@ -37,10 +37,10 @@
 // safest default when implementing an OpenServo on a new hardware.
 // These defaults should be overriden by specifying the HARDWARE_TYPE
 // above for actual known servo hardware.
-#define DEFAULT_PID_PGAIN               0x0800
-#define DEFAULT_PID_DGAIN               0x0C00
+#define DEFAULT_PID_PGAIN               0x0600
+#define DEFAULT_PID_DGAIN               0x0100
 #define DEFAULT_PID_IGAIN               0x0000
-#define DEFAULT_PID_DEADBAND            0x01
+#define DEFAULT_PID_DEADBAND            0x04
 
 // Specify default mininimum and maximum seek positions.  The OpenServo will
 // not attempt to seek beyond these positions.
@@ -48,7 +48,7 @@
 #define DEFAULT_MAX_SEEK                0x03A0
 
 // Default pwm frequency divider.
-#define DEFAULT_PWM_FREQ_DIVIDER        0x0040
+#define DEFAULT_PWM_FREQ_DIVIDER        0xfbc9
 
 // Default maximum PWM value as percentage
 #define DEFAULT_PWM_MAX                  70
