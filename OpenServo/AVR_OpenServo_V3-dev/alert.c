@@ -57,7 +57,7 @@ void alert_init(void)
 // Function to initialize alerts.
 {
     // reset the alerts register to 0, or no errors
-    banks_write_byte(ALERT_CONFIG_BANK, ALERT_STATUS, 0x00);
+    banks_write_byte(ALERT_BANK, ALERT_STATUS, 0x00);
 
     throttle = 0;
 
