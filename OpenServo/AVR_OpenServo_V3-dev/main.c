@@ -1,5 +1,6 @@
 /*
     Copyright (c) 2006 Michael P. Thompson <mpthompson@gmail.com>
+    Copyright (c) 2009 barry Carter <barry.carter@gmail.com>
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -253,9 +254,12 @@ int main (void)
     // Initialise the stepper motor
     step_init();
 #endif
-
+    
     // Initialize the ADC module.
     adc_init();
+
+    // Initialise the Heartbeart
+    heartbeat_init();
 
     // Initialize the PID algorithm module.
     pid_init();
@@ -322,11 +326,11 @@ int main (void)
     // for new position, power or TWI commands to be processed.
     for (;;)
     {
+        static uint8_t emf_motor_is_coasting = 0;
+
         // Is the system heartbeat ready?
         if (heartbeat_is_ready())
         {
-            int16_t pwm;
-            int16_t position;
             static int16_t last_seek_position;
             static int16_t wait_seek_position;
             static int16_t new_seek_position;
@@ -382,11 +386,13 @@ int main (void)
             {
                 // Disable PWM
                 backemf_coast_motor();
+                emf_motor_is_coasting = 1;
             }
             else
             {
                 // reset the back EMF value to 0
                 banks_write_word(INFORMATION_BANK, REG_BACKEMF_HI, REG_BACKEMF_LO, 0);
+                emf_motor_is_coasting = 0;
             }
 #endif
 
@@ -395,47 +401,59 @@ int main (void)
             adc_start(ADC_FIRST_CHANNEL);
 #endif
 
-            // Wait for the samples to complete
+        }
+    
+    
+        // Wait for the samples to complete
 #if TEMPERATURE_ENABLED
-            while(!adc_temperature_value_is_ready())
-                ;;
-
+        if (adc_temperature_value_is_ready())
+        {
             // Save temperature value to registers
             registers_write_word(REG_TEMPERATURE_HI, REG_TEMPERATURE_LO, (uint16_t)adc_get_temperature_value());
+        }
 #endif
 #if CURRENT_ENABLED
-            while(!adc_power_value_is_ready())
-                ;;
+        if (adc_power_value_is_ready())
+        {
 
             // Get the new power value.
             uint16_t power = adc_get_power_value();
 
             // Update the power value for reporting.
             power_update(power);
-
+        }
 #endif
 #if ADC_POSITION_ENABLED
-            while(!adc_position_value_is_ready())
-                ;;
-#endif
-#if BACKEMF_ENABLED
-            // Quick and dirty check to see if pwm is active
-            if (pwm_a || pwm_b)
-            {
-                // Get the backemf sample.
-                backemf_get_sample();
-
-                // Turn the motor back on
-                backemf_restore_motor();
-            }
-#endif
-
-#if ADC_POSITION_ENABLED
+        if (adc_position_value_is_ready())
+        {
+            int16_t position;
             // Get the new position value from the ADC module.
             position = (int16_t) adc_get_position_value();
 #else
+        if (position_value_is_ready())
+        {
+            int16_t position;
             // Get the position value from an external module.
             position = (int16_t) get_position_value();
+#endif
+            int16_t pwm;
+#if BACKEMF_ENABLED
+            if (emf_motor_is_coasting == 1)
+            {
+                uint8_t pwm_a = registers_read_byte(REG_PWM_DIRA);
+                uint8_t pwm_b = registers_read_byte(REG_PWM_DIRB);
+
+                // Quick and dirty check to see if pwm is active
+                if (pwm_a || pwm_b)
+                {
+                    // Get the backemf sample.
+                    backemf_get_sample();
+
+                    // Turn the motor back on
+                    backemf_restore_motor();
+		    emf_motor_is_coasting = 0;
+                }
+            }
 #endif
 
             // Call the PID algorithm module to get a new PWM value.
@@ -460,9 +478,8 @@ int main (void)
             // Sanity checks are performed against the position value.
             step_update(position, pwm);
 #endif
-
         }
-
+    
         // Was a command recieved?
         if (twi_data_in_receive_buffer())
         {
