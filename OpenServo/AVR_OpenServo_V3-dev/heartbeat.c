@@ -70,6 +70,6 @@ SIGNAL(SIG_OUTPUT_COMPARE0A)
 {
     // Increment the timer.
     timer_increment();
-
+    TCNT0 = 0;
     heartbeat_ready = 1;
 }
