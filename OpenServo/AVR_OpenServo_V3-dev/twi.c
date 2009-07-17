@@ -654,7 +654,7 @@ SIGNAL(SIG_TWI)
                     (0<<TWSTA) |                             // Don't generate start condition.
                     (0<<TWSTO) |                             // Don't generate stop condition.
                     (1<<TWINT) |                             // Clear the TWI interrupt.
-                    (0<<TWEA) |                              // Acknowledge the data.
+                    (1<<TWEA) |                              // Acknowledge the data.
                     (0<<TWWC);                               //
 
             break;
