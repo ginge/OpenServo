@@ -42,7 +42,7 @@ http://www.gnu.org/licenses/gpl.txt
 #include <string.h>
 #include <math.h>
 
-#define DEBUG_OUT
+//#define DEBUG_OUT
 
 /* Perform a setup data transfer without a full usb transfer */
 int OSIF_USB_write(usb_dev_handle *handle, int request, int value, int index)
@@ -494,7 +494,7 @@ EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
         else
         {
             printf("Found device at address 0x%02x, dc %d\n", i, *dev_count);
-            devices[lc] = i;
+            devices[*dev_count] = i;
             (*dev_count)++;
 #ifdef DEBUG_OUT
             printf ("OSIF_scan: dev count %d\n", *dev_count);
