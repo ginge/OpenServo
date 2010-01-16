@@ -33,7 +33,11 @@
 
 // The minimum and maximum servo position as defined by 10-bit ADC values.
 #define MIN_POSITION            (0)
+#if ENCODER_ENABLED
+#define MAX_POSITION            (4095)
+#else
 #define MAX_POSITION            (1023)
+#endif
 
 // The minimum and maximum output.
 #define MAX_OUTPUT              (255)
@@ -42,6 +46,24 @@
 // Values preserved across multiple PID iterations.
 static int16_t previous_seek;
 static int16_t previous_position;
+
+#if FULL_ROTATION_ENABLED
+static int16_t normalize_position_difference(int16_t posdiff)
+{
+    if (posdiff > ((MAX_POSITION - MIN_POSITION) / 2))
+    {
+        posdiff -= (MAX_POSITION - MIN_POSITION);
+    }
+
+    if (posdiff < -((MAX_POSITION - MIN_POSITION) / 2))
+    {
+        posdiff += (MAX_POSITION - MIN_POSITION);
+    }
+
+    return posdiff;
+}
+#endif
+
 
 //
 // Digital Lowpass Filter Implementation
@@ -66,11 +88,19 @@ static int32_t filter_reg = 0;
 
 static int16_t filter_update(int16_t input)
 {
+#if 0
     // Update the filter with the current input.
+#if FULL_ROTATION_ENABLED
+    filter_reg += normalize_position_difference(input - (filter_reg >> FILTER_SHIFT));
+#else
     filter_reg = filter_reg - (filter_reg >> FILTER_SHIFT) + input;
+#endif
 
     // Scale output for unity gain.
     return (int16_t) (filter_reg >> FILTER_SHIFT);
+#else
+    return input;
+#endif
 }
 
 void pid_init(void)
@@ -126,7 +156,11 @@ int16_t pid_position_to_pwm(int16_t current_position)
     filtered_position = filter_update(current_position);
 
     // Use the filtered position to determine velocity.
+#if FULL_ROTATION_ENABLED
+    current_velocity = normalize_position_difference(filtered_position - previous_position);
+#else
     current_velocity = filtered_position - previous_position;
+#endif
     previous_position = filtered_position;
 
     // Get the seek position and velocity.
@@ -168,7 +202,11 @@ int16_t pid_position_to_pwm(int16_t current_position)
     if (seek_position > maximum_position) seek_position = maximum_position;
 
     // The proportional component to the PID is the position error.
+#if FULL_ROTATION_ENABLED
+    p_component = normalize_position_difference(seek_position - current_position);
+#else
     p_component = seek_position - current_position;
+#endif
 
     // The derivative component to the PID is the velocity.
     d_component = seek_velocity - current_velocity;

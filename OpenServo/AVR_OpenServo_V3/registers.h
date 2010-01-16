@@ -27,6 +27,8 @@
 #ifndef _OS_REGISTERS_H_
 #define _OS_REGISTERS_H_ 1
 
+#include "config.h"
+
 //
 // Defines servo control registers.
 //
@@ -94,6 +96,13 @@
 #define REG_REVERSE_SEEK            0x2E
 #define REG_RESERVED_2F             0x2F
 
+#if ENCODER_ENABLED
+#define REG_ENCODER_RAW_0           0x30
+#define REG_ENCODER_RAW_1           0x31
+#define REG_ENCODER_RAW_2           0x32
+#define REG_ENCODER_RAW_3           0x33
+#endif
+
 //
 // Define the register ranges.
 //
@@ -102,8 +111,15 @@
 #define MIN_READ_WRITE_REGISTER     0x10
 #define MAX_READ_WRITE_REGISTER     0x1F
 #define MIN_WRITE_PROTECT_REGISTER  0x20
+
+#if ENCODER_ENABLED
+#define MAX_WRITE_PROTECT_REGISTER  0x35
+#define MIN_UNUSED_REGISTER         0x35
+#else
 #define MAX_WRITE_PROTECT_REGISTER  0x2F
 #define MIN_UNUSED_REGISTER         0x30
+#endif
+
 #define MAX_UNUSED_REGISTER         0x5F
 #define MIN_REDIRECT_REGISTER       0x60
 #define MAX_REDIRECT_REGISTER       0x6F

@@ -33,6 +33,12 @@
 #include "pwm.h"
 #include "registers.h"
 
+#if ENCODER_ENABLED
+#define MAX_POSITION  (4095)
+#else
+#define MAX_POSITION  (1023)
+#endif
+
 //
 // ATmega168
 // =========
@@ -351,12 +357,12 @@ void pwm_update(uint16_t position, int16_t pwm)
         max_position = registers_read_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO);
 
         // Make sure these values are sane 10-bit values.
-        if (min_position > 0x3ff) min_position = 0x3ff;
-        if (max_position > 0x3ff) max_position = 0x3ff;
+        if (min_position > MAX_POSITION) min_position = MAX_POSITION;
+        if (max_position > MAX_POSITION) max_position = MAX_POSITION;
 
         // Adjust the values because of the reverse sense.
-        min_position = 0x3ff - min_position;
-        max_position = 0x3ff - max_position;
+        min_position = MAX_POSITION - min_position;
+        max_position = MAX_POSITION - max_position;
     }
     else
     {
@@ -367,8 +373,8 @@ void pwm_update(uint16_t position, int16_t pwm)
         max_position = registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
         // Make sure these values are sane 10-bit values.
-        if (min_position > 0x3ff) min_position = 0x3ff;
-        if (max_position > 0x3ff) max_position = 0x3ff;
+        if (min_position > MAX_POSITION) min_position = MAX_POSITION;
+        if (max_position > MAX_POSITION) max_position = MAX_POSITION;
     }
 
     // Disable clockwise movements when position is below the minimum position.

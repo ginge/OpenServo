@@ -60,6 +60,12 @@
 // within software.
 #define SWAP_PWM_DIRECTION_ENABLED  0
 
+// Enable (1) or disable (0) support for I2C connected encoder.
+#define ENCODER_ENABLED             0
+
+// Enable (1) or disable (0) support for full rotation
+#define FULL_ROTATION_ENABLED       0
+
 // The known OpenServo hardware types are listed below.
 #define HARDWARE_TYPE_UNKNOWN           0
 #define HARDWARE_TYPE_FUTABA_S3003      1

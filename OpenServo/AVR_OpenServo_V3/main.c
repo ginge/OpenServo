@@ -42,6 +42,8 @@
 #include "twi.h"
 #include "watchdog.h"
 #include "registers.h"
+#include "swi2c.h"
+#include "enc.h"
 
 static void config_pin_defaults(void)
 // Configure pins to their default states to conform to recommendation that all
@@ -164,7 +166,11 @@ static void handle_twi_command(void)
         case TWI_CMD_CURVE_MOTION_RESET:
 
             // Reset the motion to the current position.
+#if ENCODER_ENABLED
+            motion_reset(enc_get_position_value());
+#else
             motion_reset(adc_get_position_value());
+#endif
 
             break;
 
@@ -216,6 +222,11 @@ int main (void)
     pulse_control_init();
 #endif
 
+#if ENCODER_ENABLED
+    // Initialize software I2C to talk with encoder.
+    swi2c_init();
+#endif
+
     // Initialize the TWI slave module.
     twi_slave_init(registers_read_byte(REG_TWI_ADDRESS));
 
@@ -225,16 +236,26 @@ int main (void)
     // Enable interrupts.
     sei();
 
+#if !ENCODER_ENABLED
     // Wait until initial position value is ready.
     while (!adc_position_value_is_ready());
+#endif
 
 #if CURVE_MOTION_ENABLED
     // Reset the curve motion with the current position of the servo.
+#if ENCODER_ENABLED
+    motion_reset(enc_get_position_value());
+#else
     motion_reset(adc_get_position_value());
+#endif
 #endif
 
     // Set the initial seek position and velocity.
+#if ENCODER_ENABLED
+    registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, enc_get_position_value());
+#else
     registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, adc_get_position_value());
+#endif
     registers_write_word(REG_SEEK_VELOCITY_HI, REG_SEEK_VELOCITY_LO, 0);
 
     // XXX Enable PWM and writing.  I do this for now to make development and
@@ -248,7 +269,9 @@ int main (void)
     for (;;)
     {
         // Is position value ready?
+#if !ENCODER_ENABLED
         if (adc_position_value_is_ready())
+#endif
         {
             int16_t pwm;
             int16_t position;
@@ -264,14 +287,23 @@ int main (void)
 #endif
 
             // Get the new position value.
+#if ENCODER_ENABLED
+            position = (int16_t) enc_get_position_value();
+#else
             position = (int16_t) adc_get_position_value();
+#endif
 
-            // Call the PID algorithm module to get a new PWM value.
-            pwm = pid_position_to_pwm(position);
+#if ENCODER_ENABLED
+            if (position >= 0)
+#endif
+            {
+                // Call the PID algorithm module to get a new PWM value.
+                pwm = pid_position_to_pwm(position);
 
-            // Update the servo movement as indicated by the PWM value.
-            // Sanity checks are performed against the position value.
-            pwm_update(position, pwm);
+                // Update the servo movement as indicated by the PWM value.
+                // Sanity checks are performed against the position value.
+                pwm_update(position, pwm);
+            }
         }
 
         // Is a power value ready?

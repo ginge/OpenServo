@@ -87,7 +87,11 @@ void adc_init(void)
     PORTC &= ~((1<<PC0) | (1<<PC1) | (1<<PC2));
 
     // Disable digital input for ADC0, ADC1 and ADC2.
+#if ENCODER_ENABLED
+    DIDR0 |= (1<<ADC0D) | (1<<ADC1D);
+#else
     DIDR0 |= (1<<ADC0D) | (1<<ADC1D) |(1<<ADC2D);
+#endif
 
     // Set the ADC multiplexer selection register.
     ADMUX = (0<<REFS1) | (1<<REFS0) |                       // Select AVCC as voltage reference.
