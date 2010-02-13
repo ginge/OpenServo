@@ -7,7 +7,7 @@ OBJ = OSIFdll.o OSIFflash.o OSIFhex.o OSIFio.o
 	$(CC) -c -o $@ $< $(CFLAGS) -fPIC
 
 libOSIFlib: $(OBJ)
-	gcc -shared -Wl,-soname,libOSIFlib.so.1 -o libOSIFlib.so.1.0.1 $^ $(CFLAGS) -lusb
+	gcc -shared -Wl,-soname,libOSIFlib.so.1 -o libOSIFlib.so.1.0.1 $^ $(CFLAGS) -lusb -lm
 
 clean:
 	rm *.o
