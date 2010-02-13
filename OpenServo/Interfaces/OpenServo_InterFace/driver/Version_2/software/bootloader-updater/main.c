@@ -2,7 +2,7 @@
 // USBtiny Bootloader flash
 //
 // Copyright (C) 2007 Barry Carter
-//
+// Copyright (C) 2008 Alistair Buxton
 //
 // This is free software, licensed under the terms of the GNU General
 // Public License V2 as published by the Free Software Foundation.
@@ -28,6 +28,10 @@ usb_dev_handle *usbhandle;
 static usb_dev_handle *find_device();
 
 int load_file(char *filename, int *memory, int *maxaddr);
+
+#define MAX_PAGE 65536
+#define MAX_MEMORY 65536
+#define MAX_RETRY 3
 
 int init()
 {
@@ -79,6 +83,7 @@ unsigned int get_page_size() {
                              USBTINYBL_FUNC_GET_PAGE, 0, 0, 
                              buf, sizeof(buf), 5000);
 
+
     if (retlen != 2) {
         fprintf(stderr, "Error: wrong page size. Got: %d !\n", retlen);
         exit(1);
@@ -119,68 +124,107 @@ void start_application() {
     }
 }
 
-void write_page(int address, unsigned char *page, int page_size) {
+void write_page(int page, unsigned char *page_buffer, int page_size) {
 
+    int address = page * page_size;
     int retval;
 
     retval = usb_control_msg(usbhandle, 
                              USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, 
                              USBTINYBL_FUNC_WRITE, address, 0, 
-                             (char *)page, page_size, 10000);
+                             (char *)page_buffer, page_size, 10000);
 
     if (retval != page_size) {
         fprintf(stderr, "Error: wrong byte count in write_page: %d !\n", retval);
-        exit(1);
+//        exit(1);
     }
 }
 
-void read_page(int address, unsigned char *page, int page_size) 
+void read_page(int page, unsigned char *page_buffer, int page_size) 
 {
-
+    int address = page * page_size;
     int retval;
 
     retval = usb_control_msg(usbhandle, 
                              USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
                              USBTINYBL_FUNC_READ, address, 0, 
-                             (char *)page, page_size, 10000);
-    printf("page %d\n",address);
+                             (char *)page_buffer, page_size, 10000);
 
     if (retval != page_size) 
     {
         fprintf(stderr, "Error: wrong byte count in read_page: %d !\n", retval);
-        exit(1);
+  //      exit(1);
     }
 }
 
-int verify_page(int address, unsigned char *page_wr, unsigned char *page_rd, int page_size) 
+// compare two char buffers. return number of characters which are equal.
+int verify_page(unsigned char *page_wr, unsigned char *page_rd, int page_size) 
 {
     int i;
-
-    if( (i=strncmp((char *)page_rd, (char *)page_wr, page_size)) != 0) 
-    {
-        printf("failed %x\n", i);
-        return i;
-    }
-
-    return -1;
+    for(i=0;i<page_size&&page_wr[i]==page_rd[i];i++) ;
+    return i;
 }
+
+int process_firmware(unsigned char *firmware, int firmware_length, int page_size, char mode) {
+
+    unsigned char page_buffer[MAX_PAGE]; // stores the read back page for verification
+
+    int whole_pages = 0; // number of pages we need to process
+    int page = 0;        // current page
+    int verify_tmp = 0;  // result of verify
+    int fail_count = 0;  // failure count
+
+    whole_pages = firmware_length / page_size;
+    if((firmware_length % page_size) > 0) whole_pages++;
+
+    for(page=0;page<whole_pages;page++) {
+usleep(100);
+        if(mode == 'w') {
+            printf("Writing page %d...", page);
+            write_page(page, firmware+(page*page_size), page_size);        
+        }
+
+        printf("Verifying page %d...", page);
+        read_page(page, page_buffer, page_size);
+
+        verify_tmp=verify_page(page_buffer, firmware+(page*page_size), page_size);
+        if(verify_tmp < page_size)
+        {
+            printf("Failed at page %d, byte %d, (address 0x%x)\n", page, verify_tmp, (page*page_size)+verify_tmp);
+
+            if(mode == 'v') return -1;
+            else {
+                fail_count++;
+                if(fail_count >= MAX_RETRY) {
+                    printf("Failed too many times, giving up.\n");
+                    return -1;
+                }
+                printf("Retrying...");
+                page--;
+            }
+        } else {
+            printf("OK\n");
+            fail_count = 0;
+        }
+    }
+    return 0;
+}
+
 
 int main(int argc, char **argv) 
 {
 
-    int memory[65536];
-    unsigned char page[8192][512];
-    int max_addr=0;
-    int reg_addr=0;
-    int n=0;
+    int memory[MAX_MEMORY];
+    unsigned char real_memory[MAX_MEMORY];
+    int max_addr;
     int page_size;
-    int i;
-    int page_count=0;
     int firmware_ver;
-    int fail_count=0;
+    int i;
 
-    if (argc < 2) {
-        fprintf(stderr, "Usage: osifupdate filename.hex\n");
+    if (argc < 3 || argv[1][1] != 0 || 
+        (argv[1][0] != 'w' && argv[1][0] != 'v')) {
+        fprintf(stderr, "Usage: osifupdate w filename.hex (Write firmware)\n");
+        fprintf(stderr, "Usage: osifupdate v filename.hex (Verify firmware)\n");
         exit(1);
     }
 
@@ -194,71 +238,26 @@ int main(int argc, char **argv)
     printf("Firmware Version: %02d.%02d\n", firmware_ver>>8, firmware_ver&0xFF);
 
     // load file into memory array
-    if (load_file(argv[1], memory, &max_addr) <0)
+    if (load_file(argv[2], memory, &max_addr) <0)
     {
         printf("Failed to load file %s. Check path.\n", argv[1]);
         return -1;
     }
 
-    // Break the memory array into each page
+    // convert to byte array
+    memset(real_memory, 0, MAX_MEMORY);
     for (i=0; i<= max_addr+1; i++) 
     {
         //copy the temporary page into the page array
-        page[page_count][n]=memory[i];
-        n++;
-        if (n==page_size||max_addr == i) 
-        {
-            reg_addr+=(page_size);
-            page_count++;
-            n=0; //reset the counter pointer.
-        }
+        real_memory[i]=memory[i]&0xff;
     }
-    printf( "page count %d max byte %d\n", page_count, max_addr);
 
-    unsigned char page_readfrom[255];
-    reg_addr=0;
+    printf("Firmware size: %d bytes (%d pages)\n", max_addr, (max_addr%page_size)?(max_addr/page_size)+1:(max_addr/page_size));
 
-    for (i=0; i< page_count; i++) 
-    {
-        int j=0;
-        write_page( reg_addr, page[i], page_size);
-        printf("\nWrote. Page %d\n", i);
+    // process task
+    process_firmware(real_memory, max_addr, page_size, argv[1][0]);
 
-        read_page(reg_addr, page_readfrom, page_size);
-        for(n=0; n<page_size; n++)
-        {
-            if (j>5)
-            {
-                printf("\n");
-                j=0;
-            }
-            printf("|0x%02x 0x%02x|", (unsigned char)page_readfrom[n], page[i][n]);
-            j++;
-        }
-
-        int err;
-
-        if ((err = verify_page( reg_addr, page[i], page_readfrom, page_size)) >=0)
-        {
-            if (fail_count > 2)
-            {
-                printf("Failed verify 3 times. Hard Fail. Sorry.\n");
-                return -1;
-            }
-            printf("Verify page error at byte %d. Will resend.\n", err+(page_size*i));
-            --i;
-            fail_count++;
-            continue;
-        }
-
-/*        for(n=0; n<page_size; n++)
-        {
-            printf("0x%02x ", (unsigned char)page[i][n]);
-        }*/
-        reg_addr+=(page_size);
-    }
-    printf("\nFlash completed OK\n");
-
+    // clean up
     usb_close(usbhandle);
 
     return 0;
