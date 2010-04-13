@@ -1,0 +1,1 @@
+This directory contains a preliminary EDA (schematic and so on) for OpenServo V4. The design is still in development.

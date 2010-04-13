@@ -1,0 +1,28 @@
+EESchema-DOCLIB  Version 2.0  Date: 07/04/2010 00:05:55
+#
+$CMP LM3480IM-3.3
+D 100mA, Quasi Low-Dropout Linear Voltage
+K 100mA Low-Dropout Linear Voltage Regulator SOT-23
+$ENDCMP
+#
+$CMP MCP9701A(SC70-5)
+D Low-Power Linear Active Thermistor
+K Thermistor Temperature Analog SC70-5
+$ENDCMP
+#
+$CMP MCP9701A(SOT23-3)
+D Low-Power Linear Active Thermistor
+K Thermistor Temperature Analog SOT23-3
+$ENDCMP
+#
+$CMP TC4428A
+D Dual High-Speed Power MOSFET Drivers
+K MOSFET Driver
+$ENDCMP
+#
+$CMP ZXCT1009
+D high-side current monitor
+K high-side current monitor
+$ENDCMP
+#
+#End Doc Library

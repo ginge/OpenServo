@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0  Date: 02/04/2010 11:41:49
+#
+$CMP ATxmega32A4
+D ATxmega32A4 8/16 Bit AVR Microcontroller, 32kB+4kB Flash, 4096B SRAM, 1024B EEPROM
+K AVR avr ATMEL atmel MICROCONTROLLER microcontroller 8bit 16bit ATXMEGA atxmega ATXMEGA32 atxmega32
+$ENDCMP
+#
+#End Doc Library
