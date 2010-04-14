@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 13/04/2010 21:33:34
+EESchema Schematic File Version 2  date 14/04/2010 23:00:13
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "13 apr 2010"
+Date "14 apr 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -45,15 +45,29 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text Notes 600  800  0    157  ~ 31
-NOTE: This is a “Work In Progress”; implement at your own risk.
-NoConn ~ 1850 6750
-NoConn ~ 1850 6050
+Wire Wire Line
+	7050 2450 6550 2450
+Connection ~ 6850 1950
+Wire Wire Line
+	6850 1950 6850 2150
+Wire Wire Line
+	6850 2150 7050 2150
+Connection ~ 6750 2050
+Wire Wire Line
+	6750 2050 6750 2250
+Wire Wire Line
+	6750 2250 7050 2250
+Wire Wire Line
+	6450 2050 7050 2050
+Wire Wire Line
+	6450 1850 7050 1850
+Wire Wire Line
+	7050 1550 5950 1550
 Wire Wire Line
 	10400 5050 10400 4950
 Connection ~ 5950 1750
 Wire Wire Line
-	5950 1750 5950 1550
+	5950 1550 5950 1750
 Connection ~ 6650 1850
 Wire Wire Line
 	10100 2350 10100 1850
@@ -65,19 +79,13 @@ Wire Notes Line
 	5110 2100 5110 1600
 Connection ~ 1750 4050
 Wire Wire Line
-	1750 3950 1750 4300
+	1750 4300 1750 3950
 Wire Wire Line
 	1750 2900 1750 2800
 Wire Wire Line
 	4500 4250 5200 4250
 Wire Wire Line
 	5200 4250 5200 3200
-Wire Wire Line
-	5950 1550 6900 1550
-Wire Wire Line
-	6900 2050 6450 2050
-Wire Wire Line
-	6450 1850 6900 1850
 Connection ~ 850  4050
 Wire Wire Line
 	1000 4050 850  4050
@@ -142,8 +150,6 @@ Wire Wire Line
 	5650 2050 5650 2250
 Wire Wire Line
 	5350 1950 6050 1950
-Wire Wire Line
-	6900 2150 6650 2150
 Wire Wire Line
 	6050 1750 5350 1750
 Wire Wire Line
@@ -289,15 +295,9 @@ Wire Wire Line
 Wire Wire Line
 	6050 1850 5350 1850
 Wire Wire Line
-	6900 2250 6550 2250
-Wire Wire Line
 	5650 2050 6050 2050
 Wire Wire Line
-	6900 2350 6650 2350
-Wire Wire Line
-	6650 2350 6650 1850
-Wire Wire Line
-	6900 2450 6550 2450
+	6650 1850 6650 2350
 Wire Wire Line
 	5650 2250 4300 2250
 Wire Wire Line
@@ -361,11 +361,7 @@ Connection ~ 8800 6450
 Wire Wire Line
 	1600 4050 1750 4050
 Wire Wire Line
-	6450 1750 6900 1750
-Wire Wire Line
-	6450 1950 6900 1950
-Wire Wire Line
-	6900 1450 5850 1450
+	7050 1450 5850 1450
 Wire Wire Line
 	4500 6750 5150 6750
 Wire Wire Line
@@ -382,14 +378,22 @@ Wire Wire Line
 	9850 1550 10100 1550
 Wire Wire Line
 	10100 1550 10100 1100
-Wire Wire Line
-	6550 2450 6550 1950
 Connection ~ 6550 1950
-Connection ~ 6650 2150
-Connection ~ 6550 2250
 Wire Wire Line
 	5850 1450 5850 2050
 Connection ~ 5850 2050
+Wire Wire Line
+	7050 1750 6450 1750
+Wire Wire Line
+	6550 2450 6550 1950
+Wire Wire Line
+	7050 1950 6450 1950
+Wire Wire Line
+	6650 2350 7050 2350
+Text Notes 600  800  0    157  ~ 31
+NOTE: This is a “Work In Progress”; implement at your own risk.
+NoConn ~ 1850 6750
+NoConn ~ 1850 6050
 $Comp
 L INDUCTOR L2
 U 1 1 4BBCF6ED
@@ -688,9 +692,9 @@ F 2 "SM0603" H 10500 6250 60  0001 C CNN
 	1    10400 6100
 	1    0    0    -1  
 $EndComp
-Text Label 6900 1450 0    30   ~ 0
+Text Label 7050 1450 0    30   ~ 0
 PA7_(GPIO)
-Text Label 6900 1550 0    30   ~ 0
+Text Label 7050 1550 0    30   ~ 0
 PA6_(GPIO)
 Text Label 4650 3650 0    30   ~ 0
 PA6_(GPIO)
@@ -716,9 +720,9 @@ F 1 "+BATT" H 5700 1650 30  0000 C CNN
 	1    5700 1550
 	1    0    0    -1  
 $EndComp
-Text Label 6900 2150 0    30   ~ 0
+Text Label 7050 2150 0    30   ~ 0
 USART_1_RXD
-Text Label 6900 2250 0    30   ~ 0
+Text Label 7050 2250 0    30   ~ 0
 USART_1_TXD
 Text Label 4650 5350 0    30   ~ 0
 USART_1_RXD
@@ -799,26 +803,26 @@ Text Label 4300 1850 2    30   ~ 0
 PDI_DATA
 Text Label 4300 1750 2    30   ~ 0
 RESET(PDI_CLK)
-Text Label 6900 2450 0    30   ~ 0
-SDA(host)
-Text Label 6900 2350 0    30   ~ 0
-SCL(host)
-Text Label 6900 1850 0    30   ~ 0
+Text Label 7050 2450 0    30   ~ 0
+SDA_host
+Text Label 7050 2350 0    30   ~ 0
+SCL_host
+Text Label 7050 2050 0    30   ~ 0
 SPI_1_~SS~
-Text Label 6900 1950 0    30   ~ 0
+Text Label 7050 1950 0    30   ~ 0
 SPI_1_MOSI_USART_2_XCK
-Text Label 6900 2050 0    30   ~ 0
+Text Label 7050 1750 0    30   ~ 0
 SPI_1_MISO_USART_2_RXD
-Text Label 6900 1750 0    30   ~ 0
+Text Label 7050 1850 0    30   ~ 0
 SPI_1_SCK_USART_2_TXD
 Text Label 4650 5450 0    30   ~ 0
-SCL(host)
+SCL_host
 Text Label 4650 5550 0    30   ~ 0
-SDA(host)
+SDA_host
 Text Label 4650 6850 0    30   ~ 0
-SCL(onboard)
+SCL_onboard
 Text Label 4650 6950 0    30   ~ 0
-SDA(onboard)
+SDA_onboard
 Text Label 4650 5150 0    30   ~ 0
 SPI_1_~SS~
 Text Label 4650 5050 0    30   ~ 0
