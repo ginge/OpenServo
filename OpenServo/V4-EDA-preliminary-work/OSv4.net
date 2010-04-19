@@ -1,8 +1,11 @@
-# EESchema Netlist Version 1.1 created  14/04/2010 22:54:54
+# EESchema Netlist Version 1.1 created  20/04/2010 00:36:44
 (
+ ( /4B96C947/4B8AE5FB OPTPAD  JP11 +3.3V {Lib=OPTION}
+  (    1 VCC )
+ )
  ( /4B96C947/4BBCF6ED SM0603  L2 47nH,_5%,_DCR<0.3ohm,_>100mA {Lib=INDUCTOR}
   (    1 VCC )
-  (    2 N-000041 )
+  (    2 N-000050 )
  )
  ( /4B96C947/4BB88501 1pin  POT3 CONN_1 {Lib=CONN_1}
   (    1 GND )
@@ -20,7 +23,7 @@
   (    1 N-000039 )
  )
  ( /4B96C947/4BB8766A EDGEPIN  P1-6 P1 {Lib=EDGEPIN}
-  (    1 N-000032 )
+  (    1 N-000035 )
  )
  ( /4B96C947/4BB87660 EDGEPIN  P1-4 P1 {Lib=EDGEPIN}
   (    1 /OSv4_logic/PA6_(GPIO) )
@@ -51,24 +54,12 @@
  ( /4B96C947/4BAAA6C0 RP0804  RP1 R_PACK4 {Lib=R_PACK4}
   (    1 /OSv4_logic/PA7_(GPIO) )
   (    2 N-000039 )
-  (    3 N-000032 )
+  (    3 N-000035 )
   (    4 /OSv4_logic/PA6_(GPIO) )
   (    5 /OSv4_logic/SPI_1_MISO_USART_2_RXD )
-  (    6 /OSv4_logic/SCL_host )
-  (    7 /OSv4_logic/SDA_host )
+  (    6 /OSv4_logic/SPI_1_SCK_USART_2_TXD )
+  (    7 /OSv4_logic/SPI_1_MOSI_USART_2_XCK )
   (    8 /OSv4_logic/SPI_1_~SS~ )
- )
- ( /4B96C947/4B96D7C3 OPTPAD  JP7 PD7 {Lib=OPTION}
-  (    1 /OSv4_logic/SPI_2_SCK_USART_3_TXD )
- )
- ( /4B96C947/4B96D790 OPTPAD  JP6 PD6 {Lib=OPTION}
-  (    1 /OSv4_logic/SPI_2_MISO_USART_3_RXD )
- )
- ( /4B96C947/4B96D783 OPTPAD  JP5 PD5 {Lib=OPTION}
-  (    1 /OSv4_logic/SPI_2_MOSI_USART_3_XCK )
- )
- ( /4B96C947/4B96D77F OPTPAD  JP4 PD4 {Lib=OPTION}
-  (    1 /OSv4_logic/SPI_2_~SS~ )
  )
  ( /4B96C947/4B96D775 OPTPAD  JP3 SCL {Lib=OPTION}
   (    1 /OSv4_logic/SCL_onboard )
@@ -77,20 +68,11 @@
   (    1 /OSv4_logic/SDA_onboard )
  )
  ( /4B96C947/4B96CAE1 SM0603  C18 33uF_4V {Lib=CP1}
-  (    1 N-000041 )
+  (    1 N-000050 )
   (    2 GND )
  )
- ( /4B96C947/4B8AE5FB OPTPAD  JP11 +3.3V {Lib=OPTION}
-  (    1 VCC )
- )
  ( /4B96C947/4B8AE5C3 OPTPAD  JP9 PB2 {Lib=OPTION}
-  (    1 N-000025 )
- )
- ( /4B96C947/4B8AE5BA OPTPAD  JP8 PB1 {Lib=OPTION}
-  (    1 N-000024 )
- )
- ( /4B96C947/4B8AE5B4 OPTPAD  JP10 PB3 {Lib=OPTION}
-  (    1 N-000036 )
+  (    1 N-000028 )
  )
  ( /4B96C947/4B8AA902 OPTPAD  JP1 GND {Lib=OPTION}
   (    1 GND )
@@ -124,35 +106,35 @@
   (    2 /OSv4_logic/PA6_(GPIO) )
   (    3 /OSv4_logic/PA7_(GPIO) )
   (    4 ? )
-  (    5 N-000024 )
-  (    6 N-000025 )
-  (    7 N-000036 )
+  (    5 ? )
+  (    6 N-000028 )
+  (    7 ? )
   (    8 GND )
   (    9 VCC )
-  (   10 /OSv4_logic/SDA_host )
-  (   11 /OSv4_logic/SCL_host )
-  (   12 /OSv4_logic/SDA_host )
+  (   10 /OSv4_logic/SPI_1_MOSI_USART_2_XCK )
+  (   11 /OSv4_logic/SPI_1_SCK_USART_2_TXD )
+  (   12 /OSv4_logic/SPI_1_MOSI_USART_2_XCK )
   (   13 /OSv4_logic/SPI_1_~SS~ )
   (   14 /OSv4_logic/SPI_1_~SS~ )
-  (   15 /OSv4_logic/SDA_host )
+  (   15 /OSv4_logic/SPI_1_MOSI_USART_2_XCK )
   (   16 /OSv4_logic/SPI_1_MISO_USART_2_RXD )
-  (   17 /OSv4_logic/SCL_host )
+  (   17 /OSv4_logic/SPI_1_SCK_USART_2_TXD )
   (   18 GND )
   (   19 VCC )
   (   20 /OSv4_logic/PWM_A )
   (   21 /OSv4_logic/PWM_B )
   (   22 /OSv4_logic/EN_A )
   (   23 /OSv4_logic/EN_B )
-  (   24 /OSv4_logic/SPI_2_~SS~ )
-  (   25 /OSv4_logic/SPI_2_MOSI_USART_3_XCK )
-  (   26 /OSv4_logic/SPI_2_MISO_USART_3_RXD )
-  (   27 /OSv4_logic/SPI_2_SCK_USART_3_TXD )
+  (   24 ? )
+  (   25 ? )
+  (   26 ? )
+  (   27 ? )
   (   28 /OSv4_logic/SDA_onboard )
   (   29 /OSv4_logic/SCL_onboard )
   (   30 GND )
   (   31 VCC )
-  (   32 N-000020 )
-  (   33 N-000020 )
+  (   32 N-000030 )
+  (   33 N-000030 )
   (   34 /OSv4_logic/PDI_DATA )
   (   35 /OSv4_logic/RESET(PDI_CLK) )
   (   36 ? )
@@ -161,21 +143,21 @@
   (   39 +3.3VADC )
   (   40 +3.3VADC )
   (   41 N-000003 )
-  (   42 /OSv4_logic/BATTV )
+  (   42 /OSv4_logic/TEMPERATURE )
   (   43 /OSv4_logic/POSITION )
-  (   44 /OSv4_logic/TEMPERATURE )
+  (   44 /OSv4_logic/BATTV )
  )
  ( /4B96C947/4B86F84F SM0402  D1 DIODE {Lib=DIODE}
   (    1 +BATT )
-  (    2 N-000037 )
+  (    2 N-000040 )
  )
  ( /4B96C947/4B86F81A SM0603  C17 47uF_16V {Lib=CP1}
-  (    1 N-000037 )
+  (    1 N-000040 )
   (    2 GND )
  )
  ( /4B96C947/4B86B462 SOT23_3  U3 LM3480IM-3.3 {Lib=LM3480IM-3.3}
-  (    1 N-000041 )
-  (    2 N-000037 )
+  (    1 N-000050 )
+  (    2 N-000040 )
   (    3 GND )
  )
  ( /4B96C947/4B86AC31 SM0402  R6 10.0K {Lib=R}
@@ -475,88 +457,85 @@ $endfootprintlist
 }
 { Pin List by Nets
 Net 1 "" ""
+ Q4 5
+ Q4 6
  Q4 7
  Q4 8
- Q4 6
- Q4 5
  M2 1
 Net 2 "" ""
- Q1 5
  Q1 6
- Q1 7
- Q1 8
+ Q1 5
  M1 1
+ Q1 8
+ Q1 7
 Net 3 "" ""
- U4 41
- D2 2
  R1 2
  R3 1
  C5 1
+ U4 41
+ D2 2
 Net 4 "/OSv4_logic/EN_A" "EN_A"
- U6 4
  RP2 6
+ U6 4
  U4 22
 Net 5 "" ""
- U6 6
  Q4 4
+ U6 6
 Net 6 "+BATT" "+BATT"
- U6 7
+ C1 1
  D1 1
- U5 7
+ C2 1
  C3 1
+ R2 1
+ U1 2
+ U5 7
+ P1-1 1
+ R4 1
+ U6 7
  C4 1
  P1-2 1
- R4 1
- P1-1 1
- U1 2
- R2 1
- C1 1
- C2 1
 Net 7 "" ""
- U5 6
  Q1 4
+ U5 6
 Net 8 "" ""
- U5 8
  Q1 2
+ U5 8
 Net 9 "/OSv4_logic/PWM_A" "PWM_A"
  RP2 8
- U4 20
  U5 2
+ U4 20
 Net 10 "" ""
- R2 2
- U1 3
  Q1 3
+ R2 2
  Q4 3
+ U1 3
 Net 11 "/OSv4_logic/PWM_B" "PWM_B"
  RP2 5
- U6 2
  U4 21
+ U6 2
 Net 12 "" ""
- Q4 2
  U6 8
+ Q4 2
 Net 13 "" ""
- U1 1
  R1 1
+ U1 1
 Net 16 "/OSv4_logic/EN_B" "EN_B"
- RP2 7
  U5 4
  U4 23
+ RP2 7
 Net 17 "GND" "GND"
- R6 2
- U4 18
- C7 2
  C6 2
- C17 2
+ C7 2
  U4 38
- C18 2
- JP1 1
- C14 2
- C13 2
- C12 2
+ C17 2
  POT3 1
- P1-10 1
- P1-9 1
- U2 3
+ U3 3
+ C18 2
+ C14 2
+ JP1 1
+ C11 2
+ C12 2
+ C13 2
  R3 2
  C5 2
  D2 1
@@ -571,91 +550,75 @@ Net 17 "GND" "GND"
  RP2 2
  RP2 1
  U6 3
- Q4 1
- Q1 1
  U4 30
+ U2 3
  U4 8
- U3 3
- C11 2
-Net 20 "" ""
- U4 32
- U4 33
-Net 24 "" ""
- JP8 1
- U4 5
-Net 25 "" ""
+ P1-10 1
+ Q1 1
+ Q4 1
+ U4 18
+ P1-9 1
+ R6 2
+Net 28 "" ""
  U4 6
  JP9 1
-Net 26 "+3.3VADC" "+3.3VADC"
- U4 39
- L1 2
- C11 1
- U4 40
-Net 27 "/OSv4_logic/BATTV" "BATTV"
+Net 30 "" ""
+ U4 32
+ U4 33
+Net 31 "/OSv4_logic/BATTV" "BATTV"
  R4 2
  R6 1
- U4 42
-Net 28 "/OSv4_logic/POSITION" "POSITION"
+ U4 44
+Net 32 "/OSv4_logic/POSITION" "POSITION"
  POT2 1
  U4 43
-Net 29 "/OSv4_logic/TEMPERATURE" "TEMPERATURE"
- U4 44
+Net 33 "/OSv4_logic/TEMPERATURE" "TEMPERATURE"
+ U4 42
  U2 2
-Net 30 "VCC" "VCC"
- POT1 1
- R19 1
+Net 34 "VCC" "VCC"
+ L2 1
  U2 1
+ C14 1
+ C13 1
+ L1 1
+ R19 1
+ POT1 1
+ C12 1
+ C6 1
  C7 1
  U4 19
- C13 1
- C14 1
- C12 1
  U4 9
- C6 1
- L2 1
  JP11 1
- L1 1
  U4 31
-Net 32 "" ""
- P1-6 1
+Net 35 "" ""
  RP1 3
-Net 33 "/OSv4_logic/RESET(PDI_CLK)" "RESET(PDI_CLK)"
+ P1-6 1
+Net 36 "/OSv4_logic/RESET(PDI_CLK)" "RESET(PDI_CLK)"
  U4 35
- R19 2
  P1-3 1
-Net 34 "/OSv4_logic/SPI_1_~SS~" "SPI_1_~SS~"
- U4 14
- U4 13
- RP1 8
-Net 35 "/OSv4_logic/PA6_(GPIO)" "PA6_(GPIO)"
- RP1 4
+ R19 2
+Net 37 "/OSv4_logic/PA6_(GPIO)" "PA6_(GPIO)"
  P1-4 1
  U4 2
-Net 36 "" ""
- U4 7
- JP10 1
-Net 37 "" ""
+ RP1 4
+Net 38 "/OSv4_logic/SPI_1_~SS~" "SPI_1_~SS~"
+ RP1 8
+ U4 14
+ U4 13
+Net 39 "" ""
+ RP1 2
+ P1-8 1
+Net 40 "" ""
+ D1 2
  U3 2
  C17 1
- D1 2
-Net 38 "/OSv4_logic/PDI_DATA" "PDI_DATA"
+Net 41 "/OSv4_logic/PDI_DATA" "PDI_DATA"
  U4 34
  P1-5 1
-Net 39 "" ""
- P1-8 1
- RP1 2
-Net 40 "/OSv4_logic/SCL_host" "SCL_host"
+Net 42 "/OSv4_logic/SPI_1_SCK_USART_2_TXD" "SPI_1_SCK_USART_2_TXD"
  U4 17
  U4 11
  RP1 6
-Net 41 "" ""
- U3 1
- C18 1
- L2 2
-Net 42 "/OSv4_logic/PA7_(GPIO)" "PA7_(GPIO)"
- P1-7 1
- RP1 1
- U4 3
 Net 43 "/OSv4_logic/SPI_1_MISO_USART_2_RXD" "SPI_1_MISO_USART_2_RXD"
  U4 16
  RP1 5
@@ -663,24 +626,25 @@ Net 44 "/OSv4_logic/SCL_onboard" "SCL_onboard"
  U4 29
  JP3 1
 Net 45 "/OSv4_logic/SDA_onboard" "SDA_onboard"
- U4 28
  JP2 1
-Net 46 "/OSv4_logic/SPI_2_SCK_USART_3_TXD" "SPI_2_SCK_USART_3_TXD"
- JP7 1
- U4 27
-Net 47 "/OSv4_logic/SPI_2_MISO_USART_3_RXD" "SPI_2_MISO_USART_3_RXD"
- JP6 1
- U4 26
-Net 48 "/OSv4_logic/SPI_2_MOSI_USART_3_XCK" "SPI_2_MOSI_USART_3_XCK"
- U4 25
- JP5 1
-Net 49 "/OSv4_logic/SPI_2_~SS~" "SPI_2_~SS~"
- U4 24
- JP4 1
-Net 50 "/OSv4_logic/SDA_host" "SDA_host"
+ U4 28
+Net 46 "+3.3VADC" "+3.3VADC"
+ U4 40
+ U4 39
+ L1 2
+ C11 1
+Net 48 "/OSv4_logic/SPI_1_MOSI_USART_2_XCK" "SPI_1_MOSI_USART_2_XCK"
  U4 15
  U4 10
  U4 12
  RP1 7
+Net 49 "/OSv4_logic/PA7_(GPIO)" "PA7_(GPIO)"
+ U4 3
+ P1-7 1
+ RP1 1
+Net 50 "" ""
+ C18 1
+ L2 2
+ U3 1
 }
 #End

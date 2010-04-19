@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 14/04/2010 23:00:13
+EESchema Schematic File Version 2  date 20/04/2010 00:36:48
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 3 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "14 apr 2010"
+Date "19 apr 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -83,10 +83,10 @@ Wire Wire Line
 Wire Wire Line
 	6700 4200 7450 4200
 Wire Wire Line
-	6450 6200 6450 6000
+	6450 6000 6450 6200
 Connection ~ 6400 4550
 Wire Wire Line
-	6500 4550 6500 4450
+	6500 4450 6500 4550
 Wire Wire Line
 	6500 4550 6350 4550
 Wire Wire Line
@@ -98,9 +98,9 @@ Wire Wire Line
 Wire Wire Line
 	5100 5450 5100 5550
 Wire Wire Line
-	5150 6200 5150 6000
+	5150 6000 5150 6200
 Wire Wire Line
-	5100 4550 5100 4450
+	5100 4450 5100 4550
 Wire Wire Line
 	7850 5250 7450 5250
 Wire Wire Line
@@ -128,7 +128,7 @@ Wire Wire Line
 Wire Wire Line
 	4200 5250 4200 5800
 Wire Wire Line
-	3800 2400 3800 2300
+	3800 2300 3800 2400
 Wire Wire Line
 	3800 2400 4400 2400
 Connection ~ 5800 2200
@@ -145,7 +145,7 @@ Connection ~ 6550 2100
 Wire Wire Line
 	6550 2100 6550 2000
 Wire Wire Line
-	7250 2100 7250 2000
+	7250 2000 7250 2100
 Connection ~ 6900 1500
 Wire Wire Line
 	6900 1500 6900 1600
@@ -158,7 +158,7 @@ Wire Wire Line
 Connection ~ 4250 2400
 Connection ~ 3800 1800
 Wire Wire Line
-	6200 2100 7250 2100
+	7250 2100 6200 2100
 Connection ~ 5200 5000
 Wire Wire Line
 	5450 5000 5200 5000
@@ -170,7 +170,7 @@ Wire Wire Line
 	5200 5450 5200 4550
 Connection ~ 5800 6200
 Wire Wire Line
-	6450 6200 5150 6200
+	5150 6200 6450 6200
 Wire Wire Line
 	5150 3800 6450 3800
 Connection ~ 5800 3800
@@ -232,7 +232,7 @@ Wire Wire Line
 Wire Wire Line
 	6450 3800 6450 4000
 Wire Wire Line
-	6350 5450 6350 5550
+	6350 5550 6350 5450
 Wire Wire Line
 	6350 5450 6500 5450
 Wire Wire Line

@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 14/04/2010 23:00:13
+EESchema Schematic File Version 2  date 20/04/2010 00:36:48
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "14 apr 2010"
+Date "19 apr 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -45,6 +45,28 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
+NoConn ~ 4500 4600
+NoConn ~ 4500 4400
+Wire Wire Line
+	7750 6850 7750 4000
+$Comp
+L OPTION JP11
+U 1 1 4B8AE5FB
+P 6250 3800
+F 0 "JP11" H 6300 3800 60  0000 C CNN
+F 1 "+3.3V" H 6525 3800 40  0000 C CNN
+F 2 "OPTPAD" H 6250 3800 60  0001 C CNN
+	1    6250 3800
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4500 6050
+NoConn ~ 4500 5950
+NoConn ~ 4500 5850
+NoConn ~ 4500 5750
+Wire Wire Line
+	4500 4850 4650 4850
+Wire Wire Line
+	4650 4950 4500 4950
 Wire Wire Line
 	7050 2450 6550 2450
 Connection ~ 6850 1950
@@ -79,7 +101,7 @@ Wire Notes Line
 	5110 2100 5110 1600
 Connection ~ 1750 4050
 Wire Wire Line
-	1750 4300 1750 3950
+	1750 3950 1750 4300
 Wire Wire Line
 	1750 2900 1750 2800
 Wire Wire Line
@@ -102,18 +124,6 @@ Wire Wire Line
 	7900 3800 7900 6950
 Wire Wire Line
 	7900 6950 4500 6950
-Wire Wire Line
-	7300 4000 7700 4000
-Wire Wire Line
-	7700 4000 7700 6050
-Wire Wire Line
-	7700 6050 4500 6050
-Wire Wire Line
-	7300 4200 7500 4200
-Wire Wire Line
-	7500 4200 7500 5850
-Wire Wire Line
-	7500 5850 4500 5850
 Wire Wire Line
 	6450 6450 6150 6450
 Wire Wire Line
@@ -158,14 +168,6 @@ Wire Wire Line
 	4650 5250 4500 5250
 Wire Wire Line
 	4650 5050 4500 5050
-Wire Wire Line
-	4500 4850 4650 4850
-Wire Wire Line
-	5950 3900 5300 3900
-Wire Wire Line
-	5300 3900 5300 4400
-Wire Wire Line
-	5300 4400 4500 4400
 Wire Wire Line
 	4500 3850 4650 3850
 Wire Wire Line
@@ -267,8 +269,6 @@ Wire Wire Line
 Wire Wire Line
 	5800 3800 5800 3200
 Wire Wire Line
-	4500 4600 5500 4600
-Wire Wire Line
 	4500 4500 5400 4500
 Wire Wire Line
 	5400 4500 5400 4000
@@ -280,12 +280,6 @@ Wire Wire Line
 	5850 4200 5850 4350
 Wire Wire Line
 	8800 5400 8800 5000
-Wire Wire Line
-	5500 4600 5500 4100
-Wire Wire Line
-	5500 4100 5950 4100
-Wire Wire Line
-	4650 4950 4500 4950
 Wire Wire Line
 	4650 5150 4500 5150
 Wire Wire Line
@@ -335,23 +329,9 @@ Wire Wire Line
 Wire Wire Line
 	6050 6600 6450 6600
 Wire Wire Line
-	4500 5750 7400 5750
+	7750 6850 4500 6850
 Wire Wire Line
-	7400 5750 7400 4300
-Wire Wire Line
-	7400 4300 7300 4300
-Wire Wire Line
-	4500 5950 7600 5950
-Wire Wire Line
-	7600 5950 7600 4100
-Wire Wire Line
-	7600 4100 7300 4100
-Wire Wire Line
-	4500 6850 7800 6850
-Wire Wire Line
-	7800 6850 7800 3900
-Wire Wire Line
-	7800 3900 7300 3900
+	7750 4000 7300 4000
 Wire Wire Line
 	4450 2350 5550 2350
 Connection ~ 1750 4300
@@ -613,53 +593,13 @@ optional?
 Text Notes 8900 5400 0    60   Italic 0
 Brown-out protection\nOptional? (no) Value?
 $Comp
-L OPTION JP7
-U 1 1 4B96D7C3
-P 7000 4300
-F 0 "JP7" H 7025 4300 60  0000 C CNN
-F 1 "PD7" H 7225 4300 40  0000 C CNN
-F 2 "OPTPAD" H 7000 4300 60  0001 C CNN
-	1    7000 4300
-	-1   0    0    1   
-$EndComp
-$Comp
-L OPTION JP6
-U 1 1 4B96D790
-P 7000 4200
-F 0 "JP6" H 7025 4200 60  0000 C CNN
-F 1 "PD6" H 7225 4200 40  0000 C CNN
-F 2 "OPTPAD" H 7000 4200 60  0001 C CNN
-	1    7000 4200
-	-1   0    0    1   
-$EndComp
-$Comp
-L OPTION JP5
-U 1 1 4B96D783
-P 7000 4100
-F 0 "JP5" H 7025 4100 60  0000 C CNN
-F 1 "PD5" H 7225 4100 40  0000 C CNN
-F 2 "OPTPAD" H 7000 4100 60  0001 C CNN
-	1    7000 4100
-	-1   0    0    1   
-$EndComp
-$Comp
-L OPTION JP4
-U 1 1 4B96D77F
-P 7000 4000
-F 0 "JP4" H 7025 4000 60  0000 C CNN
-F 1 "PD4" H 7225 4000 40  0000 C CNN
-F 2 "OPTPAD" H 7000 4000 60  0001 C CNN
-	1    7000 4000
-	-1   0    0    1   
-$EndComp
-$Comp
 L OPTION JP3
 U 1 1 4B96D775
-P 7000 3900
-F 0 "JP3" H 7025 3900 60  0000 C CNN
-F 1 "SCL" H 7225 3900 40  0000 C CNN
-F 2 "OPTPAD" H 7000 3900 60  0001 C CNN
-	1    7000 3900
+P 7000 4000
+F 0 "JP3" H 7025 4000 60  0000 C CNN
+F 1 "SCL" H 7225 4000 40  0000 C CNN
+F 2 "OPTPAD" H 7000 4000 60  0001 C CNN
+	1    7000 4000
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -749,16 +689,6 @@ F 1 "GND" H 5850 4280 30  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L OPTION JP11
-U 1 1 4B8AE5FB
-P 6250 3800
-F 0 "JP11" H 6300 3800 60  0000 C CNN
-F 1 "+3.3V" H 6525 3800 40  0000 C CNN
-F 2 "OPTPAD" H 6250 3800 60  0001 C CNN
-	1    6250 3800
-	1    0    0    -1  
-$EndComp
-$Comp
 L OPTION JP9
 U 1 1 4B8AE5C3
 P 6250 4000
@@ -766,26 +696,6 @@ F 0 "JP9" H 6275 4000 60  0000 C CNN
 F 1 "PB2" H 6475 4000 40  0000 C CNN
 F 2 "OPTPAD" H 6250 4000 60  0001 C CNN
 	1    6250 4000
-	1    0    0    -1  
-$EndComp
-$Comp
-L OPTION JP8
-U 1 1 4B8AE5BA
-P 6250 4100
-F 0 "JP8" H 6275 4100 60  0000 C CNN
-F 1 "PB1" H 6475 4100 40  0000 C CNN
-F 2 "OPTPAD" H 6250 4100 60  0001 C CNN
-	1    6250 4100
-	1    0    0    -1  
-$EndComp
-$Comp
-L OPTION JP10
-U 1 1 4B8AE5B4
-P 6250 3900
-F 0 "JP10" H 6300 3900 60  0000 C CNN
-F 1 "PB3" H 6525 3900 40  0000 C CNN
-F 2 "OPTPAD" H 6250 3900 60  0001 C CNN
-	1    6250 3900
 	1    0    0    -1  
 $EndComp
 Text Notes 5200 2600 0    60   ~ 0
@@ -831,14 +741,6 @@ Text Label 4650 4950 0    30   ~ 0
 SPI_1_MISO_USART_2_RXD
 Text Label 4650 4850 0    30   ~ 0
 SPI_1_SCK_USART_2_TXD
-Text Label 4900 5750 0    30   ~ 0
-SPI_2_SCK_USART_3_TXD
-Text Label 4900 5850 0    30   ~ 0
-SPI_2_MISO_USART_3_RXD
-Text Label 4900 5950 0    30   ~ 0
-SPI_2_MOSI_USART_3_XCK
-Text Label 4900 6050 0    30   ~ 0
-SPI_2_~SS~
 Text Label 4900 6150 0    30   ~ 0
 EN_B
 Text Label 4900 6250 0    30   ~ 0
@@ -858,11 +760,11 @@ F 2 "OPTPAD" H 6250 4200 60  0001 C CNN
 	1    0    0    -1  
 $EndComp
 NoConn ~ 4500 3750
-Text Label 4650 3850 0    30   ~ 0
+Text Label 4650 4050 0    30   ~ 0
 TEMPERATURE
 Text Label 4650 3950 0    30   ~ 0
 POSITION
-Text Label 4650 4050 0    30   ~ 0
+Text Label 4650 3850 0    30   ~ 0
 BATTV
 Text Label 1100 3800 0    60   ~ 0
 PDI_DATA
