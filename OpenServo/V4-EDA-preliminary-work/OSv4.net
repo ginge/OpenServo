@@ -1,4 +1,4 @@
-# EESchema Netlist Version 1.1 created  20/04/2010 00:36:44
+# EESchema Netlist Version 1.1 created  25/04/2010 17:16:56
 (
  ( /4B96C947/4B8AE5FB OPTPAD  JP11 +3.3V {Lib=OPTION}
   (    1 VCC )
@@ -142,10 +142,10 @@
   (   38 GND )
   (   39 +3.3VADC )
   (   40 +3.3VADC )
-  (   41 N-000003 )
-  (   42 /OSv4_logic/TEMPERATURE )
-  (   43 /OSv4_logic/POSITION )
-  (   44 /OSv4_logic/BATTV )
+  (   41 N-000010 )
+  (   42 /OSv4_logic/BATTV )
+  (   43 /OSv4_logic/TEMPERATURE )
+  (   44 /OSv4_logic/POSITION )
  )
  ( /4B96C947/4B86F84F SM0402  D1 DIODE {Lib=DIODE}
   (    1 +BATT )
@@ -181,33 +181,33 @@
   (    2 GND )
   (    3 GND )
   (    4 GND )
-  (    5 /OSv4_logic/PWM_B )
+  (    5 /OSv4_logic/PWM_A )
   (    6 /OSv4_logic/EN_A )
   (    7 /OSv4_logic/EN_B )
-  (    8 /OSv4_logic/PWM_A )
+  (    8 /OSv4_logic/PWM_B )
  )
  ( /4B96C926/4BB66CE3 1pin  M3 CONN_1 {Lib=CONN_1}
   (    1 GND )
  )
  ( /4B96C926/4BAFC8F5 SO8E  Q4 NP_MOSFET {Lib=NP_MOSFET}
   (    1 GND )
-  (    2 N-000012 )
-  (    3 N-000010 )
+  (    2 N-000002 )
+  (    3 N-000012 )
   (    4 N-000005 )
-  (    5 N-000001 )
-  (    6 N-000001 )
-  (    7 N-000001 )
-  (    8 N-000001 )
+  (    5 N-000003 )
+  (    6 N-000003 )
+  (    7 N-000003 )
+  (    8 N-000003 )
  )
  ( /4B96C926/4BAFC7E3 SO8E  Q1 NP_MOSFET {Lib=NP_MOSFET}
   (    1 GND )
   (    2 N-000008 )
-  (    3 N-000010 )
+  (    3 N-000012 )
   (    4 N-000007 )
-  (    5 N-000002 )
-  (    6 N-000002 )
-  (    7 N-000002 )
-  (    8 N-000002 )
+  (    5 N-000001 )
+  (    6 N-000001 )
+  (    7 N-000001 )
+  (    8 N-000001 )
  )
  ( /4B96C926/4BAA6F8E MSOP_8  U6 TC4428A {Lib=TC4428A}
   (    1 ? )
@@ -217,7 +217,7 @@
   (    5 ? )
   (    6 N-000005 )
   (    7 +BATT )
-  (    8 N-000012 )
+  (    8 N-000002 )
  )
  ( /4B96C926/4BAA6F73 MSOP_8  U5 TC4428A {Lib=TC4428A}
   (    1 ? )
@@ -231,19 +231,19 @@
  )
  ( /4B96C926/4B9D203D SM0402  D2 ZENER {Lib=ZENER}
   (    1 GND )
-  (    2 N-000003 )
+  (    2 N-000010 )
  )
  ( /4B96C926/4B8A7BDF SM0402  C5 0.1uF {Lib=C}
-  (    1 N-000003 )
+  (    1 N-000010 )
   (    2 GND )
  )
  ( /4B96C926/4B8A7AFF SM0402  R3 R {Lib=R}
-  (    1 N-000003 )
+  (    1 N-000010 )
   (    2 GND )
  )
  ( /4B96C926/4B8A7AF8 SM0402  R1 R {Lib=R}
   (    1 N-000013 )
-  (    2 N-000003 )
+  (    2 N-000010 )
  )
  ( /4B96C926/4B8A7A39 SM0402  C4 0.1uF {Lib=C}
   (    1 +BATT )
@@ -263,18 +263,18 @@
  )
  ( /4B96C926/4B8A79C1 SM0805  R2 0.05 {Lib=R}
   (    1 +BATT )
-  (    2 N-000010 )
+  (    2 N-000012 )
  )
  ( /4B96C926/4B8A7932 SOT23_3  U1 ZXCT1009 {Lib=ZXCT1009}
   (    1 N-000013 )
   (    2 +BATT )
-  (    3 N-000010 )
+  (    3 N-000012 )
  )
  ( /4B96C926/4B89B5BD 1pin  M2 CONN_1 {Lib=CONN_1}
-  (    1 N-000001 )
+  (    1 N-000003 )
  )
  ( /4B96C926/4B89B5B6 1pin  M1 CONN_1 {Lib=CONN_1}
-  (    1 N-000002 )
+  (    1 N-000001 )
  )
 )
 *
@@ -457,108 +457,108 @@ $endfootprintlist
 }
 { Pin List by Nets
 Net 1 "" ""
- Q4 5
- Q4 6
- Q4 7
- Q4 8
- M2 1
-Net 2 "" ""
- Q1 6
  Q1 5
- M1 1
- Q1 8
+ Q1 6
  Q1 7
+ Q1 8
+ M1 1
+Net 2 "" ""
+ Q4 2
+ U6 8
 Net 3 "" ""
- R1 2
- R3 1
- C5 1
- U4 41
- D2 2
+ Q4 8
+ Q4 7
+ Q4 6
+ Q4 5
+ M2 1
 Net 4 "/OSv4_logic/EN_A" "EN_A"
- RP2 6
  U6 4
+ RP2 6
  U4 22
 Net 5 "" ""
  Q4 4
  U6 6
 Net 6 "+BATT" "+BATT"
+ U1 2
+ R2 1
  C1 1
- D1 1
  C2 1
  C3 1
- R2 1
- U1 2
+ C4 1
  U5 7
  P1-1 1
- R4 1
- U6 7
- C4 1
  P1-2 1
+ R4 1
+ D1 1
+ U6 7
 Net 7 "" ""
- Q1 4
  U5 6
+ Q1 4
 Net 8 "" ""
  Q1 2
  U5 8
 Net 9 "/OSv4_logic/PWM_A" "PWM_A"
- RP2 8
- U5 2
  U4 20
-Net 10 "" ""
- Q1 3
- R2 2
- Q4 3
- U1 3
-Net 11 "/OSv4_logic/PWM_B" "PWM_B"
+ U5 2
  RP2 5
- U4 21
- U6 2
-Net 12 "" ""
- U6 8
- Q4 2
-Net 13 "" ""
- R1 1
- U1 1
-Net 16 "/OSv4_logic/EN_B" "EN_B"
- U5 4
- U4 23
- RP2 7
-Net 17 "GND" "GND"
- C6 2
+Net 10 "" ""
+ R3 1
+ R1 2
+ C5 1
+ U4 41
+ D2 2
+Net 11 "GND" "GND"
+ Q1 1
+ U4 8
+ JP1 1
+ C13 2
+ P1-10 1
+ U4 18
+ C11 2
+ P1-9 1
+ U2 3
+ C12 2
+ U3 3
  C7 2
  U4 38
- C17 2
  POT3 1
- U3 3
- C18 2
+ C17 2
  C14 2
- JP1 1
- C11 2
- C12 2
- C13 2
- R3 2
- C5 2
- D2 1
+ U4 30
+ R6 2
+ C6 2
  U5 3
  C1 2
  C2 2
  C3 2
  C4 2
+ R3 2
+ C5 2
+ D2 1
+ C18 2
+ U6 3
+ Q4 1
  M3 1
  RP2 4
  RP2 3
  RP2 2
  RP2 1
- U6 3
- U4 30
- U2 3
- U4 8
- P1-10 1
- Q1 1
- Q4 1
- U4 18
- P1-9 1
- R6 2
+Net 12 "" ""
+ U1 3
+ R2 2
+ Q1 3
+ Q4 3
+Net 13 "" ""
+ U1 1
+ R1 1
+Net 16 "/OSv4_logic/PWM_B" "PWM_B"
+ U6 2
+ RP2 8
+ U4 21
+Net 17 "/OSv4_logic/EN_B" "EN_B"
+ RP2 7
+ U4 23
+ U5 4
 Net 28 "" ""
  U4 6
  JP9 1
@@ -568,21 +568,21 @@ Net 30 "" ""
 Net 31 "/OSv4_logic/BATTV" "BATTV"
  R4 2
  R6 1
- U4 44
+ U4 42
 Net 32 "/OSv4_logic/POSITION" "POSITION"
  POT2 1
- U4 43
+ U4 44
 Net 33 "/OSv4_logic/TEMPERATURE" "TEMPERATURE"
- U4 42
  U2 2
+ U4 43
 Net 34 "VCC" "VCC"
- L2 1
- U2 1
- C14 1
  C13 1
+ L2 1
+ C14 1
+ POT1 1
  L1 1
  R19 1
- POT1 1
+ U2 1
  C12 1
  C6 1
  C7 1
