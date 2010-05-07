@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 04/05/2010 11:09:49
+EESchema Schematic File Version 2  date 07/05/2010 17:07:47
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "4 may 2010"
+Date "7 may 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -45,24 +45,17 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-NoConn ~ 4500 4600
-NoConn ~ 4500 4400
+Wire Notes Line
+	10300 5600 10300 5100
+Wire Notes Line
+	10300 5600 10500 5600
+Wire Notes Line
+	10500 5600 10500 5100
+Wire Notes Line
+	10500 5100 10300 5100
+Connection ~ 10400 5050
 Wire Wire Line
 	7750 6850 7750 4000
-$Comp
-L OPTION JP5
-U 1 1 4B8AE5FB
-P 6250 3800
-F 0 "JP5" H 6300 3800 60  0000 C CNN
-F 1 "+3.3V" H 6525 3800 40  0000 C CNN
-F 2 "OPTPAD" H 6250 3800 60  0001 C CNN
-	1    6250 3800
-	1    0    0    -1  
-$EndComp
-NoConn ~ 4500 6050
-NoConn ~ 4500 5950
-NoConn ~ 4500 5850
-NoConn ~ 4500 5750
 Wire Wire Line
 	4500 4850 4650 4850
 Wire Wire Line
@@ -85,8 +78,6 @@ Wire Wire Line
 	6450 1850 7050 1850
 Wire Wire Line
 	7050 1550 5950 1550
-Wire Wire Line
-	10400 5050 10400 4950
 Connection ~ 5950 1750
 Wire Wire Line
 	5950 1550 5950 1750
@@ -313,8 +304,6 @@ Wire Wire Line
 Wire Wire Line
 	8800 5800 8800 5900
 Wire Wire Line
-	10400 5900 10400 5650
-Wire Wire Line
 	9600 6350 9600 6650
 Wire Wire Line
 	10400 6300 10400 6450
@@ -370,20 +359,33 @@ Wire Wire Line
 	7050 1950 6450 1950
 Wire Wire Line
 	6650 2350 7050 2350
+Wire Wire Line
+	10400 5900 10400 4950
+Connection ~ 10400 5650
+Text Notes 10700 5900 1    60   Italic 0
+47nH, 5%, DCR<0.3ohm, >100mA
+Text Notes 9050 4750 0    60   Italic 0
+One might use an inductor\nbetween vcc and C13; but\nthe cramped noisy nature\nof the OS PCB means that\nit is likely not overly useful\nand merely wastes space?
+NoConn ~ 4500 4600
+NoConn ~ 4500 4400
+$Comp
+L OPTION JP5
+U 1 1 4B8AE5FB
+P 6250 3800
+F 0 "JP5" H 6300 3800 60  0000 C CNN
+F 1 "+3.3V" H 6525 3800 40  0000 C CNN
+F 2 "OPTPAD" H 6250 3800 60  0001 C CNN
+	1    6250 3800
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4500 6050
+NoConn ~ 4500 5950
+NoConn ~ 4500 5850
+NoConn ~ 4500 5750
 Text Notes 600  800  0    157  ~ 31
 NOTE: This is a “Work In Progress”; implement at your own risk.
 NoConn ~ 1850 6750
 NoConn ~ 1850 6050
-$Comp
-L INDUCTOR L2
-U 1 1 4BBCF6ED
-P 10400 5350
-F 0 "L2" V 10350 5350 40  0000 C CNN
-F 1 "47nH, 5%, DCR<0.3ohm, >100mA" V 10500 5350 40  0000 C CNN
-F 2 "SM0603" V 10310 5310 60  0001 C CNN
-	1    10400 5350
-	1    0    0    -1  
-$EndComp
 Text Notes 9200 1350 0    60   ~ 0
 R5 - serbo pot\noff board
 $Comp
@@ -515,6 +517,11 @@ P 4950 1650
 F 0 "P1-1" H 4730 1670 31  0000 C CNN
 F 1 "P1" H 4930 1750 40  0000 C CNN
 F 2 "EDGEPIN" H 4710 1890 60  0001 C CNN
+F 4 "Hirose" H 4950 1650 60  0001 C CNN "Manufacturer"
+F 5 "DF11-10DP-2DSA(24)" H 4950 1650 60  0001 C CNN "Mfg. P/N"
+F 6 "" H 4950 1650 60  0001 C CNN "Farnell"
+F 7 "H10232-ND" H 4950 1650 60  0001 C CNN "DigiKey"
+F 8 "Part numbers for Tin - Gold: DF11-10DP-2DSA(01), H2853-ND" H 4950 1650 60  0001 C CNN "Comments"
 	1    4950 1650
 	1    0    0    -1  
 $EndComp
@@ -524,7 +531,12 @@ U 1 1 4BB5B742
 P 2200 1750
 F 0 "U2" H 1700 2000 60  0000 L CNN
 F 1 "MCP9701A" H 2200 1500 60  0000 R CNN
-F 2 "SOT23_3" H 1640 2060 60  0001 C CNN
+F 2 "SOT23-3" H 1640 2060 60  0001 C CNN
+F 4 "Microchip" H 2200 1750 60  0001 C CNN "Manufacturer"
+F 5 "MCP9701AT-E/TT" H 2200 1750 60  0001 C CNN "Mfg. P/N"
+F 6 "" H 2200 1750 60  0001 C CNN "Farnell"
+F 7 "MCP9701AT-E/TTCT-ND" H 2200 1750 60  0001 C CNN "DigiKey"
+F 8 "" H 2200 1750 60  0001 C CNN "Comments"
 	1    2200 1750
 	1    0    0    -1  
 $EndComp
@@ -547,7 +559,7 @@ F 1 "AVCC" H 1750 4040 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Text Notes 9900 6700 0    60   ~ 0
-C17 and C18 are to be\nplaced close to U3\n
+C12 and C13 are to be\nplaced close to U3\n
 NoConn ~ 4500 4700
 $Comp
 L VCC #PWR03
@@ -567,6 +579,11 @@ P 6250 1700
 F 0 "RP1" H 6250 2150 40  0000 C CNN
 F 1 "R_PACK4" H 6250 1650 40  0000 C CNN
 F 2 "RP0804" H 6210 2190 60  0001 C CNN
+F 4 "Bourns" H 6250 1700 60  0001 C CNN "Manufacturer"
+F 5 "CAY10-101J4LF" H 6250 1700 60  0001 C CNN "Mfg. P/N"
+F 6 "1770149RL" H 6250 1700 60  0001 C CNN "Farnell"
+F 7 "" H 6250 1700 60  0001 C CNN "DigiKey"
+F 8 "" H 6250 1700 60  0001 C CNN "Comments"
 	1    6250 1700
 	1    0    0    1   
 $EndComp
@@ -779,7 +796,7 @@ L C C11
 U 1 1 4B8A9346
 P 1450 5500
 F 0 "C11" V 1500 5375 50  0000 L CNN
-F 1 "100nF" V 1500 5675 50  0000 L CNN
+F 1 "0.1uF" V 1500 5675 50  0000 L CNN
 F 2 "SM0402" V 1550 5325 60  0001 C CNN
 	1    1450 5500
 	0    1    1    0   
@@ -789,7 +806,7 @@ L C C10
 U 1 1 4B8A9340
 P 1450 5100
 F 0 "C10" V 1500 4975 50  0000 L CNN
-F 1 "100nF" V 1500 5275 50  0000 L CNN
+F 1 "0.1uF" V 1500 5275 50  0000 L CNN
 F 2 "SM0402" V 1550 4925 60  0001 C CNN
 	1    1450 5100
 	0    1    1    0   
@@ -799,7 +816,7 @@ L C C9
 U 1 1 4B8A92EF
 P 1450 4700
 F 0 "C9" V 1500 4575 50  0000 L CNN
-F 1 "100nF" V 1500 4875 50  0000 L CNN
+F 1 "0.1uF" V 1500 4875 50  0000 L CNN
 F 2 "SM0402" V 1550 4525 60  0001 C CNN
 	1    1450 4700
 	0    1    1    0   
@@ -832,10 +849,10 @@ F 1 "GND" H 1050 5780 30  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R19
+L R R6
 U 1 1 4B8A8EA8
 P 1750 3150
-F 0 "R19" H 1900 3100 50  0000 C CNN
+F 0 "R6" H 1900 3100 50  0000 C CNN
 F 1 "10.0K" H 1950 3200 50  0000 C CNN
 F 2 "SM0402" H 1750 3150 60  0001 C CNN
 	1    1750 3150
@@ -846,7 +863,7 @@ L C C8
 U 1 1 4B8A8D44
 P 1450 4300
 F 0 "C8" V 1500 4175 50  0000 L CNN
-F 1 "100nF" V 1500 4475 50  0000 L CNN
+F 1 "0.1uF" V 1500 4475 50  0000 L CNN
 F 2 "SM0402" H 1450 4300 60  0001 C CNN
 	1    1450 4300
 	0    1    1    0   
@@ -856,8 +873,13 @@ L INDUCTOR L1
 U 1 1 4B8A89A9
 P 1300 4050
 F 0 "L1" V 1250 4050 40  0000 C CNN
-F 1 "INDUCTOR" V 1400 4050 40  0000 C CNN
-F 2 "SM0603" V 1210 4010 60  0001 C CNN
+F 1 "10uH" V 1400 4050 40  0000 C CNN
+F 2 "MLF1608E100K" V 1210 4010 60  0001 C CNN
+F 4 "TDK" H 1300 4050 60  0001 C CNN "Manufacturer"
+F 5 "MLF1608E100K" H 1300 4050 60  0001 C CNN "Mfg. P/N"
+F 6 "1669541" H 1300 4050 60  0001 C CNN "Farnell"
+F 7 "445-1025-1-ND" H 1300 4050 60  0001 C CNN "DigiKey"
+F 8 "10%, Max DC R 1.7ohm, 10ma" H 1300 4050 60  0001 C CNN "Comments"
 	1    1300 4050
 	0    -1   -1   0   
 $EndComp
@@ -868,6 +890,11 @@ P 3400 5250
 F 0 "U4" H 2500 7080 50  0000 L BNN
 F 1 "ATXMEGA32A4" H 3700 3350 50  0000 L BNN
 F 2 "VQFN44-XMEGA" H 2450 7130 60  0001 C CNN
+F 4 "Atmel" H 3400 5250 60  0001 C CNN "Manufacturer"
+F 5 "ATxmega32A4-MH" H 3400 5250 60  0001 C CNN "Mfg. P/N"
+F 6 "" H 3400 5250 60  0001 C CNN "Farnell"
+F 7 "" H 3400 5250 60  0001 C CNN "DigiKey"
+F 8 "Also consider: ATXMEGA32D4 (DigiKey: ATXMEGA32D4-MH-ND)" H 3400 5250 60  0001 C CNN "Comments"
 	1    3400 5250
 	1    0    0    -1  
 $EndComp
@@ -933,12 +960,17 @@ U 1 1 4B86B462
 P 9600 6000
 F 0 "U3" H 9425 6325 60  0000 C CNN
 F 1 "LM3480IM-3.3" H 9650 5725 60  0000 L CNN
-F 2 "SOT23_3" H 9365 6385 60  0001 C CNN
+F 2 "SOT23-3" H 9365 6385 60  0001 C CNN
+F 4 "National Semiconductor" H 9600 6000 60  0001 C CNN "Manufacturer"
+F 5 "LM3480IM3-3.3/NOPB" H 9600 6000 60  0001 C CNN "Mfg. P/N"
+F 6 "1469102" H 9600 6000 60  0001 C CNN "Farnell"
+F 7 "LM3480IM3-3.3CT-ND" H 9600 6000 60  0001 C CNN "DigiKey"
+F 8 "" H 9600 6000 60  0001 C CNN "Comments"
 	1    9600 6000
 	1    0    0    -1  
 $EndComp
 Text Notes 9100 3950 0    60   ~ 0
-R4 and R6 are\nscaled for a\nmaximum of 12V\n(BATTV=3V @ 12V)\n
+R4 and R5 are\nscaled for a\nmaximum of 12V\n(BATTV=3V @ 12V)\n
 Text Label 9600 3750 0    60   ~ 0
 BATTV
 $Comp
@@ -951,12 +983,17 @@ F 1 "GND" H 10100 4330 30  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R6
+L R R5
 U 1 1 4B86AC31
 P 10100 4100
-F 0 "R6" H 10250 4050 50  0000 C CNN
+F 0 "R5" H 10250 4050 50  0000 C CNN
 F 1 "10.0K" H 10300 4150 50  0000 C CNN
 F 2 "SM0402" H 10300 4000 60  0001 C CNN
+F 4 "multicomp" H 10100 4100 60  0001 C CNN "Manufacturer"
+F 5 "MC 0.0625W 0402 1% 10K" H 10100 4100 60  0001 C CNN "Mfg. P/N"
+F 6 "1358069" H 10100 4100 60  0001 C CNN "Farnell"
+F 7 "" H 10100 4100 60  0001 C CNN "DigiKey"
+F 8 "1%, 0.06W" H 10100 4100 60  0001 C CNN "Comments"
 	1    10100 4100
 	1    0    0    -1  
 $EndComp
@@ -967,6 +1004,11 @@ P 10100 3400
 F 0 "R4" H 10250 3350 50  0000 C CNN
 F 1 "30.0K" H 10300 3450 50  0000 C CNN
 F 2 "SM0402" H 10300 3300 60  0001 C CNN
+F 4 "multicomp" H 10100 3400 60  0001 C CNN "Manufacturer"
+F 5 "MC 0.0625W 0402 1% 10K" H 10100 3400 60  0001 C CNN "Mfg. P/N"
+F 6 "1358082" H 10100 3400 60  0001 C CNN "Farnell"
+F 7 "" H 10100 3400 60  0001 C CNN "DigiKey"
+F 8 "1%, 0.06W" H 10100 3400 60  0001 C CNN "Comments"
 	1    10100 3400
 	1    0    0    -1  
 $EndComp

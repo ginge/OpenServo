@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 04/05/2010 11:09:49
+EESchema Schematic File Version 2  date 07/05/2010 17:07:47
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 1 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "4 may 2010"
+Date "7 may 2010"
 Rev ""
 Comp ""
 Comment1 ""
@@ -45,6 +45,8 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
+Text Notes 1550 4900 0    157  ~ 31
+NOTE: This is the latest schematic and does not match the PCB and\nother items which you may currently find in the same location as this\ndocument- the PCB design is being redone.\n\nNote also that this is most definitely a “Work In Progress” that is in a\nstate of flux... It is presented for review purposes only and does not\nrepresent an end product!
 Text Notes 600  800  0    157  ~ 31
 NOTE: This is a “Work In Progress”; implement at your own risk.
 Text Notes 1150 1300 0    118  ~ 0

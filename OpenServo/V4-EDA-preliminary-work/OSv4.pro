@@ -1,4 +1,4 @@
-update=04/05/2010 11:10:29
+update=07/05/2010 17:45:45
 version=1
 last_client=eeschema
 [cvpcb]
@@ -16,8 +16,8 @@ version=1
 [pcbnew]
 version=1
 PadDrlX=0
-PadDimH=2048
-PadDimV=2048
+PadDimH=237
+PadDimV=354
 BoardThickness=630
 RouteTo=15
 RouteBo=0
@@ -52,8 +52,11 @@ LibName12=SMD0402
 LibName13=RP0804
 LibName14=OPTPAD
 LibName15=EDGEPIN
-LibName16=SOT23_3
-LibName17=ZXCT1009
+LibName16=ZXCT1009
+LibName17=SOIC8
+LibName18=sot23-3
+LibName19=SOT23_3
+LibName20=MLF1608E100K
 [eeschema]
 version=1
 LibDir=
