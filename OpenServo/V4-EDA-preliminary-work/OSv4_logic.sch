@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 08/05/2010 23:36:58
+EESchema Schematic File Version 2  date 08/05/2010 23:44:42
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -45,17 +45,16 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-NoConn ~ 6350 2950
+NoConn ~ 8000 2250
+NoConn ~ 8000 2350
+NoConn ~ 8000 2450
+NoConn ~ 8000 2550
+NoConn ~ 7600 2550
+NoConn ~ 7600 2450
+NoConn ~ 7600 2350
+NoConn ~ 7600 2250
 Text Notes 6400 2850 0    60   ~ 0
 RP1 would have provided some limited protection against\nconnection and programming errors; however design\nconsiderations on the PCB mean that this is one of the\nitems that probably has to be dropped from the design.
-NoConn ~ 8100 2500
-NoConn ~ 8100 2600
-NoConn ~ 7700 2600
-NoConn ~ 7700 2500
-NoConn ~ 7700 2400
-NoConn ~ 7700 2300
-NoConn ~ 8100 2400
-NoConn ~ 8100 2300
 Wire Wire Line
 	7050 2050 5650 2050
 Wire Wire Line
