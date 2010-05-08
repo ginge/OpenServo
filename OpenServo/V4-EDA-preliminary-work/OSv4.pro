@@ -1,4 +1,4 @@
-update=07/05/2010 17:45:45
+update=08/05/2010 01:00:28
 version=1
 last_client=eeschema
 [cvpcb]
@@ -16,8 +16,8 @@ version=1
 [pcbnew]
 version=1
 PadDrlX=0
-PadDimH=237
-PadDimV=354
+PadDimH=393
+PadDimV=551
 BoardThickness=630
 RouteTo=15
 RouteBo=0
@@ -48,15 +48,15 @@ LibName8=valves
 LibName9=led
 LibName10=dip_sockets
 LibName11=atxmega
-LibName12=SMD0402
-LibName13=RP0804
-LibName14=OPTPAD
-LibName15=EDGEPIN
-LibName16=ZXCT1009
-LibName17=SOIC8
-LibName18=sot23-3
-LibName19=SOT23_3
-LibName20=MLF1608E100K
+LibName12=smd0402
+LibName13=optpad
+LibName14=edgepin
+LibName15=zxct1009
+LibName16=soic8
+LibName17=sot23-3
+LibName18=sot23_3
+LibName19=mlf1608e100k
+LibName20=cay10-xxxj4
 [eeschema]
 version=1
 LibDir=
