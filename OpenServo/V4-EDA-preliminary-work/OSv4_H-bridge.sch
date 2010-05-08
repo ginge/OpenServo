@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 08/05/2010 00:59:33
+EESchema Schematic File Version 2  date 08/05/2010 23:36:58
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 3 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "7 may 2010"
+Date "8 may 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -45,36 +45,39 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text Notes 5200 2550 0    60   ~ 0
-TODO: Change R2 for 0.5W 1% SM1206?
-Connection ~ 1800 4850
 Wire Wire Line
-	1800 4850 1800 6100
+	3350 7000 3350 6200
+Wire Wire Line
+	1800 6000 1800 5250
+Wire Wire Line
+	1800 6000 2600 6000
+Connection ~ 3900 5250
+Wire Wire Line
+	3900 4650 3900 5250
+Wire Wire Line
+	3900 4650 3800 4650
+Connection ~ 3200 6000
+Wire Wire Line
+	3000 6000 3200 6000
+Connection ~ 2050 6200
+Wire Wire Line
+	2600 6200 2050 6200
+Wire Wire Line
+	9950 6850 3500 6850
+Connection ~ 1600 4850
+Connection ~ 1800 5250
 Connection ~ 9950 4850
 Wire Wire Line
-	9950 4850 9950 6850
-Wire Wire Line
-	9950 6850 3750 6850
-Wire Wire Line
-	3750 6850 3750 6000
-Wire Wire Line
-	3750 6000 3000 6000
-Connection ~ 2400 6200
-Wire Wire Line
-	2600 6200 2400 6200
-Wire Wire Line
-	2400 6550 2400 6000
-Wire Wire Line
-	2400 6000 2600 6000
+	9950 6850 9950 4850
 Wire Wire Line
 	4900 5800 4200 5800
 Wire Wire Line
 	6700 4200 7450 4200
 Wire Wire Line
-	6450 6000 6450 6200
+	6450 6200 6450 6000
 Connection ~ 6400 4550
 Wire Wire Line
-	6500 4450 6500 4550
+	6500 4550 6500 4450
 Wire Wire Line
 	6500 4550 6350 4550
 Wire Wire Line
@@ -86,9 +89,9 @@ Wire Wire Line
 Wire Wire Line
 	5100 5450 5100 5550
 Wire Wire Line
-	5150 6000 5150 6200
+	5150 6200 5150 6000
 Wire Wire Line
-	5100 4450 5100 4550
+	5100 4550 5100 4450
 Wire Wire Line
 	7850 5250 7450 5250
 Wire Wire Line
@@ -114,7 +117,7 @@ Wire Wire Line
 Wire Wire Line
 	4200 5250 4200 5800
 Wire Wire Line
-	3800 2300 3800 2400
+	3800 2400 3800 2300
 Wire Wire Line
 	3800 2400 4400 2400
 Connection ~ 5800 2200
@@ -131,7 +134,7 @@ Connection ~ 6550 2100
 Wire Wire Line
 	6550 2100 6550 2000
 Wire Wire Line
-	7250 2000 7250 2100
+	7250 2100 7250 2000
 Connection ~ 6900 1500
 Wire Wire Line
 	6900 1500 6900 1600
@@ -144,7 +147,7 @@ Wire Wire Line
 Connection ~ 4250 2400
 Connection ~ 3800 1800
 Wire Wire Line
-	7250 2100 6200 2100
+	6200 2100 7250 2100
 Connection ~ 5200 5000
 Wire Wire Line
 	5450 5000 5200 5000
@@ -153,10 +156,10 @@ Wire Wire Line
 Wire Wire Line
 	5100 4550 5250 4550
 Wire Wire Line
-	5200 4550 5200 5450
+	5200 5450 5200 4550
 Connection ~ 5800 6200
 Wire Wire Line
-	5150 6200 6450 6200
+	6450 6200 5150 6200
 Wire Wire Line
 	5150 3800 6450 3800
 Connection ~ 5800 3800
@@ -164,7 +167,7 @@ Wire Wire Line
 	6150 5000 6400 5000
 Connection ~ 6400 5000
 Wire Wire Line
-	5800 1500 7250 1500
+	7250 1500 5800 1500
 Wire Wire Line
 	5800 1400 5450 1400
 Connection ~ 5800 1400
@@ -184,19 +187,19 @@ Wire Wire Line
 	6900 2100 6900 2000
 Connection ~ 6900 2100
 Wire Wire Line
-	5800 2050 5800 3800
+	5800 3800 5800 2050
 Wire Wire Line
 	5800 1550 5800 1300
 Wire Wire Line
 	4250 2500 4250 2400
 Wire Wire Line
-	3800 1900 3800 1800
+	3800 1800 3800 1900
 Wire Wire Line
 	4200 4850 4200 4200
 Wire Wire Line
 	4000 3600 4000 5050
 Wire Wire Line
-	1200 4850 2300 4850
+	2300 4850 1200 4850
 Wire Wire Line
 	4000 5050 3800 5050
 Wire Wire Line
@@ -216,7 +219,7 @@ Wire Wire Line
 Wire Wire Line
 	6450 3800 6450 4000
 Wire Wire Line
-	6350 5550 6350 5450
+	6350 5450 6350 5550
 Wire Wire Line
 	6350 5450 6500 5450
 Wire Wire Line
@@ -229,28 +232,34 @@ Wire Wire Line
 Wire Wire Line
 	4200 4200 4900 4200
 Wire Wire Line
-	3000 6100 3200 6100
+	3200 5900 3000 5900
 Wire Wire Line
-	2600 5900 1600 5900
+	3200 6550 3200 5900
 Wire Wire Line
-	1600 5900 1600 5250
-Connection ~ 1600 5250
-Wire Wire Line
-	1800 6100 2600 6100
-Wire Wire Line
-	3000 5900 3200 5900
-Wire Wire Line
-	3200 5900 3200 6550
-Connection ~ 3200 6100
-Wire Wire Line
-	3000 6200 3600 6200
-Wire Wire Line
-	3600 6200 3600 7000
-Wire Wire Line
-	3600 7000 10100 7000
+	3350 7000 10100 7000
 Wire Wire Line
 	10100 7000 10100 5250
 Connection ~ 10100 5250
+Wire Wire Line
+	2600 6100 2050 6100
+Connection ~ 2050 6100
+Wire Wire Line
+	3350 6200 3000 6200
+Wire Wire Line
+	3000 6100 3500 6100
+Wire Wire Line
+	2600 5900 1600 5900
+Wire Wire Line
+	1600 5900 1600 4850
+Wire Wire Line
+	3500 6100 3500 6850
+Connection ~ 3500 6850
+Text Notes 1350 4200 0    60   ~ 0
+NOTE: According to the docs, pin 5 on U5 has\n"no internal connection"; it has been used for\nrouting purposes on the PCB.\n\nTODO: TEST!
+Text Notes 900  2650 0    60   ~ 0
+U5 & U6 (TC4428A): Originally the intention was to use the\nMSOP-8 package which would allow more room on the PCB\nfor other things. However, this packaging only appears to be\navailable when purchased in large quantities; which is not\nworkable for a project where there is an expectation to be\nable to produce low-count runs.
+Text Notes 5200 2550 0    60   ~ 0
+TODO: Change R2 for 0.5W 1% SM1206?
 $Comp
 L GND #PWR022
 U 1 1 4BE1E85D
@@ -262,15 +271,6 @@ F 1 "GND" H 3200 6480 30  0001 C CNN
 $EndComp
 Text Notes 600  800  0    157  ~ 31
 NOTE: This is a “Work In Progress”; implement at your own risk.
-$Comp
-L GND #PWR023
-U 1 1 4BB67093
-P 2400 6550
-F 0 "#PWR023" H 2400 6550 30  0001 C CNN
-F 1 "GND" H 2400 6480 30  0001 C CNN
-	1    2400 6550
-	1    0    0    -1  
-$EndComp
 $Comp
 L R_PACK4 RP2
 U 1 1 4BB66F52
@@ -303,8 +303,13 @@ L NP_MOSFET U8
 U 2 1 4BAFC8F5
 P 6450 4200
 F 0 "U8" H 6225 4365 60  0000 C CNN
-F 1 "NP_MOSFET" H 6100 4500 60  0000 C CNN
+F 1 "MOSFET" H 6100 4500 60  0000 C CNN
 F 2 "SOIC8" H 6165 4425 60  0001 C CNN
+F 4 "ROHM" H 6450 4200 60  0001 C CNN "Manufacturer"
+F 5 "SP8M4FU6TB" H 6450 4200 60  0001 C CNN "Mfg. P/N"
+F 6 "1525587" H 6450 4200 60  0001 C CNN "Farnell"
+F 7 "" H 6450 4200 60  0001 C CNN "DigiKey"
+F 8 "" H 6450 4200 60  0001 C CNN "Comments"
 	2    6450 4200
 	-1   0    0    1   
 $EndComp
@@ -313,8 +318,13 @@ L NP_MOSFET U8
 U 1 1 4BAFC8A1
 P 6450 5800
 F 0 "U8" H 6225 5965 60  0000 C CNN
-F 1 "NP_MOSFET" H 6100 6100 60  0000 C CNN
+F 1 "MOSFET" H 6100 6100 60  0000 C CNN
 F 2 "SOIC8" H 6165 6025 60  0001 C CNN
+F 4 "ROHM" H 6450 5800 60  0001 C CNN "Manufacturer"
+F 5 "SP8M4FU6TB" H 6450 5800 60  0001 C CNN "Mfg. P/N"
+F 6 "1525587" H 6450 5800 60  0001 C CNN "Farnell"
+F 7 "" H 6450 5800 60  0001 C CNN "DigiKey"
+F 8 "" H 6450 5800 60  0001 C CNN "Comments"
 	1    6450 5800
 	-1   0    0    -1  
 $EndComp
@@ -323,8 +333,13 @@ L NP_MOSFET U7
 U 2 1 4BAFC7E3
 P 5150 4200
 F 0 "U7" H 4925 4365 60  0000 C CNN
-F 1 "NP_MOSFET" H 4800 4500 60  0000 C CNN
+F 1 "MOSFET" H 4800 4500 60  0000 C CNN
 F 2 "SOIC8" H 5150 4200 60  0001 C CNN
+F 4 "ROHM" H 5150 4200 60  0001 C CNN "Manufacturer"
+F 5 "SP8M4FU6TB" H 5150 4200 60  0001 C CNN "Mfg. P/N"
+F 6 "1525587" H 5150 4200 60  0001 C CNN "Farnell"
+F 7 "" H 5150 4200 60  0001 C CNN "DigiKey"
+F 8 "" H 5150 4200 60  0001 C CNN "Comments"
 	2    5150 4200
 	1    0    0    1   
 $EndComp
@@ -333,12 +348,16 @@ L NP_MOSFET U7
 U 1 1 4BAFC774
 P 5150 5800
 F 0 "U7" H 4925 5965 60  0000 C CNN
-F 1 "NP_MOSFET" H 4800 6100 60  0000 C CNN
+F 1 "MOSFET" H 4800 6100 60  0000 C CNN
 F 2 "SOIC8" H 4865 6025 60  0001 C CNN
+F 4 "ROHM" H 5150 5800 60  0001 C CNN "Manufacturer"
+F 5 "SP8M4FU6TB" H 5150 5800 60  0001 C CNN "Mfg. P/N"
+F 6 "1525587" H 5150 5800 60  0001 C CNN "Farnell"
+F 7 "" H 5150 5800 60  0001 C CNN "DigiKey"
+F 8 "" H 5150 5800 60  0001 C CNN "Comments"
 	1    5150 5800
 	1    0    0    -1  
 $EndComp
-NoConn ~ 3800 4650
 NoConn ~ 9350 4650
 NoConn ~ 7850 4650
 NoConn ~ 2300 4650
@@ -398,10 +417,10 @@ PWM_A
 Text GLabel 1200 5250 0    60   Input ~ 0
 EN_B
 $Comp
-L GND #PWR024
+L GND #PWR023
 U 1 1 4B8AEABA
 P 2050 6550
-F 0 "#PWR024" H 2050 6550 30  0001 C CNN
+F 0 "#PWR023" H 2050 6550 30  0001 C CNN
 F 1 "GND" H 2050 6480 30  0001 C CNN
 	1    2050 6550
 	1    0    0    -1  
@@ -409,10 +428,10 @@ $EndComp
 Text Notes 3900 1500 0    60   ~ 0
 TODO: R1 and R3 need\nadjustment for V4.\n
 $Comp
-L GND #PWR025
+L GND #PWR024
 U 1 1 4B8A7BF3
 P 4250 2500
-F 0 "#PWR025" H 4250 2500 30  0001 C CNN
+F 0 "#PWR024" H 4250 2500 30  0001 C CNN
 F 1 "GND" H 4250 2430 30  0001 C CNN
 	1    4250 2500
 	1    0    0    -1  
@@ -439,6 +458,11 @@ P 4400 2100
 F 0 "R3" H 4500 2050 50  0000 C CNN
 F 1 "R" H 4500 2150 50  0000 C CNN
 F 2 "SM0402" H 4550 2000 60  0001 C CNN
+F 4 "" H 4400 2100 60  0001 C CNN "Manufacturer"
+F 5 "" H 4400 2100 60  0001 C CNN "Mfg. P/N"
+F 6 "" H 4400 2100 60  0001 C CNN "Farnell"
+F 7 "" H 4400 2100 60  0001 C CNN "DigiKey"
+F 8 "" H 4400 2100 60  0001 C CNN "Comments"
 	1    4400 2100
 	1    0    0    -1  
 $EndComp
@@ -449,23 +473,28 @@ P 4700 1800
 F 0 "R1" V 4780 1800 50  0000 C CNN
 F 1 "R" V 4700 1800 50  0000 C CNN
 F 2 "SM0402" V 4830 1750 60  0001 C CNN
+F 4 "" H 4700 1800 60  0001 C CNN "Manufacturer"
+F 5 "" H 4700 1800 60  0001 C CNN "Mfg. P/N"
+F 6 "" H 4700 1800 60  0001 C CNN "Farnell"
+F 7 "" H 4700 1800 60  0001 C CNN "DigiKey"
+F 8 "" H 4700 1800 60  0001 C CNN "Comments"
 	1    4700 1800
 	0    1    1    0   
 $EndComp
 $Comp
-L GND #PWR026
+L GND #PWR025
 U 1 1 4B8A7A9A
 P 6200 2350
-F 0 "#PWR026" H 6200 2350 30  0001 C CNN
+F 0 "#PWR025" H 6200 2350 30  0001 C CNN
 F 1 "GND" H 6200 2280 30  0001 C CNN
 	1    6200 2350
 	1    0    0    -1  
 $EndComp
 $Comp
-L +BATT #PWR027
+L +BATT #PWR026
 U 1 1 4B8A7A61
 P 5800 1300
-F 0 "#PWR027" H 5800 1250 20  0001 C CNN
+F 0 "#PWR026" H 5800 1250 20  0001 C CNN
 F 1 "+BATT" H 5800 1400 30  0000 C CNN
 	1    5800 1300
 	1    0    0    -1  
@@ -561,37 +590,37 @@ F 8 "Farnell equiv: 1132757" H 5300 1800 60  0001 C CNN "Comments"
 	0    1    1    0   
 $EndComp
 $Comp
-L +BATT #PWR028
+L +BATT #PWR027
 U 1 1 4B89B9B8
 P 7650 3600
-F 0 "#PWR028" H 7650 3550 20  0001 C CNN
+F 0 "#PWR027" H 7650 3550 20  0001 C CNN
 F 1 "+BATT" H 7650 3700 30  0000 C CNN
 	1    7650 3600
 	1    0    0    -1  
 $EndComp
 $Comp
-L +BATT #PWR029
+L +BATT #PWR028
 U 1 1 4B89B9AA
 P 4000 3600
-F 0 "#PWR029" H 4000 3550 20  0001 C CNN
+F 0 "#PWR028" H 4000 3550 20  0001 C CNN
 F 1 "+BATT" H 4000 3700 30  0000 C CNN
 	1    4000 3600
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR030
+L GND #PWR029
 U 1 1 4B89B98B
 P 9600 6550
-F 0 "#PWR030" H 9600 6550 30  0001 C CNN
+F 0 "#PWR029" H 9600 6550 30  0001 C CNN
 F 1 "GND" H 9600 6480 30  0001 C CNN
 	1    9600 6550
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR031
+L GND #PWR030
 U 1 1 4B89B96E
 P 5800 6550
-F 0 "#PWR031" H 5800 6550 30  0001 C CNN
+F 0 "#PWR030" H 5800 6550 30  0001 C CNN
 F 1 "GND" H 5800 6480 30  0001 C CNN
 	1    5800 6550
 	1    0    0    -1  
