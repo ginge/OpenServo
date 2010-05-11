@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 08/05/2010 23:44:42
+EESchema Schematic File Version 2  date 11/05/2010 23:49:02
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "8 may 2010"
+Date "11 may 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -45,20 +45,22 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-NoConn ~ 8000 2250
-NoConn ~ 8000 2350
-NoConn ~ 8000 2450
-NoConn ~ 8000 2550
-NoConn ~ 7600 2550
-NoConn ~ 7600 2450
-NoConn ~ 7600 2350
-NoConn ~ 7600 2250
-Text Notes 6400 2850 0    60   ~ 0
-RP1 would have provided some limited protection against\nconnection and programming errors; however design\nconsiderations on the PCB mean that this is one of the\nitems that probably has to be dropped from the design.
+Text Notes 2100 2600 0    60   ~ 0
+NOTE: The XMEGA has an integrated temperature sensor.\nHowever, U2 can be placed close to the MOSFETs and\nmotor end of the PCB; which likely gives more qualitative\ndata than using the one inside the MCU. Could U2 be\ndropped if board space becomes a problem?
+Connection ~ 6850 2050
 Wire Wire Line
-	7050 2050 5650 2050
+	6850 2050 6850 2150
+Connection ~ 6750 1750
+Connection ~ 6650 1850
+Wire Wire Line
+	6650 1850 6650 2350
+Connection ~ 6550 1950
+Wire Wire Line
+	6550 1950 6550 2450
 Wire Wire Line
 	5350 1850 7050 1850
+Wire Wire Line
+	7050 2050 5650 2050
 Wire Notes Line
 	6150 2100 6150 1700
 Wire Notes Line
@@ -69,15 +71,9 @@ Wire Notes Line
 	6350 1700 6150 1700
 Connection ~ 10400 5650
 Wire Wire Line
-	10400 4950 10400 5900
+	10400 5900 10400 4950
 Wire Wire Line
-	7050 2350 6650 2350
-Wire Wire Line
-	6550 1950 6550 2450
-Connection ~ 5850 2050
-Wire Wire Line
-	5850 2050 5850 1450
-Connection ~ 6550 1950
+	6650 2350 7050 2350
 Wire Wire Line
 	10100 1100 10100 1550
 Wire Wire Line
@@ -95,7 +91,7 @@ Wire Wire Line
 Wire Wire Line
 	5150 6750 4500 6750
 Wire Wire Line
-	5850 1450 7050 1450
+	7050 1450 5850 1450
 Wire Wire Line
 	1600 4050 1750 4050
 Connection ~ 8800 6450
@@ -121,9 +117,9 @@ Wire Wire Line
 Wire Wire Line
 	10400 6450 10400 6300
 Wire Wire Line
-	9600 6650 9600 6350
+	9600 6350 9600 6650
 Wire Wire Line
-	8800 5900 8800 5800
+	8800 5800 8800 5900
 Wire Wire Line
 	4650 3550 4500 3550
 Wire Wire Line
@@ -143,15 +139,13 @@ Wire Wire Line
 Wire Wire Line
 	4300 2250 5650 2250
 Wire Wire Line
-	6650 2350 6650 1850
-Wire Wire Line
 	4650 5550 4500 5550
 Wire Wire Line
 	4650 5350 4500 5350
 Wire Wire Line
 	4650 5150 4500 5150
 Wire Wire Line
-	8800 5000 8800 5400
+	8800 5400 8800 5000
 Wire Wire Line
 	5850 4350 5850 4200
 Wire Wire Line
@@ -172,7 +166,7 @@ Wire Wire Line
 	4500 4150 4650 4150
 Connection ~ 1750 3550
 Wire Wire Line
-	1100 3550 1850 3550
+	1850 3550 1100 3550
 Connection ~ 1050 4700
 Wire Wire Line
 	1050 4700 1250 4700
@@ -185,11 +179,11 @@ Connection ~ 1050 4900
 Wire Wire Line
 	1050 4900 1850 4900
 Wire Wire Line
-	1850 5500 1650 5500
+	1650 5500 1850 5500
 Wire Wire Line
-	1850 5100 1650 5100
+	1650 5100 1850 5100
 Wire Wire Line
-	1850 4700 1650 4700
+	1650 4700 1850 4700
 Connection ~ 10100 3750
 Wire Wire Line
 	9600 3750 10100 3750
@@ -222,7 +216,7 @@ Wire Wire Line
 Connection ~ 10100 1300
 Connection ~ 10100 2100
 Wire Wire Line
-	10100 3650 10100 3850
+	10100 3850 10100 3650
 Wire Wire Line
 	1700 4700 1700 4550
 Connection ~ 1700 4700
@@ -287,7 +281,7 @@ Wire Wire Line
 	9200 5850 8800 5850
 Connection ~ 8800 5850
 Wire Wire Line
-	10400 5850 10000 5850
+	10000 5850 10400 5850
 Connection ~ 10400 5850
 Wire Wire Line
 	8800 6450 8800 6300
@@ -309,7 +303,7 @@ Wire Wire Line
 Wire Wire Line
 	7900 3800 7300 3800
 Wire Wire Line
-	1650 4300 1850 4300
+	1850 4300 1650 4300
 Wire Wire Line
 	4300 1650 4650 1650
 Wire Wire Line
@@ -335,7 +329,6 @@ Wire Wire Line
 	9850 1850 10100 1850
 Wire Wire Line
 	10100 1850 10100 2350
-Connection ~ 6650 1850
 Wire Wire Line
 	5950 1750 5950 1550
 Connection ~ 5950 1750
@@ -344,13 +337,7 @@ Wire Wire Line
 Wire Wire Line
 	7050 2250 6750 2250
 Wire Wire Line
-	6750 2250 6750 2050
-Connection ~ 6750 2050
-Wire Wire Line
-	7050 2150 6850 2150
-Wire Wire Line
-	6850 2150 6850 1950
-Connection ~ 6850 1950
+	6850 2150 7050 2150
 Wire Wire Line
 	6550 2450 7050 2450
 Wire Wire Line
@@ -369,9 +356,24 @@ Wire Notes Line
 Wire Notes Line
 	10300 5600 10300 5100
 Wire Wire Line
-	5350 1750 7050 1750
+	7050 1750 5350 1750
 Wire Wire Line
-	5350 1950 7050 1950
+	7050 1950 5350 1950
+Wire Wire Line
+	5850 1450 5850 2050
+Connection ~ 5850 2050
+Wire Wire Line
+	6750 2250 6750 1750
+NoConn ~ 8000 2250
+NoConn ~ 8000 2350
+NoConn ~ 8000 2450
+NoConn ~ 8000 2550
+NoConn ~ 7600 2550
+NoConn ~ 7600 2450
+NoConn ~ 7600 2350
+NoConn ~ 7600 2250
+Text Notes 6400 2850 0    60   ~ 0
+RP1 would have provided some limited protection against\nconnection and programming errors; however design\nconsiderations on the PCB mean that this is one of the\nitems that probably has to be dropped.
 Text Notes 10700 5900 1    60   Italic 0
 47nH, 5%, DCR<0.3ohm, >100mA
 Text Notes 9050 4750 0    60   Italic 0
@@ -637,7 +639,7 @@ F 2 "OPTPAD" H 7000 3800 60  0001 C CNN
 	1    7000 3800
 	-1   0    0    1   
 $EndComp
-Text GLabel 4650 4150 2    60   Input ~ 0
+Text GLabel 4650 3950 2    60   Input ~ 0
 CURRENT
 Text GLabel 6450 6600 2    60   Output ~ 0
 PWM_A
@@ -747,13 +749,13 @@ Text Label 7050 2450 0    30   ~ 0
 SDA_host
 Text Label 7050 2350 0    30   ~ 0
 SCL_host
-Text Label 7050 2050 0    30   ~ 0
-SPI_1_~SS~
-Text Label 7050 1950 0    30   ~ 0
-SPI_1_MOSI_USART_2_XCK
 Text Label 7050 1750 0    30   ~ 0
-SPI_1_MISO_USART_2_RXD
+SPI_1_~SS~
+Text Label 7050 2050 0    30   ~ 0
+SPI_1_MOSI_USART_2_XCK
 Text Label 7050 1850 0    30   ~ 0
+SPI_1_MISO_USART_2_RXD
+Text Label 7050 1950 0    30   ~ 0
 SPI_1_SCK_USART_2_TXD
 Text Label 4650 5450 0    30   ~ 0
 SCL_host
@@ -790,7 +792,7 @@ F 2 "OPTPAD" H 6250 4200 60  0001 C CNN
 	1    0    0    -1  
 $EndComp
 NoConn ~ 4500 3750
-Text Label 4650 3950 0    30   ~ 0
+Text Label 4650 4150 0    30   ~ 0
 TEMPERATURE
 Text Label 4650 3850 0    30   ~ 0
 POSITION
