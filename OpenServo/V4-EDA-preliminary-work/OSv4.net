@@ -1,4 +1,4 @@
-# EESchema Netlist Version 1.1 created  11/05/2010 21:45:03
+# EESchema Netlist Version 1.1 created  13/05/2010 00:48:00
 (
  ( /4B96C947/4B8AE5FB OPTPAD  JP5 +3.3V {Lib=OPTION}
   (    1 VCC )
@@ -143,9 +143,9 @@
   (   43 N-000002 )
   (   44 /OSv4_logic/POSITION )
  )
- ( /4B96C947/4B86F84F SOD-923  D1 DIODE {Lib=DIODE}
-  (    1 +BATT )
-  (    2 N-000033 )
+ ( /4B96C947/4B86F84F SOD-923  D1 DIODE {Lib=DIODE2}
+  (    1 N-000033 )
+  (    2 +BATT )
  )
  ( /4B96C947/4B86F81A SM0603  C12 22uF_16V {Lib=CP1}
   (    1 N-000033 )
@@ -478,7 +478,7 @@ Net 5 "+BATT" "+BATT"
  R2 1
  U5 7
  R4 1
- D1 1
+ D1 2
  P1-1 1
  P1-2 1
  U6 7
@@ -587,7 +587,7 @@ Net 32 "VCC" "VCC"
  U4 31
  U4 9
 Net 33 "" ""
- D1 2
+ D1 1
  C12 1
  U3 2
 Net 34 "+3.3VADC" "+3.3VADC"

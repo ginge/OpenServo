@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 11/05/2010 23:49:02
+EESchema Schematic File Version 2  date 13/05/2010 00:13:19
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "11 may 2010"
+Date "12 may 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -966,7 +966,7 @@ F 1 "+BATT" H 8800 5100 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L DIODE D1
+L DIODE2 D1
 U 1 1 4B86F84F
 P 8800 5600
 F 0 "D1" V 8800 5700 40  0000 C CNN
