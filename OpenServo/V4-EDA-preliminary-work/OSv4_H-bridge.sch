@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 13/05/2010 00:13:19
+EESchema Schematic File Version 2  date 13/05/2010 22:32:29
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 3 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "12 may 2010"
+Date "13 may 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -280,9 +280,9 @@ F 1 "R_PACK4" H 2800 6200 40  0000 C CNN
 F 2 "CAY10-XXXJ4" H 2760 6740 60  0001 C CNN
 F 4 "Bourns" H 2800 6250 60  0001 C CNN "Manufacturer"
 F 5 "CAY10-103J4LF" H 2800 6250 60  0001 C CNN "Mfg. P/N"
-F 6 "1770152RL" H 2800 6250 60  0001 C CNN "Farnell"
+F 6 "1770152" H 2800 6250 60  0001 C CNN "Farnell"
 F 7 "" H 2800 6250 60  0001 C CNN "DigiKey"
-F 8 "" H 2800 6250 60  0001 C CNN "Comments"
+F 8 "YC124-JR-07100RL is cheaper for lower counts; but footprint may need revision" H 2800 6250 60  0001 C CNN "Comments"
 	1    2800 6250
 	1    0    0    -1  
 $EndComp
@@ -456,13 +456,13 @@ L R R3
 U 1 1 4B8A7AFF
 P 4400 2100
 F 0 "R3" H 4500 2050 50  0000 C CNN
-F 1 "R" H 4500 2150 50  0000 C CNN
+F 1 "4.99K" H 4500 2150 50  0000 C CNN
 F 2 "SM0402" H 4550 2000 60  0001 C CNN
-F 4 "" H 4400 2100 60  0001 C CNN "Manufacturer"
-F 5 "" H 4400 2100 60  0001 C CNN "Mfg. P/N"
-F 6 "" H 4400 2100 60  0001 C CNN "Farnell"
+F 4 "multicomp" H 4400 2100 60  0001 C CNN "Manufacturer"
+F 5 "MC 0.0625W 0402 1% 4K99" H 4400 2100 60  0001 C CNN "Mfg. P/N"
+F 6 "1803107" H 4400 2100 60  0001 C CNN "Farnell"
 F 7 "" H 4400 2100 60  0001 C CNN "DigiKey"
-F 8 "" H 4400 2100 60  0001 C CNN "Comments"
+F 8 "1%, 0.06W" H 4400 2100 60  0001 C CNN "Comments"
 	1    4400 2100
 	1    0    0    -1  
 $EndComp
@@ -470,14 +470,14 @@ $Comp
 L R R1
 U 1 1 4B8A7AF8
 P 4700 1800
-F 0 "R1" V 4780 1800 50  0000 C CNN
-F 1 "R" V 4700 1800 50  0000 C CNN
+F 0 "R1" V 4800 1800 50  0000 C CNN
+F 1 "1K" V 4600 1750 50  0000 C CNN
 F 2 "SM0402" V 4830 1750 60  0001 C CNN
-F 4 "" H 4700 1800 60  0001 C CNN "Manufacturer"
-F 5 "" H 4700 1800 60  0001 C CNN "Mfg. P/N"
-F 6 "" H 4700 1800 60  0001 C CNN "Farnell"
+F 4 "multicomp" H 4700 1800 60  0001 C CNN "Manufacturer"
+F 5 "MC 0.0625W 0402 1% 1K" H 4700 1800 60  0001 C CNN "Mfg. P/N"
+F 6 "1358043" H 4700 1800 60  0001 C CNN "Farnell"
 F 7 "" H 4700 1800 60  0001 C CNN "DigiKey"
-F 8 "" H 4700 1800 60  0001 C CNN "Comments"
+F 8 "1%, 0.06W" H 4700 1800 60  0001 C CNN "Comments"
 	1    4700 1800
 	0    1    1    0   
 $EndComp

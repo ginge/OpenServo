@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 13/05/2010 00:13:19
+EESchema Schematic File Version 2  date 13/05/2010 22:32:29
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "12 may 2010"
+Date "13 may 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -593,7 +593,7 @@ F 1 "R_PACK4" H 7800 2150 40  0000 C CNN
 F 2 "CAY10-XXXJ4" H 7760 2690 60  0001 C CNN
 F 4 "Bourns" H 7800 2200 60  0001 C CNN "Manufacturer"
 F 5 "CAY10-101J4LF" H 7800 2200 60  0001 C CNN "Mfg. P/N"
-F 6 "1770149RL" H 7800 2200 60  0001 C CNN "Farnell"
+F 6 "1770149" H 7800 2200 60  0001 C CNN "Farnell"
 F 7 "" H 7800 2200 60  0001 C CNN "DigiKey"
 F 8 "" H 7800 2200 60  0001 C CNN "Comments"
 	1    7800 2200
