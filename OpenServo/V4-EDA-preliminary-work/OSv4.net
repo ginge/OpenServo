@@ -1,4 +1,4 @@
-# EESchema Netlist Version 1.1 created  13/05/2010 00:48:00
+# EESchema Netlist Version 1.1 created  15/05/2010 00:35:29
 (
  ( /4B96C947/4B8AE5FB OPTPAD  JP5 +3.3V {Lib=OPTION}
   (    1 VCC )
@@ -233,11 +233,11 @@
   (    1 N-000002 )
   (    2 GND )
  )
- ( /4B96C926/4B8A7AFF SM0402  R3 R {Lib=R}
+ ( /4B96C926/4B8A7AFF SM0402  R3 4.99K {Lib=R}
   (    1 N-000002 )
   (    2 GND )
  )
- ( /4B96C926/4B8A7AF8 SM0402  R1 R {Lib=R}
+ ( /4B96C926/4B8A7AF8 SM0402  R1 1K {Lib=R}
   (    1 N-000014 )
   (    2 N-000002 )
  )
