@@ -1,4 +1,4 @@
-# EESchema Netlist Version 1.1 created  15/05/2010 00:35:29
+# EESchema Netlist Version 1.1 created  14/06/2010 22:45:47
 (
  ( /4B96C947/4B8AE5FB OPTPAD  JP5 +3.3V {Lib=OPTION}
   (    1 VCC )
@@ -19,10 +19,10 @@
   (    1 /OSv4_logic/SDA_host )
  )
  ( /4B96C947/4BB8766A EDGEPIN  P1-6 P1 {Lib=EDGEPIN}
-  (    1 /OSv4_logic/SCL_host )
+  (    1 /OSv4_logic/SPI_1_MISO_USART_2_RXD )
  )
  ( /4B96C947/4BB87660 EDGEPIN  P1-4 P1 {Lib=EDGEPIN}
-  (    1 /OSv4_logic/PA6_(GPIO) )
+  (    1 /OSv4_logic/USART_1_TXD )
  )
  ( /4B96C947/4BB87646 EDGEPIN  P1-2 P1 {Lib=EDGEPIN}
   (    1 +BATT )
@@ -63,10 +63,6 @@
  ( /4B96C947/4B96D74D OPTPAD  JP2 SDA {Lib=OPTION}
   (    1 /OSv4_logic/SDA_onboard )
  )
- ( /4B96C947/4B96CAE1 SM0402  C13 4.7uF_16V {Lib=CP1}
-  (    1 VCC )
-  (    2 GND )
- )
  ( /4B96C947/4B8AE5C3 OPTPAD  JP4 PB2 {Lib=OPTION}
   (    1 N-000039 )
  )
@@ -99,7 +95,7 @@
  )
  ( /4B96C947/4B8A8908 VQFN44-XMEGA  U4 ATXMEGA32A4 {Lib=ATXMEGA32A4}
   (    1 ? )
-  (    2 /OSv4_logic/PA6_(GPIO) )
+  (    2 /OSv4_logic/USART_1_TXD )
   (    3 /OSv4_logic/USART_1_RXD )
   (    4 ? )
   (    5 ? )
@@ -108,12 +104,12 @@
   (    8 GND )
   (    9 VCC )
   (   10 /OSv4_logic/SDA_host )
-  (   11 /OSv4_logic/SCL_host )
+  (   11 /OSv4_logic/SPI_1_MISO_USART_2_RXD )
   (   12 /OSv4_logic/USART_1_RXD )
-  (   13 /OSv4_logic/PA6_(GPIO) )
-  (   14 /OSv4_logic/PA6_(GPIO) )
+  (   13 /OSv4_logic/USART_1_TXD )
+  (   14 /OSv4_logic/USART_1_TXD )
   (   15 /OSv4_logic/USART_1_RXD )
-  (   16 /OSv4_logic/SCL_host )
+  (   16 /OSv4_logic/SPI_1_MISO_USART_2_RXD )
   (   17 /OSv4_logic/SDA_host )
   (   18 GND )
   (   19 VCC )
@@ -147,7 +143,7 @@
   (    1 N-000033 )
   (    2 +BATT )
  )
- ( /4B96C947/4B86F81A SM0603  C12 22uF_16V {Lib=CP1}
+ ( /4B96C947/4B86F81A SMC3216  C12 10uF_16V {Lib=CP1}
   (    1 N-000033 )
   (    2 GND )
  )
@@ -308,10 +304,6 @@ $endlist
 $component U2
  SOT23-3
 $endlist
-$component C13
- CP*
- SM*
-$endlist
 $component C11
  SM*
  C?
@@ -453,98 +445,97 @@ $endfootprintlist
 }
 { Pin List by Nets
 Net 1 "" ""
+ U7 6
+ U7 5
+ U7 7
  U7 8
  M1 1
- U7 7
- U7 5
- U7 6
 Net 2 "" ""
- U4 43
  D2 2
  C5 1
  R3 1
  R1 2
+ U4 43
 Net 3 "" ""
- M2 1
  U8 5
  U8 6
  U8 7
  U8 8
+ M2 1
 Net 4 "" ""
  U6 6
  U8 4
 Net 5 "+BATT" "+BATT"
  U1 2
  R2 1
+ C1 1
  U5 7
- R4 1
  D1 2
- P1-1 1
  P1-2 1
+ P1-1 1
+ R4 1
  U6 7
  C4 1
  C3 1
  C2 1
- C1 1
 Net 6 "" ""
- U7 4
  U5 6
+ U7 4
 Net 7 "" ""
  U5 8
  U5 5
  U7 2
 Net 8 "/OSv4_logic/PWM_B" "PWM_B"
- U4 21
  RP2 6
  U6 2
+ U4 21
 Net 9 "/OSv4_logic/PWM_A" "PWM_A"
  U4 20
- RP2 1
  U5 2
+ RP2 1
 Net 10 "/OSv4_logic/EN_B" "EN_B"
  RP2 2
  U5 4
  U4 23
 Net 11 "GND" "GND"
- U4 8
- P1-10 1
  U4 18
+ P1-10 1
+ POT3 1
+ U4 8
+ U2 3
+ U4 30
+ JP1 1
+ U3 3
+ C8 2
  C9 2
  C10 2
  C11 2
- P1-9 1
+ R5 2
+ C6 2
  C7 2
  U4 38
  C12 2
- U3 3
- JP1 1
- U4 30
- POT3 1
- C8 2
- R5 2
- C6 2
- C5 2
  D2 1
  U5 3
- R3 2
- U6 3
- U8 1
- C13 2
- U7 1
- U2 3
  C1 2
  C2 2
  C3 2
  C4 2
  M3 1
  RP2 8
+ R3 2
+ C5 2
+ U6 3
+ U8 1
+ U7 1
+ P1-9 1
  RP2 7
  RP2 4
  RP2 3
 Net 12 "" ""
- U8 3
  U7 3
  R2 2
+ U8 3
  U1 3
 Net 13 "" ""
  U8 2
@@ -556,77 +547,76 @@ Net 16 "/OSv4_logic/EN_A" "EN_A"
  U4 22
  U6 4
  RP2 5
-Net 19 "/OSv4_logic/PA6_(GPIO)" "PA6_(GPIO)"
- U4 13
- U4 14
+Net 19 "/OSv4_logic/USART_1_TXD" "USART_1_TXD"
  U4 2
  P1-4 1
+ U4 14
+ U4 13
 Net 20 "" ""
- U4 33
  U4 32
+ U4 33
 Net 30 "/OSv4_logic/POSITION" "POSITION"
- POT2 1
  U4 44
+ POT2 1
 Net 31 "/OSv4_logic/TEMPERATURE" "TEMPERATURE"
- U4 41
  U2 2
+ U4 41
 Net 32 "VCC" "VCC"
+ U3 1
  C11 1
  JP5 1
- L1 1
- R6 1
- POT1 1
- C9 1
- C10 1
- U2 1
- C13 1
- U3 1
  U4 19
  C7 1
- C6 1
- U4 31
+ C9 1
+ C10 1
+ R6 1
+ L1 1
+ U2 1
+ POT1 1
  U4 9
+ U4 31
+ C6 1
 Net 33 "" ""
  D1 1
  C12 1
  U3 2
 Net 34 "+3.3VADC" "+3.3VADC"
- L1 2
- C8 1
  U4 39
  U4 40
+ C8 1
+ L1 2
 Net 35 "/OSv4_logic/PDI_DATA" "PDI_DATA"
  P1-5 1
  U4 34
-Net 36 "/OSv4_logic/SCL_host" "SCL_host"
+Net 36 "/OSv4_logic/SPI_1_MISO_USART_2_RXD" "SPI_1_MISO_USART_2_RXD"
  U4 11
  P1-6 1
  U4 16
 Net 37 "/OSv4_logic/BATTV" "BATTV"
- U4 42
- R4 2
  R5 1
+ R4 2
+ U4 42
 Net 38 "/OSv4_logic/RESET(PDI_CLK)" "RESET(PDI_CLK)"
  P1-3 1
- U4 35
  R6 2
+ U4 35
 Net 39 "" ""
  JP4 1
  U4 6
 Net 40 "/OSv4_logic/SDA_host" "SDA_host"
+ U4 10
  U4 17
  P1-8 1
- U4 10
 Net 42 "/OSv4_logic/SCL_onboard" "SCL_onboard"
- JP3 1
  U4 29
+ JP3 1
 Net 43 "/OSv4_logic/SDA_onboard" "SDA_onboard"
- JP2 1
  U4 28
+ JP2 1
 Net 44 "/OSv4_logic/USART_1_RXD" "USART_1_RXD"
+ U4 3
  U4 15
  P1-7 1
- U4 3
  U4 12
 }
 #End

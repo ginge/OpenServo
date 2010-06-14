@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 15/05/2010 00:33:24
+EESchema Schematic File Version 2  date 14/06/2010 08:35:59
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "14 may 2010"
+Date "14 jun 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -45,8 +45,12 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text Notes 2100 2600 0    60   ~ 0
-NOTE: The XMEGA has an integrated temperature sensor.\nHowever, U2 can be placed close to the MOSFETs and\nmotor end of the PCB; which likely gives more qualitative\ndata than using the one inside the MCU. Could U2 be\ndropped if board space becomes a problem?
+Wire Wire Line
+	10400 4950 10400 5900
+Wire Wire Line
+	10400 6450 10400 6300
+Text Notes 11100 6100 2    39   Italic 0
+C13,4.7uF 16V,SMC3216\nTR3A475K016C2000
 Connection ~ 6850 2050
 Wire Wire Line
 	6850 2050 6850 2150
@@ -56,7 +60,7 @@ Wire Wire Line
 	6650 1850 6650 2350
 Connection ~ 6550 1950
 Wire Wire Line
-	6550 1950 6550 2450
+	6550 2450 6550 1950
 Wire Wire Line
 	5350 1850 7050 1850
 Wire Wire Line
@@ -70,8 +74,6 @@ Wire Notes Line
 Wire Notes Line
 	6350 1700 6150 1700
 Connection ~ 10400 5650
-Wire Wire Line
-	10400 5900 10400 4950
 Wire Wire Line
 	6650 2350 7050 2350
 Wire Wire Line
@@ -114,8 +116,6 @@ Wire Wire Line
 	6200 6300 6200 6250
 Wire Wire Line
 	6200 6250 4500 6250
-Wire Wire Line
-	10400 6450 10400 6300
 Wire Wire Line
 	9600 6350 9600 6650
 Wire Wire Line
@@ -199,9 +199,9 @@ Connection ~ 1250 2200
 Wire Wire Line
 	2750 2200 1250 2200
 Wire Wire Line
-	1400 1650 1250 1650
+	1250 1650 1400 1650
 Wire Wire Line
-	1250 1650 1250 2400
+	1250 2400 1250 1650
 Wire Wire Line
 	1400 1800 800  1800
 Wire Wire Line
@@ -221,7 +221,7 @@ Wire Wire Line
 	1700 4700 1700 4550
 Connection ~ 1700 4700
 Wire Wire Line
-	1700 4550 850  4550
+	850  4550 1700 4550
 Wire Wire Line
 	1700 5100 1700 4950
 Connection ~ 1700 5100
@@ -232,9 +232,9 @@ Wire Wire Line
 	1700 5500 1700 5350
 Connection ~ 1700 5500
 Wire Wire Line
-	1700 5350 850  5350
+	850  5350 1700 5350
 Wire Wire Line
-	850  5350 850  2800
+	850  2800 850  5350
 Connection ~ 850  4950
 Wire Wire Line
 	1850 4500 1050 4500
@@ -246,9 +246,9 @@ Wire Wire Line
 	1050 5100 1250 5100
 Connection ~ 1050 5100
 Wire Wire Line
-	1250 4300 1050 4300
+	1050 4300 1250 4300
 Wire Wire Line
-	1050 4300 1050 5850
+	1050 5850 1050 4300
 Connection ~ 1050 4500
 Wire Wire Line
 	1850 3800 1100 3800
@@ -326,9 +326,9 @@ Wire Notes Line
 Wire Notes Line
 	5110 2100 4890 2100
 Wire Wire Line
-	9850 1850 10100 1850
+	10100 1850 9850 1850
 Wire Wire Line
-	10100 1850 10100 2350
+	10100 2350 10100 1850
 Wire Wire Line
 	5950 1750 5950 1550
 Connection ~ 5950 1750
@@ -364,6 +364,18 @@ Wire Wire Line
 Connection ~ 5850 2050
 Wire Wire Line
 	6750 2250 6750 1750
+Wire Notes Line
+	10500 5950 10300 5950
+Wire Notes Line
+	10500 5950 10500 6250
+Wire Notes Line
+	10500 6250 10300 6250
+Wire Notes Line
+	10300 6250 10300 5950
+Connection ~ 10400 6300
+Connection ~ 10400 5900
+Text Notes 2100 2600 0    60   ~ 0
+NOTE: The XMEGA has an integrated temperature sensor.\nHowever, U2 can be placed close to the MOSFETs and\nmotor end of the PCB; which likely gives more qualitative\ndata than using the one inside the MCU. Could U2 be\ndropped if board space becomes a problem?
 NoConn ~ 8000 2250
 NoConn ~ 8000 2350
 NoConn ~ 8000 2450
@@ -649,21 +661,6 @@ Text GLabel 6450 6300 2    60   Output ~ 0
 EN_A
 Text GLabel 6450 6150 2    60   Output ~ 0
 EN_B
-$Comp
-L CP1 C13
-U 1 1 4B96CAE1
-P 10400 6100
-F 0 "C13" H 10450 6200 50  0000 L CNN
-F 1 "4.7uF 16V" H 10450 6000 50  0000 L CNN
-F 2 "SM0402" H 10500 6250 60  0001 C CNN
-F 4 "Vishay Sprague" H 10400 6100 60  0001 C CNN "Manufacturer"
-F 5 "TR3A475K016C2000" H 10400 6100 60  0001 C CNN "Mfg. P/N"
-F 6 "1754083" H 10400 6100 60  0001 C CNN "Farnell"
-F 7 "" H 10400 6100 60  0001 C CNN "DigiKey"
-F 8 "" H 10400 6100 60  0001 C CNN "Comments"
-	1    10400 6100
-	1    0    0    -1  
-$EndComp
 Text Label 7050 1450 0    30   ~ 0
 PA7_(GPIO)
 Text Label 7050 1550 0    30   ~ 0
@@ -985,13 +982,13 @@ L CP1 C12
 U 1 1 4B86F81A
 P 8800 6100
 F 0 "C12" H 8850 6200 50  0000 L CNN
-F 1 "22uF 16V" H 8850 6000 50  0000 L CNN
-F 2 "SM0603" H 8900 6250 60  0001 C CNN
+F 1 "10uF 16V" H 8850 6000 50  0000 L CNN
+F 2 "SMC3216" H 8900 6250 60  0001 C CNN
 F 4 "Vishay Sprague" H 8800 6100 60  0001 C CNN "Manufacturer"
-F 5 "TR3C226K016C0375" H 8800 6100 60  0001 C CNN "Mfg. P/N"
-F 6 "1754088" H 8800 6100 60  0001 C CNN "Farnell"
+F 5 "TR3A106K016C1700" H 8800 6100 60  0001 C CNN "Mfg. P/N"
+F 6 "1754086" H 8800 6100 60  0001 C CNN "Farnell"
 F 7 "" H 8800 6100 60  0001 C CNN "DigiKey"
-F 8 "Maybe TR3B226K016C0600 if smaller physical size is needed" H 8800 6100 60  0001 C CNN "Comments"
+F 8 "" H 8800 6100 60  0001 C CNN "Comments"
 	1    8800 6100
 	1    0    0    -1  
 $EndComp
