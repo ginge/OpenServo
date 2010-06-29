@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 29/06/2010 00:23:49
+EESchema Schematic File Version 2  date 29/06/2010 22:50:51
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 3 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "28 jun 2010"
+Date "29 jun 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""

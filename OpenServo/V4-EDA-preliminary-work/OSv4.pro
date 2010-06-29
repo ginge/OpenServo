@@ -1,4 +1,4 @@
-update=29/06/2010 01:02:15
+update=29/06/2010 23:38:23
 version=1
 last_client=pcbnew
 [cvpcb]
@@ -84,8 +84,8 @@ LibName32=osv4parts
 [pcbnew]
 version=1
 PadDrlX=0
-PadDimH=276
-PadDimV=197
+PadDimH=118
+PadDimV=158
 BoardThickness=630
 SgPcb45=1
 TxtPcbV=800

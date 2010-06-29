@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 29/06/2010 00:23:49
+EESchema Schematic File Version 2  date 29/06/2010 22:50:51
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "28 jun 2010"
+Date "29 jun 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -1074,10 +1074,10 @@ U 1 1 4B86AB20
 P 10500 1700
 F 0 "C6" H 10550 1800 50  0000 L CNN
 F 1 "0.1uF" H 10550 1600 50  0000 L CNN
-F 2 "SM0603" H 10600 1850 60  0001 C CNN
+F 2 "SM0402" H 10600 1850 60  0001 C CNN
 F 4 "multicomp" H 10500 1700 60  0001 C CNN "Manufacturer"
-F 5 "B0603R104KCT" H 10500 1700 60  0001 C CNN "Mfg. P/N"
-F 6 "9406140" H 10500 1700 60  0001 C CNN "Farnell"
+F 5 "MCCA000050" H 10500 1700 60  0001 C CNN "Mfg. P/N"
+F 6 "1758896" H 10500 1700 60  0001 C CNN "Farnell"
 F 7 "" H 10500 1700 60  0001 C CNN "DigiKey"
 F 8 "X7R, ±10%, 16V, Ceramic" H 10500 1700 60  0001 C CNN "Comments"
 	1    10500 1700
