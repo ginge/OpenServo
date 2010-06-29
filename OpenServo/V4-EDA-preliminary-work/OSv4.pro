@@ -1,4 +1,4 @@
-update=14/06/2010 23:15:28
+update=29/06/2010 01:02:15
 version=1
 last_client=pcbnew
 [cvpcb]
@@ -84,8 +84,8 @@ LibName32=osv4parts
 [pcbnew]
 version=1
 PadDrlX=0
-PadDimH=393
-PadDimV=551
+PadDimH=276
+PadDimV=197
 BoardThickness=630
 SgPcb45=1
 TxtPcbV=800
@@ -120,4 +120,4 @@ LibName16=soic8
 LibName17=sot23-3
 LibName18=sot23_3
 LibName19=mlf1608e100k
-LibName20=cay10-xxxj4
+LibName20=cay16-xxxj4

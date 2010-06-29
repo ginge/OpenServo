@@ -1,4 +1,4 @@
-# EESchema Netlist Version 1.1 created  14/06/2010 22:45:47
+# EESchema Netlist Version 1.1 created  29/06/2010 00:23:57
 (
  ( /4B96C947/4B8AE5FB OPTPAD  JP5 +3.3V {Lib=OPTION}
   (    1 VCC )
@@ -160,7 +160,7 @@
   (    1 +BATT )
   (    2 /OSv4_logic/BATTV )
  )
- ( /4B96C947/4B86AB20 SM0402  C6 0.1uF {Lib=C}
+ ( /4B96C947/4B86AB20 SM0603  C6 0.1uF {Lib=C}
   (    1 VCC )
   (    2 GND )
  )
@@ -168,7 +168,7 @@
   (    1 VCC )
   (    2 GND )
  )
- ( /4B96C926/4BB66F52 CAY10-XXXJ4  RP2 R_PACK4 {Lib=R_PACK4}
+ ( /4B96C926/4BB66F52 CAY16-XXXJ4  RP2 R_PACK4 {Lib=R_PACK4}
   (    1 /OSv4_logic/PWM_A )
   (    2 /OSv4_logic/EN_B )
   (    3 GND )

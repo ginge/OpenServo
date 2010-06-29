@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 14/06/2010 08:35:59
+EESchema Schematic File Version 2  date 29/06/2010 00:23:49
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 3 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "14 jun 2010"
+Date "28 jun 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -277,12 +277,12 @@ U 1 1 4BB66F52
 P 2800 6250
 F 0 "RP2" H 2800 6700 40  0000 C CNN
 F 1 "R_PACK4" H 2800 6200 40  0000 C CNN
-F 2 "CAY10-XXXJ4" H 2760 6740 60  0001 C CNN
+F 2 "CAY16-XXXJ4" H 2760 6740 60  0001 C CNN
 F 4 "Bourns" H 2800 6250 60  0001 C CNN "Manufacturer"
-F 5 "CAY10-103J4LF" H 2800 6250 60  0001 C CNN "Mfg. P/N"
-F 6 "1770152" H 2800 6250 60  0001 C CNN "Farnell"
+F 5 "CAY16-103J4LF" H 2800 6250 60  0001 C CNN "Mfg. P/N"
+F 6 "1770137" H 2800 6250 60  0001 C CNN "Farnell"
 F 7 "" H 2800 6250 60  0001 C CNN "DigiKey"
-F 8 "YC124-JR-07100RL is cheaper for lower counts; but footprint may need revision" H 2800 6250 60  0001 C CNN "Comments"
+F 8 "" H 2800 6250 60  0001 C CNN "Comments"
 	1    2800 6250
 	1    0    0    -1  
 $EndComp
