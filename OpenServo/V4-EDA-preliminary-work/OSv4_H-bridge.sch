@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 29/06/2010 22:50:51
+EESchema Schematic File Version 2  date 02/07/2010 00:00:53
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 3 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "29 jun 2010"
+Date "1 jul 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -392,17 +392,17 @@ F 8 "" H 3050 4950 60  0001 C CNN "Comments"
 	1    0    0    -1  
 $EndComp
 $Comp
-L ZENER D2
+L ZENER_R D2
 U 1 1 4B9D203D
 P 3800 2100
 F 0 "D2" V 3900 2000 50  0000 C CNN
-F 1 "3.6V" H 3800 2200 40  0000 C CNN
-F 2 "SOD-123" V 3950 1950 60  0001 C CNN
-F 4 "Fairchild Semiconductor" H 3800 2100 60  0001 C CNN "Manufacturer"
-F 5 "MMSZ5227B" H 3800 2100 60  0001 C CNN "Mfg. P/N"
-F 6 "1700854" H 3800 2100 60  0001 C CNN "Farnell"
+F 1 "3.6V Zener" H 3800 2200 40  0000 C CNN
+F 2 "SOD-323" V 3950 1950 60  0001 C CNN
+F 4 "On Semiconductor" H 3800 2100 60  0001 C CNN "Manufacturer"
+F 5 "MM3Z3V6T1G" H 3800 2100 60  0001 C CNN "Mfg. P/N"
+F 6 "1431199" H 3800 2100 60  0001 C CNN "Farnell"
 F 7 "" H 3800 2100 60  0001 C CNN "DigiKey"
-F 8 "3.6V, 0.5W, 5%" H 3800 2100 60  0001 C CNN "Comments"
+F 8 "3.6V, 0.2W, 5%" H 3800 2100 60  0001 C CNN "Comments"
 	1    3800 2100
 	0    -1   -1   0   
 $EndComp
@@ -580,7 +580,7 @@ U 1 1 4B8A7932
 P 5300 1800
 F 0 "U1" V 4950 1650 60  0000 C CNN
 F 1 "ZXCT1009" V 5600 1550 60  0000 L CNN
-F 2 "SOT23-3" V 4890 1590 60  0001 C CNN
+F 2 "SOT23_3" V 4890 1590 60  0001 C CNN
 F 4 "Zetex" H 5300 1800 60  0001 C CNN "Manufacturer"
 F 5 "ZXCT1009FTA" H 5300 1800 60  0001 C CNN "Mfg. P/N"
 F 6 "See comments" H 5300 1800 60  0001 C CNN "Farnell"

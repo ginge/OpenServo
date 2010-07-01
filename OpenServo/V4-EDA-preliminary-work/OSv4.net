@@ -1,4 +1,4 @@
-# EESchema Netlist Version 1.1 created  29/06/2010 00:23:57
+# EESchema Netlist Version 1.1 created  02/07/2010 00:02:38
 (
  ( /4B96C947/4B8AE5FB OPTPAD  JP5 +3.3V {Lib=OPTION}
   (    1 VCC )
@@ -42,12 +42,12 @@
  ( /4B96C947/4BB87617 EDGEPIN  P1-1 P1 {Lib=EDGEPIN}
   (    1 +BATT )
  )
- ( /4B96C947/4BB5B742 SOT23-3  U2 MCP9701A {Lib=MCP9701A(SOT23-3)}
+ ( /4B96C947/4BB5B742 SOT23_3  U2 MCP9701A {Lib=MCP9701A(SOT23-3)}
   (    1 VCC )
   (    2 /OSv4_logic/TEMPERATURE )
   (    3 GND )
  )
- ( /4B96C947/4BAAA6C0 CAY10-XXXJ4  RP1 R_PACK4 {Lib=R_PACK4}
+ ( /4B96C947/4BAAA6C0 CAY16-XXXJ4  RP1 R_PACK4 {Lib=R_PACK4}
   (    1 ? )
   (    2 ? )
   (    3 ? )
@@ -147,7 +147,7 @@
   (    1 N-000033 )
   (    2 GND )
  )
- ( /4B96C947/4B86B462 SOT23-3  U3 LM3480IM-3.3 {Lib=LM3480IM-3.3}
+ ( /4B96C947/4B86B462 SOT23_3  U3 LM3480IM-3.3 {Lib=LM3480IM-3.3}
   (    1 VCC )
   (    2 N-000033 )
   (    3 GND )
@@ -160,7 +160,7 @@
   (    1 +BATT )
   (    2 /OSv4_logic/BATTV )
  )
- ( /4B96C947/4B86AB20 SM0603  C6 0.1uF {Lib=C}
+ ( /4B96C947/4B86AB20 SM0402  C6 0.1uF {Lib=C}
   (    1 VCC )
   (    2 GND )
  )
@@ -221,9 +221,9 @@
   (    7 +BATT )
   (    8 N-000007 )
  )
- ( /4B96C926/4B9D203D SOD-123  D2 3.6V {Lib=ZENER}
-  (    1 GND )
-  (    2 N-000002 )
+ ( /4B96C926/4B9D203D SOD-323  D2 3.6V_Zener {Lib=ZENER_R}
+  (    1 N-000002 )
+  (    2 GND )
  )
  ( /4B96C926/4B8A7BDF SM0402  C5 0.1uF {Lib=C}
   (    1 N-000002 )
@@ -257,7 +257,7 @@
   (    1 +BATT )
   (    2 N-000012 )
  )
- ( /4B96C926/4B8A7932 SOT23-3  U1 ZXCT1009 {Lib=ZXCT1009}
+ ( /4B96C926/4B8A7932 SOT23_3  U1 ZXCT1009 {Lib=ZXCT1009}
   (    1 N-000014 )
   (    2 +BATT )
   (    3 N-000012 )
@@ -451,7 +451,7 @@ Net 1 "" ""
  U7 8
  M1 1
 Net 2 "" ""
- D2 2
+ D2 1
  C5 1
  R3 1
  R1 2
@@ -515,7 +515,7 @@ Net 11 "GND" "GND"
  C7 2
  U4 38
  C12 2
- D2 1
+ D2 2
  U5 3
  C1 2
  C2 2
