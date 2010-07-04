@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 04/07/2010 10:22:34
+EESchema Schematic File Version 2  date 04/07/2010 23:28:30
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -411,7 +411,7 @@ NOTE: This is a “Work In Progress”; implement at your own risk.
 NoConn ~ 1850 6750
 NoConn ~ 1850 6050
 Text Notes 9200 1350 0    60   ~ 0
-R5 - serbo pot\noff board
+R5 - servo pot\noff board
 $Comp
 L CONN_1 POT3
 U 1 1 4BB88501

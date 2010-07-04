@@ -1,4 +1,4 @@
-update=04/07/2010 22:22:11
+update=04/07/2010 23:28:56
 version=1
 last_client=eeschema
 [cvpcb]
@@ -16,8 +16,8 @@ version=1
 [pcbnew]
 version=1
 PadDrlX=0
-PadDimH=237
-PadDimV=315
+PadDimH=95
+PadDimV=335
 BoardThickness=630
 SgPcb45=1
 TxtPcbV=800
