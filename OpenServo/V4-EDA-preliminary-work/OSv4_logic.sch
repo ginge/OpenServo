@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date 02/07/2010 00:00:53
+EESchema Schematic File Version 2  date 04/07/2010 10:22:34
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -37,7 +37,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 2 3
 Title "OpenServo v4 preliminary work-up, © OpenServo project 2010"
-Date "1 jul 2010"
+Date "4 jul 2010"
 Rev "0.0"
 Comp ""
 Comment1 ""
@@ -916,7 +916,7 @@ F 4 "TDK" H 1300 4050 60  0001 C CNN "Manufacturer"
 F 5 "MLF1608E100K" H 1300 4050 60  0001 C CNN "Mfg. P/N"
 F 6 "1669541" H 1300 4050 60  0001 C CNN "Farnell"
 F 7 "445-1025-1-ND" H 1300 4050 60  0001 C CNN "DigiKey"
-F 8 "10%, Max DC R 1.7ohm, 10ma" H 1300 4050 60  0001 C CNN "Comments"
+F 8 "10%, Max DC R 1.7ohm, 10ma, magnetic shielded" H 1300 4050 60  0001 C CNN "Comments"
 	1    1300 4050
 	0    -1   -1   0   
 $EndComp
