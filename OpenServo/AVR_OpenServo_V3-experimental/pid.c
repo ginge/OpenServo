@@ -240,7 +240,7 @@ int16_t pid_position_to_pwm(int16_t current_position, uint8_t tick)
 //
 // Update seek target
 //
-    if(tick && seek_delta!=seek_position) // Tick is our time constant
+    if(tick && seek_delta!=seek_position && seek_velocity>0) // Tick is our time constant
     {
        if(position_at_start_of_new_seek<seek_position)
        {
