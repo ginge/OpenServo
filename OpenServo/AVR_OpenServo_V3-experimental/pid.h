@@ -35,6 +35,6 @@ void pid_registers_defaults(void);
 
 // Take the 10-bit position as input and output a signed PWM to be
 // applied to the servo motors.
-int16_t pid_position_to_pwm(int16_t position);
+int16_t pid_position_to_pwm(int16_t position, uint8_t tick);
 
 #endif // _OS_PID_H_

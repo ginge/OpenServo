@@ -71,6 +71,7 @@
 #define HARDWARE_TYPE_FUTABA_S3003      1
 #define HARDWARE_TYPE_HITEC_HS_311      2
 #define HARDWARE_TYPE_HITEC_HS_475HB    3
+#define HARDWARE_TYPE_MG995             4
 
 // By default the hardware type is unknown.  This value should be
 // changed to reflect the hardware type that the code is actually
@@ -91,14 +92,15 @@
 
 // Specify default mininimum and maximum seek positions.  The OpenServo will
 // not attempt to seek beyond these positions.
-#define DEFAULT_MIN_SEEK                0x0060
-#define DEFAULT_MAX_SEEK                0x03A0
+#define DEFAULT_MIN_SEEK_STD                0x0060
+#define DEFAULT_MAX_SEEK_STD                0x03A0
 
 // Default pwm frequency divider.
 #define DEFAULT_PWM_FREQ_DIVIDER        0x0040
 
 #elif (HARDWARE_TYPE == HARDWARE_TYPE_FUTABA_S3003)
 
+#error "Values not verified with this firmware"
 // Futaba S3003 hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
 #define DEFAULT_PID_DGAIN               0x0C00
@@ -106,14 +108,15 @@
 #define DEFAULT_PID_DEADBAND            0x01
 
 // Futaba S3003 hardware default mininimum and maximum seek positions.
-#define DEFAULT_MIN_SEEK                0x0060
-#define DEFAULT_MAX_SEEK                0x03A0
+#define DEFAULT_MIN_SEEK_STD                0x0060
+#define DEFAULT_MAX_SEEK_STD                0x03A0
 
 // Futaba S3003 hardware default pwm frequency divider.
 #define DEFAULT_PWM_FREQ_DIVIDER        0x0040
 
 #elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_311)
 
+#error "Values not verified with this firmware"
 // Hitec HS-311 hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
 #define DEFAULT_PID_DGAIN               0x0C00
@@ -121,14 +124,15 @@
 #define DEFAULT_PID_DEADBAND            0x01
 
 // Hitec HS-311 hardware default mininimum and maximum seek positions.
-#define DEFAULT_MIN_SEEK                0x0060
-#define DEFAULT_MAX_SEEK                0x03A0
+#define DEFAULT_MIN_SEEK_STD                0x0060
+#define DEFAULT_MAX_SEEK_STD                0x03A0
 
 // Hitec HS-311 hardware default pwm frequency divider.
 #define DEFAULT_PWM_FREQ_DIVIDER        0x0040
 
 #elif (HARDWARE_TYPE == HARDWARE_TYPE_HITEC_HS_475HB)
 
+#error "Values not verified with this firmware"
 // Hitec HS-475HB hardware default PID gains.
 #define DEFAULT_PID_PGAIN               0x0600
 #define DEFAULT_PID_DGAIN               0x0C00
@@ -136,12 +140,44 @@
 #define DEFAULT_PID_DEADBAND            0x01
 
 // Hitec HS-475HB hardware default mininimum and maximum seek positions.
-#define DEFAULT_MIN_SEEK                0x0060
-#define DEFAULT_MAX_SEEK                0x03A0
+#define DEFAULT_MIN_SEEK_STD                0x0060
+#define DEFAULT_MAX_SEEK_STD                0x03A0
 
 // Hitec HS-475HB hardware default pwm frequency divider.
 #define DEFAULT_PWM_FREQ_DIVIDER        0x0040
 
+#elif (HARDWARE_TYPE == HARDWARE_TYPE_MG995)
+
+#define DEFAULT_PID_PGAIN               0x01a0 // Working un-tuned example
+#define DEFAULT_PID_DGAIN               0x0120 //   "
+#define DEFAULT_PID_IGAIN               0x0004 //   "
+#define DEFAULT_PID_DEADBAND            0x01
+#define DEFAULT_MIN_SEEK_STD            100    // Conservative
+#define DEFAULT_MAX_SEEK_STD            900    // Conservative
+#define DEFAULT_PWM_FREQ_DIVIDER        0x0040
+
+#endif
+
+//
+// Update minimum and maximum seek positions depending on whether the encoder is
+// used and/or full rotation is enabled.
+//
+#if FULL_ROTATION_ENABLED
+#if ENCODER_ENABLED
+#define DEFAULT_MIN_SEEK                0
+#define DEFAULT_MAX_SEEK                4095
+#else
+#define DEFAULT_MIN_SEEK                0
+#define DEFAULT_MAX_SEEK                1023
+#endif
+#else
+#if ENCODER_ENABLED
+#define DEFAULT_MIN_SEEK                (DEFAULT_MIN_SEEK_STD<<1)
+#define DEFAULT_MAX_SEEK                (DEFAULT_MAX_SEEK_STD<<1)
+#else
+#define DEFAULT_MIN_SEEK                DEFAULT_MIN_SEEK_STD
+#define DEFAULT_MAX_SEEK                DEFAULT_MAX_SEEK_STD
+#endif
 #endif
 
 #endif // _OS_ADC_H_

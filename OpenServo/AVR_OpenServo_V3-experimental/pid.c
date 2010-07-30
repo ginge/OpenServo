@@ -44,11 +44,10 @@
 #define MIN_OUTPUT              (-MAX_OUTPUT)
 
 // Values preserved across multiple PID iterations.
-static int16_t previous_seek;
-static int16_t previous_position;
-static int16_t previous_error=0;
+static int16_t previous_seek=-1; // NOTE: previous_seek==-1 used to indicate initialisation required
+static int16_t previous_position=0;
 static int16_t i_component=0;
-static int16_t seek_delta=0;
+static int16_t seek_delta=-1;
 static int16_t position_at_start_of_new_seek=-1;
 static uint8_t previous_pwm_is_enabled=0;
 
@@ -111,9 +110,7 @@ static int16_t filter_update(int16_t input)
 void pid_init(void)
 // Initialize the PID algorithm module.
 {
-    // Initialize preserved values.
-    previous_seek = 0;
-    previous_position = 0;
+   previous_seek = -1;
 }
 
 
@@ -126,8 +123,8 @@ void pid_registers_defaults(void)
 
     // Default gain values.
     registers_write_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO, DEFAULT_PID_PGAIN);
-    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, DEFAULT_PID_DGAIN);
     registers_write_word(REG_PID_IGAIN_HI, REG_PID_IGAIN_LO, DEFAULT_PID_IGAIN);
+    registers_write_word(REG_PID_DGAIN_HI, REG_PID_DGAIN_LO, DEFAULT_PID_DGAIN);
 
     // Default position limits.
     registers_write_word(REG_MIN_SEEK_HI, REG_MIN_SEEK_LO, DEFAULT_MIN_SEEK);
@@ -138,7 +135,7 @@ void pid_registers_defaults(void)
 }
 
 
-int16_t pid_position_to_pwm(int16_t current_position)
+int16_t pid_position_to_pwm(int16_t current_position, uint8_t tick)
 // This is a modified pid algorithm by which the seek position and seek
 // velocity are assumed to be a moving target.  The algorithm attempts to
 // output a pwm value that will achieve a predicted position and velocity.
@@ -174,7 +171,6 @@ int16_t pid_position_to_pwm(int16_t current_position)
 #else
     current_velocity = filtered_position - previous_position;
 #endif
-    previous_position = filtered_position;
 
     // Get the seek position and velocity.
     seek_position = (int16_t) registers_read_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO);
@@ -185,6 +181,8 @@ int16_t pid_position_to_pwm(int16_t current_position)
     maximum_position = (int16_t) registers_read_word(REG_MAX_SEEK_HI, REG_MAX_SEEK_LO);
 
     // Are we reversing the seek sense?
+// TODO: What is the point of this? Surely it is better to correct the wires to the motor than
+//       risk accidents?
     if (registers_read_byte(REG_REVERSE_SEEK) != 0)
     {
         // Yes. Update the position and velocity using reverse sense.
@@ -206,30 +204,60 @@ int16_t pid_position_to_pwm(int16_t current_position)
     // Get the deadband.
     deadband = (int16_t) registers_read_byte(REG_PID_DEADBAND);
 
+//
+// Keep the seek position bound within the set minimum and maximum position and the hardware
+// defined limits.
+//
+// NOTE: Even when full rotation is enabled, the limit of the set min and max
+//       positions are still applied: these must be set appropriately to allow
+//       full rotation to occur.
+//
+//       TODO: When full rotation is enabled, it may be that the user desires the
+//             range to be exclusive rather than inclusive.
+//
+    if (seek_position < minimum_position) seek_position = minimum_position;
+    if (seek_position > maximum_position) seek_position = maximum_position;
+    if (seek_position < MIN_POSITION) seek_position = MIN_POSITION;
+    if (seek_position > MAX_POSITION) seek_position = MAX_POSITION;
+
+//
+// Check for new seek target
+//
     if(previous_seek != seek_position ||             // New seek position has been set...
-       previous_pwm_is_enabled != pwm_is_enabled) // PWM enable state has changed...
+       previous_pwm_is_enabled != pwm_is_enabled)    // PWM enable state has changed...
     { 
-    // Use the filtered position when the seek position is not changing.
+       if(previous_seek == -1)                       // Initialisation
+       {
+          previous_position = current_position;
+          i_component = 0;
+       }
+       previous_seek = seek_position;
        seek_delta = current_position;
        position_at_start_of_new_seek = current_position;
-       previous_seek = seek_position;
        previous_pwm_is_enabled = pwm_is_enabled;
     }
-    if(position_at_start_of_new_seek<seek_position)
+
+//
+// Update seek target
+//
+    if(tick && seek_delta!=seek_position) // Tick is our time constant
     {
-       seek_delta+=seek_velocity;
-       if(seek_delta>=seek_position)
+       if(position_at_start_of_new_seek<seek_position)
        {
-          seek_delta=seek_position;
-       }
-    } else
-    {
-       if(position_at_start_of_new_seek>seek_position)
-       {
-          seek_delta-=seek_velocity;
-          if(seek_delta<=seek_position)
+          seek_delta+=seek_velocity;
+          if(seek_delta>=seek_position)
           {
              seek_delta=seek_position;
+          }
+       } else
+       {
+          if(position_at_start_of_new_seek>seek_position)
+          {
+             seek_delta-=seek_velocity;
+             if(seek_delta<=seek_position)
+             {
+                seek_delta=seek_position;
+             }
           }
        }
     }
@@ -238,25 +266,35 @@ int16_t pid_position_to_pwm(int16_t current_position)
        current_position = filtered_position;
     }
 
-
+//
+// Calculate PWM
+//
 #if FULL_ROTATION_ENABLED
     p_component = normalize_position_difference(seek_delta - current_position);
 #else
-    // Keep the seek position bound within the minimum and maximum position.
-    if (seek_delta < minimum_position) seek_delta = minimum_position;
-    if (seek_delta > maximum_position) seek_delta = maximum_position;
-
     // The proportional component to the PID is the position error.
     p_component = seek_delta - current_position;
 #endif
 
-    // The derivative component to the PID is the change in error.
-    d_component = previous_error - p_component;
-    previous_error = p_component;
-
     // The integral component
-    i_component += d_component;
+    if(tick) // Tick is our time constant
+    {
+       i_component += p_component;
+       if(i_component<-128) // Somewhat arbitrary anti integral wind-up; we're experimenting
+       {
+          i_component=-128;
+       } else
+       {
+          if(i_component>128)
+          {
+             i_component=128;
+          }
+       }
+    }
 
+    // The derivative component to the PID is the change in position.
+    d_component = previous_position - current_position;
+    previous_position = current_position;
 
     // Get the proportional, derivative and integral gains.
     p_gain = registers_read_word(REG_PID_PGAIN_HI, REG_PID_PGAIN_LO);
@@ -277,13 +315,26 @@ int16_t pid_position_to_pwm(int16_t current_position)
 
     // Apply the derivative component of the PWM output.
         pwm_output += (int32_t) d_component * (int32_t) d_gain;
-//    } else
-//    {
-//       i_component = 0;
+    } else
+    {
+       i_component = 0;
     }
 
     // Shift by 8 to account for the multiply by the 8:8 fixed point gain values.
+    // NOTE: When OpenEncoder is enabled an extra 1 place of shift is applied
+    //       to account for the increased precision (which is approximately a
+    //       factor of 2) so that the magnitude of the gain values are similar
+    //       across the two different platforms.
+    //
+    //       Factor of 2: pot measurements are typically approaching 180 degrees
+    //       across the 0 to 1023 ADC range. OpenEncoder is 360 degrees across the
+    //       0 to 4096 range.
+    //
+#if ENCODER_ENABLED
+    pwm_output >>= 9;
+#else
     pwm_output >>= 8;
+#endif
 
     // Check for output saturation.
     if (pwm_output > MAX_OUTPUT)

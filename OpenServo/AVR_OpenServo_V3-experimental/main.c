@@ -236,27 +236,27 @@ int main (void)
     // Enable interrupts.
     sei();
 
-#if !ENCODER_ENABLED
     // Wait until initial position value is ready.
-    while (!adc_position_value_is_ready());
+    {
+       int16_t position;
+    // Get start-up position
+#if ENCODER_ENABLED
+       position=(int16_t) enc_get_position_value();
+#else
+       while (!adc_position_value_is_ready());
+       position=(int16_t) adc_get_position_value();
 #endif
 
 #if CURVE_MOTION_ENABLED
     // Reset the curve motion with the current position of the servo.
-#if ENCODER_ENABLED
-    motion_reset(enc_get_position_value());
-#else
-    motion_reset(adc_get_position_value());
-#endif
+       motion_reset(position);
 #endif
 
     // Set the initial seek position and velocity.
-#if ENCODER_ENABLED
-    registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, enc_get_position_value());
-#else
-    registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, adc_get_position_value());
-#endif
-    registers_write_word(REG_SEEK_VELOCITY_HI, REG_SEEK_VELOCITY_LO, 0);
+       registers_write_word(REG_SEEK_POSITION_HI, REG_SEEK_POSITION_LO, position);
+       registers_write_word(REG_SEEK_VELOCITY_HI, REG_SEEK_VELOCITY_LO, 0);
+    }
+
 
     // XXX Enable PWM and writing.  I do this for now to make development and
     // XXX tuning a bit easier.  Constantly manually setting these values to
@@ -268,43 +268,43 @@ int main (void)
     // for new position, power or TWI commands to be processed.
     for (;;)
     {
-        // Is position value ready?
-#if !ENCODER_ENABLED
-        if (adc_position_value_is_ready())
-#endif
-        {
-            int16_t pwm;
-            int16_t position;
-
+       uint8_t tick;
+       int16_t pwm;
+       int16_t position;
+        // Is ADC position value ready?
+        // NOTE: Even when the encoder is enabled, we still need the ADC potmeasurement as the
+        //       clock because that is how the original firmware was written.
+       tick=adc_position_value_is_ready();
+       if(tick)
+       {
 #if PULSE_CONTROL_ENABLED
             // Give pulse control a chance to update the seek position.
-            pulse_control_update();
+          pulse_control_update();
 #endif
 
 #if CURVE_MOTION_ENABLED
             // Give the motion curve a chance to update the seek position and velocity.
-            motion_next(10);
+          motion_next(10);
 #endif
+       }
 
             // Get the new position value.
+       if(tick)
+       {
+          position = (int16_t) adc_get_position_value(); // NOTE: For encoder builds, this is the clock: clear the flag
 #if ENCODER_ENABLED
-            position = (int16_t) enc_get_position_value();
-#else
-            position = (int16_t) adc_get_position_value();
+       } // Always run the encoder (faster PID to PWM loop = better?)
+       position = (int16_t) enc_get_position_value();
+       if (position >= 0)
+       {
 #endif
+          // Call the PID algorithm module to get a new PWM value.
+          pwm = pid_position_to_pwm(position, tick);
 
-#if ENCODER_ENABLED
-            if (position >= 0)
-#endif
-            {
-                // Call the PID algorithm module to get a new PWM value.
-                pwm = pid_position_to_pwm(position);
-
-                // Update the servo movement as indicated by the PWM value.
-                // Sanity checks are performed against the position value.
-                pwm_update(position, pwm);
-            }
-        }
+          // Update the servo movement as indicated by the PWM value.
+          // Sanity checks are performed against the position value.
+          pwm_update(position, pwm);
+       }
 
         // Is a power value ready?
         if (adc_power_value_is_ready())
