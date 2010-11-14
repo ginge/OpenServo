@@ -20,24 +20,24 @@
 #ifndef MAINTESTWINDOW_H
 #define MAINTESTWINDOW_H
 
-#include "mainwin.h"
+#include "ui_mainwin4.h"
 #include "aboutclass.h"
 
 
 
-class mainTestWindow: public testMainWin {
+class mainTestWindow : public QDialog, public Ui::testMainWin {
 Q_OBJECT
 public:
     mainTestWindow(QWidget *parent = 0, const char *name = 0);
     ~mainTestWindow();
 public slots:
     virtual void readServo();
-    virtual void adapterSelectChange(QListViewItem *selitem);
+    virtual void adapterSelectChange(Q3ListViewItem *selitem);
     virtual void genericReadData();
     virtual void genericWriteData();
     virtual void writeServo();
     virtual void timerIntervalChange(int timerval);
-    virtual void servoSelectChange(QListViewItem *selItem);
+    virtual void servoSelectChange(Q3ListViewItem *selItem);
     virtual void liveDataClick();
     virtual void requestVoltage();
     virtual void flashFileLoad();
@@ -126,7 +126,7 @@ private:
 	int servo;
 	int adapter;
 	QString loggingData;
-	aboutBoxWidget *theAboutWin;
+	Ui_aboutBoxWidget *theAboutWin;
 };
 
 #endif

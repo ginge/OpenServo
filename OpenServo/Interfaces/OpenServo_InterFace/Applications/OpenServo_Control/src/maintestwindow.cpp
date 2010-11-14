@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "maintestwindow.h"
 #include "registers.h"
-#include "aboutbox.h"
+#include "ui_aboutbox4.h"
 
 #ifdef Q_WS_WIN
 #include <windows.h>
@@ -30,19 +30,21 @@
 #include <qstring.h>
 #include <qlabel.h>
 #include <qlineedit.h>
-#include <qlistview.h>
+#include <q3listview.h>
 #include <qpushbutton.h>
-#include <qfiledialog.h>
+#include <q3filedialog.h>
 #include <qtooltip.h>
 #include <qtimer.h>
 #include <qcheckbox.h>
 #include <qspinbox.h>
 #include <qregexp.h>
-#include <qtextedit.h>
+#include <q3textedit.h>
 
 mainTestWindow::mainTestWindow(QWidget *parent, const char *name)
-    :testMainWin(parent, name)
+  : QDialog(parent)
 {
+	Ui::testMainWin::setupUi(this);
+	
 	bool ok;
 	servoPWMenabled = true;
 	logPrint("Welcome to OpenServo test application v0.61");
@@ -144,7 +146,7 @@ void mainTestWindow::scanBus()
 {
 	int n;
 	char devname[255];
-	QListViewItem *listItem;
+	Q3ListViewItem *listItem;
 	char logbuf[255];
 
 	//check to see if the bus is initialised. If so deinitialise and rescan all busses.
@@ -187,7 +189,7 @@ void mainTestWindow::scanBus()
 			OSIF_get_adapter_name(n, &devname[0]);
 			sprintf( logbuf, "Found adapter %s", devname);
 			logPrint(logbuf);
-			listItem = new QListViewItem( adapterList, QString(devname) );
+			listItem = new Q3ListViewItem( adapterList, QString(devname) );
 		}
 		//select last one in the list
 		adapterList->setSelected(listItem, true);
@@ -206,10 +208,12 @@ void mainTestWindow::scanBus()
 void mainTestWindow::scanDevices(int adapterScan)
 {
 	int n;
-	QListViewItem *listItem;
+	Q3ListViewItem *listItem;
 	char logbuf[255];
 	unsigned char buf[2];
 	int servoCount=0;
+
+	devCount = 0;
 
 	logPrint( "Starting scan\n" );
 
@@ -238,13 +242,13 @@ void mainTestWindow::scanDevices(int adapterScan)
 
 				servoCount++;
 
-				listItem = new QListViewItem( servoList, QString().sprintf("0x%-2x", devices[n]) );
+				listItem = new Q3ListViewItem( servoList, QString().sprintf("0x%-2x", devices[n]) );
 			}
 			else	//not an OpenServo. Add to other list
 			{
 				sprintf( logbuf, "I2C device at 0x%02x", devices[n]);
 				logPrint( logbuf );
-				listItem = new QListViewItem( otherDevList, QString().sprintf("0x%-2x", devices[n]) );
+				listItem = new Q3ListViewItem( otherDevList, QString().sprintf("0x%-2x", devices[n]) );
 			}
 			
 		}
@@ -749,10 +753,10 @@ void mainTestWindow::commandPWM()
 void mainTestWindow::flashFileLoad()
 {
 	QString workingDirectory = QString("c:\\");
-	QFileDialog *dlg = new QFileDialog( workingDirectory,
+	Q3FileDialog *dlg = new Q3FileDialog( workingDirectory,
 	QString("Intel Hex (*.hex)"), 0, 0, TRUE );
-	dlg->setCaption( QFileDialog::tr( "Open" ) );
-	dlg->setMode( QFileDialog::ExistingFile );
+	dlg->setCaption( Q3FileDialog::tr( "Open" ) );
+	dlg->setMode( Q3FileDialog::ExistingFile );
 	QString result;
 	if ( dlg->exec() == QDialog::Accepted ) {
 		result = dlg->selectedFile();
@@ -916,7 +920,7 @@ void mainTestWindow::genericWriteData()
 }
 
 
-void mainTestWindow::servoSelectChange(QListViewItem *selItem)
+void mainTestWindow::servoSelectChange(Q3ListViewItem *selItem)
 {
 	char logbuf[255];
 	servo = parseOption((char *)selItem->text(0).ascii());
@@ -928,11 +932,11 @@ void mainTestWindow::servoSelectChange(QListViewItem *selItem)
 	readPids();
 }
 
-void mainTestWindow::adapterSelectChange(QListViewItem *listItem)
+void mainTestWindow::adapterSelectChange(Q3ListViewItem *listItem)
 {
-	QListViewItem *listViewItem;
+	Q3ListViewItem *listViewItem;
 	int row=0;
-	QListViewItemIterator it(adapterList);
+	Q3ListViewItemIterator it(adapterList);
 	char logbuf[255];
 
 	while ((listViewItem = it.current())) 

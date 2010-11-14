@@ -20,9 +20,9 @@
 #ifndef ABOUTCLASS_H
 #define ABOUTCLASS_H
 
-#include "aboutbox.h"
+#include "ui_aboutbox4.h"
 
-class AboutClass: public aboutBoxWidget {
+class AboutClass: public QDialog, public Ui::aboutBoxWidget {
 Q_OBJECT
 public:
     AboutClass(QWidget *parent = 0, const char *name = 0);

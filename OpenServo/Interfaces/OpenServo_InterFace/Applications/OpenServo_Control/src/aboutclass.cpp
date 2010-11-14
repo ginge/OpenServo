@@ -20,6 +20,7 @@
 #include "aboutclass.h"
 
 AboutClass::AboutClass(QWidget *parent, const char *name)
-    :aboutBoxWidget(parent, name)
+  : QDialog(parent)
 {
+  Ui::aboutBoxWidget::setupUi(this);
 }

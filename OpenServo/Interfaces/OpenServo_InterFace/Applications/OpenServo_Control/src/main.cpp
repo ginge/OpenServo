@@ -24,10 +24,16 @@
 
 int main( int argc, char ** argv ) {
     QApplication a( argc, argv );
-    testMainWin *theMainWin = new(mainTestWindow);
-    a.setMainWidget( theMainWin );         // It is our main widget
-    theMainWin->setCaption( "OpenServo Test" );
-    theMainWin->show();
+    mainTestWindow theMainWin;
+
+    theMainWin.setWindowTitle( "OpenServo Test" );
+    theMainWin.show();
+    
+    
+    //Ui_testMainWin theMainWin = new(mainTestWindow);
+    //a.setMainWidget( theMainWin );         // It is our main widget
+    //theMainWin->setCaption( "OpenServo Test" );
+    //theMainWin->show();
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
     return a.exec();
 
