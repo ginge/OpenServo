@@ -47,114 +47,13 @@ int main ( int argc, char *argv[] ) {
         printf( "            gpio s [gpio num] [1|0] - set a single gpio high or low\n");
         printf( "            more - advanced functions\n");
         printf( "\n");
-        printf( "  example: %s write 0x02 0x41 1 2 3 4 5 6 6\n");
+        printf( "  example:  write 0x02 0x41 1 2 3 4 5 6 6\n");
         printf( "\n");
         printf( "  Values can be specified as int (16) or hex (0x10).\n");
-        printf( "(c) Barry Carter 2007-2008 www.openservo.com www.robotfuzz.co.uk\n");
+        printf( "(c) Barry Carter 2007-2010 www.openservo.com www.robotfuzz.co.uk\n");
         return 1;
     }
 
-    /* Typedef the OSIF functions */
-    typedef int  (*OSIF_initfunc   )();
-    typedef int  (*OSIF_deinitfunc )();
-    typedef int  (*OSIF_writefunc  )(int adapter, int i2c_addr, unsigned char addr, unsigned char *data, size_t len);
-    typedef int  (*OSIF_readfunc   )(int adapter, int i2c_addr, unsigned char addr, unsigned char *data, size_t len);
-    typedef int  (*OSIF_reflashfunc)(int adapter, int i2c_addr, int bootloader_addr, char *filename);
-    typedef int  (*OSIF_commandfunc)(int adapter, int i2c_addr, unsigned char command);
-    typedef int  (*OSIF_scanfunc   )(int adapter, int devices[], int *dev_count);
-    typedef bool (*OSIF_probefunc  )(int adapter, int i2c_addr);
-
-    /* These are "advanced" functions */
-    typedef int  (*OSIF_write_datafunc )(int adapter, int i2c_addr, unsigned char addr, unsigned char *data, size_t len, int issue_stop);
-    typedef int  (*OSIF_writeonlyfunc  )(int adapter, int i2c_addr, unsigned char *data, size_t len, int issue_stop);
-    
-    typedef int  (*OSIF_read_datafunc  )(int adapter, int i2c_addr, unsigned char addr, unsigned char *data, size_t len, int issue_stop);
-    typedef int  (*OSIF_readonlyfunc   )(int adapter, int i2c_addr, unsigned char *data, size_t len, int issue_stop);
-    typedef int  (*OSIF_set_bitratefunc)(int adapter_no, int bitrate);
-
-    /* GPIOFunctions */
-    typedef int (*OSIF_io_set_ddrfunc  )(int adapter_no, int ddr, int enabled);
-    typedef int (*OSIF_io_set_outfunc  )(int adapter_no, int io);
-    typedef int (*OSIF_io_set_out1func  )(int adapter_no, int gpio, int state);
-    typedef int (*OSIF_io_get_infunc   )(int adapter_no, int in);
-
-    /* Pointers to the functions */
-    OSIF_deinitfunc OSIF_deinit;
-    OSIF_initfunc OSIF_init;
-    OSIF_writefunc OSIF_write;
-    OSIF_readfunc OSIF_read;
-    OSIF_reflashfunc OSIF_reflash;
-    OSIF_scanfunc OSIF_scan;
-    OSIF_probefunc OSIF_probe;
-    OSIF_commandfunc OSIF_command;
-
-    OSIF_write_datafunc OSIF_write_data;
-    OSIF_writeonlyfunc OSIF_writeonly;
-    OSIF_read_datafunc OSIF_read_data;
-    OSIF_readonlyfunc OSIF_readonly;
-    OSIF_set_bitratefunc OSIF_set_bitrate;
-
-    OSIF_io_set_ddrfunc OSIF_io_set_ddr;
-    OSIF_io_set_outfunc OSIF_io_set_out;
-    OSIF_io_get_infunc  OSIF_io_get_in;
-    OSIF_io_set_out1func OSIF_io_set_out1;
-
-#ifdef WIN32
-    /*Windows handle*/
-    HANDLE hdll;
-
-    /*LoadLibrary*/
-    hdll = LoadLibrary("OSIFdll.dll");
-
-    if (!hdll) { printf("Error loading dll\n"); exit(0); }
-
-    /*GetProcAddress*/
-    OSIF_init    = (OSIF_initfunc)GetProcAddress(hdll, "OSIF_init");
-    OSIF_deinit  = (OSIF_deinitfunc)GetProcAddress(hdll, "OSIF_deinit");
-    OSIF_write   = (OSIF_writefunc)GetProcAddress(hdll, "OSIF_write");
-    OSIF_read    = (OSIF_readfunc)GetProcAddress(hdll, "OSIF_read");
-    OSIF_reflash = (OSIF_reflashfunc)GetProcAddress(hdll, "OSIF_reflash");
-    OSIF_scan    = (OSIF_scanfunc)GetProcAddress(hdll, "OSIF_scan");
-    OSIF_probe   = (OSIF_probefunc)GetProcAddress(hdll, "OSIF_probe");
-    OSIF_command = (OSIF_commandfunc)GetProcAddress(hdll, "OSIF_command");
-
-    OSIF_write_data = (OSIF_write_datafunc)GetProcAddress(hdll, "OSIF_write_data");
-    OSIF_writeonly  = (OSIF_writeonlyfunc)GetProcAddress(hdll, "OSIF_writeonly");
-    OSIF_read_data  = (OSIF_read_datafunc)GetProcAddress(hdll, "OSIF_read_data");
-    OSIF_readonly   = (OSIF_readonlyfunc)GetProcAddress(hdll, "OSIF_readonly");
-    OSIF_set_bitrate = (OSIF_set_bitratefunc)GetProcAddress(hdll, "OSIF_set_bitrate");
-    
-#else
-    libhandle = dlopen ( "libOSIFlib.so.1", RTLD_LAZY ); // open the shared lib
-
-    // if the open failed, NULL was returned.  Print the error code
-    if ( libhandle == NULL ) 
-    {
-        fprintf ( stderr, "fail 1: %s\n", dlerror() );
-        return;
-    } 
-
-    /*GetProcAddress*/
-    OSIF_init    = (OSIF_initfunc)dlsym(libhandle, "OSIF_init");
-    OSIF_deinit  = (OSIF_deinitfunc)dlsym(libhandle, "OSIF_deinit");
-    OSIF_write   = (OSIF_writefunc)dlsym(libhandle, "OSIF_write");
-    OSIF_read    = (OSIF_readfunc)dlsym(libhandle, "OSIF_read");
-    OSIF_reflash = (OSIF_reflashfunc)dlsym(libhandle, "OSIF_reflash");
-    OSIF_scan    = (OSIF_scanfunc)dlsym(libhandle, "OSIF_scan");
-    OSIF_probe   = (OSIF_probefunc)dlsym(libhandle, "OSIF_probe");
-    OSIF_command = (OSIF_commandfunc)dlsym(libhandle, "OSIF_command");
-    
-    OSIF_write_data = (OSIF_write_datafunc)dlsym(libhandle, "OSIF_write_data");
-    OSIF_writeonly  = (OSIF_writeonlyfunc)dlsym(libhandle, "OSIF_writeonly");
-    OSIF_read_data  = (OSIF_read_datafunc)dlsym(libhandle, "OSIF_read_data");
-    OSIF_readonly   = (OSIF_readonlyfunc)dlsym(libhandle, "OSIF_readonly");
-    OSIF_set_bitrate = (OSIF_set_bitratefunc)dlsym(libhandle, "OSIF_set_bitrate");
-
-    OSIF_io_set_ddr = (OSIF_io_set_ddrfunc)dlsym(libhandle, "OSIF_io_set_ddr");
-    OSIF_io_set_out = (OSIF_io_set_outfunc)dlsym(libhandle, "OSIF_io_set_out");
-    OSIF_io_set_out1= (OSIF_io_set_out1func)dlsym(libhandle, "OSIF_io_set_out1");
-    OSIF_io_get_in  = (OSIF_io_get_infunc)dlsym(libhandle, "OSIF_io_get_in");
-#endif
     /*Call the function*/
     if (OSIF_init() <0 )
     {
@@ -287,6 +186,12 @@ int main ( int argc, char *argv[] ) {
                 printf( "device at 0x%02x\n", devices[n]);
             break;
         case 'p':       //probe to see if the i2c_addr exists at address
+            if (argv[1][1] == 'w') // pwm mode
+            {
+                if (OSIF_set_pwm(0, parse_option( argv[2])))
+                    printf("PWM Set\n");
+                break;
+            }
             if (argc < 3) { failcmd = true; break; }
             if (OSIF_probe(0, parse_option( argv[2])))
                 printf("probe found device\n");
@@ -317,10 +222,11 @@ int main ( int argc, char *argv[] ) {
             }
             break;
         case 'm':        //More help
-            printf( "  commands: w1   [i2c_addr] [filename]- write data\n");
-            printf( "  commands: w2   [i2c_addr] [filename]- write only\n");
-            printf( "  commands: r1   [i2c_addr] [filename]- read data\n");
-            printf( "  commands: r2   [i2c_addr] [filename]- read only\n");
+            printf( "  commands: w1   [i2c_addr] [byte]- write data\n");
+            printf( "  commands: w2   [i2c_addr] [byte]- write only\n");
+            printf( "  commands: r1   [i2c_addr] [address]- read data\n");
+            printf( "  commands: r2   [i2c_addr] [address]- read only\n");
+	    printf( "  commands: pwm  [value 0-255]\n");
             break;
 
         default:
@@ -334,9 +240,10 @@ int main ( int argc, char *argv[] ) {
     OSIF_deinit();
     //Free the library:
 #ifdef WIN32
-    int freeResult = FreeLibrary(hdll); 
+//    int freeResult = FreeLibrary(hdll); 
 #else
-    dlclose(libhandle);
+printf(libhandle);
+    //dlclose(libhandle);
 #endif
     return 0;
 }

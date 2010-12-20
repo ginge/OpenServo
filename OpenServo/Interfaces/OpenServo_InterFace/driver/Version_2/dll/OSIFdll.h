@@ -128,7 +128,7 @@ EXPORT int OSIF_disable_i2c(int adapter_no);
 EXPORT int OSIF_enable_i2c(int adapter_no);
 
 /** Set a Data Direction (DDR) on a GPIO pin **/
-EXPORT int OSIF_io_set_ddr(int adapter_no, int ddr, int enabled);
+EXPORT int OSIF_io_set_ddr(int adapter_no, unsigned char ddr, unsigned char enabled);
 
 /** GPIO Control function to set pin high or low **/
 EXPORT int OSIF_io_set_out(int adapter_no, int io);
@@ -142,5 +142,7 @@ EXPORT int OSIF_io_set_out1(int adapter_no, int gpio, int state);
 /** get the current pin states. THIS IS NOT suitable for asking the osif what pins
     are set when this lib loaded, OSIF doesn't know that. **/
 EXPORT int OSIF_io_get_current(int adapter_no);
+
+EXPORT int OSIF_set_pwm(int adapter_no, int pwm);
 
 #endif

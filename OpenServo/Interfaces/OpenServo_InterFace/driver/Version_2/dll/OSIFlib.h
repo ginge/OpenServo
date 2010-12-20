@@ -68,6 +68,8 @@ http://www.gnu.org/licenses/gpl.txt
 #define USBIO_SET_DDR                 30
 #define USBIO_SET_OUT                 31
 #define USBIO_GET_IN                  32
+
+#define USBPWM_RATE                   50
 // USB Serial requests
 //
 

@@ -12,3 +12,8 @@ libOSIFlib: $(OBJ)
 clean:
 	rm *.o
 	rm libOSIFlib.so.1.0.1
+
+install:
+	sudo cp libOSIFlib.so.1.0.1 /usr/lib/
+	sudo ln -sf /usr/lib/libOSIFlib.so.1.0.1 /usr/lib/libOSIFlib.so
+	sudo ln -sf /usr/lib/libOSIFlib.so.1 /usr/lib/libOSIFlib.so

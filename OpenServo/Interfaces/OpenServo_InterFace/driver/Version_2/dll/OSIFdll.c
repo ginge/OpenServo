@@ -627,7 +627,7 @@ EXPORT int OSIF_get_adapter_name(int adapter, char* name)
  // SDA
  // SCL
 **/
-EXPORT int OSIF_io_set_ddr(int adapter_no, int ddr, int enabled)
+EXPORT int OSIF_io_set_ddr(int adapter_no, unsigned char ddr, unsigned char enabled)
 {
     usb_dev_handle *handle;
     handle = get_adapter_handle(adapter_no);
@@ -640,7 +640,7 @@ EXPORT int OSIF_io_set_ddr(int adapter_no, int ddr, int enabled)
 
     if (usb_control_msg(handle, USB_CTRL_IN, 
         USBIO_SET_DDR,
-        0, ddr, 0, enabled, 1000) >0)
+        enabled, ddr, 0, 0, 1000) >0)
     {
         fprintf(stderr, "OSIF_io_set_ddr: USB write error: %s\n", usb_strerror());
         return -1;
@@ -685,14 +685,14 @@ EXPORT int OSIF_io_set_out(int adapter_no, int io)
 
     // store the gpio values
     gpio_state[adapter_no].output_state = io;
-#ifdef DEBUG_OUT
+//#ifdef DEBUG_OUT
     int j;
     for (j=0; j < 6; j++)
     {
         if (io & (1<<j))
             printf("gpio %d high\n", j);
     }
-#endif
+//#endif
 
     return 1;
 }
@@ -812,6 +812,7 @@ EXPORT int OSIF_set_bitrate(int adapter_no, int bitrate_hz)
     }
     return 1;
 }
+
 EXPORT int OSIF_set_twbr(int adapter_no, int twbr, int twps)
 {
     usb_dev_handle *handle;
@@ -824,6 +825,23 @@ EXPORT int OSIF_set_twbr(int adapter_no, int twbr, int twps)
                 1000) >0)
     {
         fprintf(stderr, "w_bitrate_USB error: %s\n", usb_strerror());
+        return -1;
+    }
+    return 1;
+}
+
+EXPORT int OSIF_set_pwm(int adapter_no, int pwm)
+{
+    usb_dev_handle *handle;
+    handle = get_adapter_handle(adapter_no);
+
+    printf("pwm: %d\n", pwm);
+    if (usb_control_msg(handle, USB_CTRL_IN,
+        USBPWM_RATE, 0
+                , pwm, 0, 0,
+                1000) >0)
+    {
+        fprintf(stderr, "w_set_pwm_USB error: %s\n", usb_strerror());
         return -1;
     }
     return 1;

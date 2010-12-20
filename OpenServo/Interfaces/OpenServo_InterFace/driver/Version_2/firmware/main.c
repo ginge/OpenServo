@@ -13,7 +13,7 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
-
+//#define OBDEV
 #include <util/twi.h>
 #define F_CPU 12000000UL  // 12 MHz
 #include <util/delay.h>
@@ -25,6 +25,10 @@ typedef unsigned char   byte_t;
 typedef unsigned int    uint_t;
 #define usb_init()  usbInit()
 #define usb_poll()  usbPoll()
+//PD-TPC - those three functions must be declared/preprocessed too for avrusb
+#define usb_in(par1,par2) usbFunctionRead(par1,par2)
+#define usb_out(par1,par2) usbFunctionWrite(par1,par2)
+#define usb_setup(par1) usbFunctionSetup(par1)
 #else
 // use usbtiny library 
 #include "usb.h"
@@ -58,9 +62,12 @@ enum
     USBIO_SET_DDR = 30,
     USBIO_SET_OUT,
     USBIO_GET_IN,
+    USBTINY_RESET,
     // Serial Requests
     USBSER_READ = 40,
-    USBSER_WRITE
+    USBSER_WRITE,
+    // PWM Requests
+    USBPWM_RATE = 50
 };
 
 // Status flags for the I2C reading and writing
@@ -93,6 +100,8 @@ enum
 #define RESET_PORT      PORTC
 #define RESET_PIN       (1 << 4)
 #define RESET_DDRMASK   RESET_PIN
+
+#define PWM_PIN         PB3
 
 // Programmer input pins:
 //      MISO    PD3     (ACK)
@@ -133,9 +142,8 @@ static byte_t          i2cstat;         // status of I2C comms
 static byte_t          i2crecvlen;      // I2C buffer recieve length
 static uint8_t         io_enabled;
 static uint8_t         io_ddr;
-static byte_t          modestat; // USB to serial mode
-
-static byte_t          start_hack;
+static byte_t          modestat;        // USB to serial mode
+static byte_t          pwm_on;          // Enable PWM mode
 
 static unsigned char UART_RxBuf[UART_RX_BUFFER_SIZE];
 static volatile unsigned char UART_RxHead;
@@ -147,6 +155,9 @@ uint16_t tx_timeout;
 //functions
 int8_t uart_putc(uint8_t c);
 int8_t uart_puts (char *s);
+void pwm_init(void);
+void pwm_deinit(void);
+
 enum
 {
     SER_MODE_READ           = 0x02,
@@ -171,6 +182,15 @@ static port_table_type port_table[] = {
                                       };
 
 #define PORT_TABLE_IO_COUNT 6
+
+// force a reboot initiated by watchdog reset
+void reboot(void)
+{
+    wdt_disable();
+    wdt_enable(WDTO_2S);
+    cli();
+    while(1) ;;
+}
 
 // ----------------------------------------------------------------------
 // Delay exactly <sck_period> times 0.5 microseconds (6 cycles).
@@ -269,8 +289,6 @@ void i2c_init()
     TWCR = 0;                           // Clear the control register
     i2c_bitrate_set(10, 1);          // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
     TWCR |= _BV(TWEN);                  // Enable I2C in control register
-
-    start_hack=0;
 }
 
 // Wait for the interupt flag to clear in the TWI hardware
@@ -309,32 +327,6 @@ static inline void i2c_stop(void)
 {
     TWCR |= _BV(TWINT) | _BV(TWSTO);            // Send the stop bit
 }
-/*
-    start_hack=1;
-    if (start_hack==1)
-    {
-        _delay_us(40);
-        I2CDDR |= (SCL_O) | (SDA_O);
-         TWCR &= ~_BV(TWEN);                  // Enable I2C in control register
-        I2CPORT |= SCL_O;                   // scl low
-        I2CPORT |= SDA_O;                   // scl low
-        _delay_us(10);
-         I2CPORT &= ~SCL_O;
-         _delay_us(20);
-         I2CPORT &= ~SDA_O;
-         _delay_us(20);
-         I2CPORT |= SCL_O;                   // scl low
-//         I2CPORT &= ~SDA_O;
-        _delay_us(10);
-        I2CPORT &= ~SCL_O;
-        _delay_us(8);
-        //         I2CPORT |= SCL_O;
-//        ret = 1;
-        TWCR = 0; 
-        TWCR |=_BV(TWEN);                  // Enable I2C in control register
-    }
-}
-*/
 
 // Send the Start condition
 static inline int i2c_start(void)
@@ -491,6 +483,11 @@ extern byte_t usb_setup(byte_t data[8])
         return 8;
     }
 
+    req = data[1];
+    if (req == USBTINY_RESET)
+    {
+        reboot();
+    }
     // Request a new I2C bitrate in case of high speed errors.
     if (req == USBI2C_SET_BITRATE)
     {
@@ -569,7 +566,7 @@ extern byte_t usb_setup(byte_t data[8])
         data[0] = *addr;
         return 1;
     }
-    if	( req == USBTINY_WRITE )                         // SPI write
+    else if	( req == USBTINY_WRITE )                         // SPI write
     {
         *addr = data[2];
         return 0;
@@ -656,7 +653,7 @@ extern byte_t usb_setup(byte_t data[8])
     if  ( req == USBIO_SET_DDR )
     {
         io_ddr = data[4];                                  // This holds the direction bits
-        io_enabled = data[6];                              // This holds the IO enabled status
+        io_enabled = data[2];                              // This holds the IO enabled status
         // Set the port directions
         for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
         {
@@ -666,6 +663,7 @@ extern byte_t usb_setup(byte_t data[8])
             if (io_ddr & (1<<x))             // if set as output
             {
                 *port_table[x].p_ddr |= _BV(port_table[x].bit);
+		*port_table[x].p_port |= _BV((port_table[x].bit)); //low
             }
             else                        //input
             {
@@ -715,7 +713,26 @@ extern byte_t usb_setup(byte_t data[8])
     {
         return 0;
     }
-
+    if (req == USBPWM_RATE)
+    {
+        if (data[4] == 0)
+        {
+            pwm_deinit();
+        }
+        else
+        {
+            if (!pwm_on)
+            {
+                pwm_init();
+            }
+            else
+            {
+                OCR2 = data[4];
+            }
+        }
+        data[0] = 1;
+        return 1;
+    }
     return 0;
 }
 
@@ -728,7 +745,7 @@ extern  byte_t  usb_in ( byte_t* data, byte_t len )
 #endif
 {
     byte_t	i;
-    if((i2cstat & I2C_PACKET) != 0)                           // Make sure we are in packet reading more in the status register
+    if((i2cstat & I2C_PACKET) != 0)                           // Make sure we are in packet reading mode in the status register
     {
         if((i2cstat & I2C_STATUS) != 0){                      // See if we are sending back the status array
             for	( i = 0; i < len; i++ )
@@ -809,6 +826,21 @@ extern void usb_out (byte_t* data, byte_t len)
 #if defined(OBDEV)
     return len;
 #endif
+}
+
+
+void pwm_init()
+{
+    TCCR2 = (0<<FOC2)|(1<<WGM21)|(1<<WGM20)|(1<<CS20)|(0<<CS21)|(0<<CS22)|(1<<COM21)|(0<<COM20);//setup PMW, no prescaler
+    OCR2 = 0x00;
+    DDRB |= (1<<PWM_PIN);
+    pwm_on = 1; 
+}
+
+void pwm_deinit()
+{
+    TCCR0 ^=(0<<COM21)|(0<<COM20); //disable OC2
+    pwm_on = 0; 
 }
 
 void io_init(void)
@@ -1065,14 +1097,20 @@ extern int main ( void )
     wdt_enable(WDTO_2S);   // Enable the watchdog timer
     wdt_reset();
 
+    cli();
     // We need to pull USB + - low for at least 200ms to force
     // a renumeration of init
-     PORTC &= ~(_BV(PC0) | _BV(PC1));
-     _delay_ms(200);
+    /*DDRC = (_BV(PC0) | _BV(PC1));
+    PORTC &= ~(_BV(PC0) | _BV(PC1));
 
+    _delay_ms(200);
+    */ // Removed for now as it was causing problems with some hosts 22-04-09
     usb_init();
+    sei();
     i2c_init();
     io_init();
+
+    sei();
 
     for	( ;; )
     {
