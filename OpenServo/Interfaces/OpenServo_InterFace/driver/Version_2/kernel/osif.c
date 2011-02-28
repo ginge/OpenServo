@@ -69,6 +69,7 @@ static int usb_read(struct i2c_adapter *i2c_adap, int cmd,
 static int usb_write(struct i2c_adapter *adapter, int cmd, 
 		     int value, int index, void *data, int len);
 
+struct osif *dev = NULL;
 /* ----- begin of i2c layer ---------------------------------------------- */
 
 static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
@@ -115,7 +116,7 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 str[0] = 0;
                 for(j=0;j<pmsg->len;j++)
                 sprintf(str+strlen(str), "%x ", pmsg->buf[i]);
-                info("   < %s", str);
+                dev_info(&dev->i2c_adap.dev, "   < %s", str);
             }
 #endif
         } else {
@@ -126,7 +127,7 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 str[0] = 0;
                 for(j=0;j<pmsg->len;j++)
                 sprintf(str+strlen(str), "%x ", pmsg->buf[i]);
-                info("   > %s", str);
+                dev_info(&dev->i2c_adap.dev, "   > %s", str);
             }
 #endif
             cmd = USBI2C_WRITE;
@@ -166,7 +167,7 @@ static u32 usb_func(struct i2c_adapter *adapter)
         /* configure for I2c mode and SMBUS emulation */
     u32 func = I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL;
 
-    info("got adapter functionality %x", func);
+    //dev_info(&dev->i2c_adap.dev, "got adapter functionality %x", func);
     return func;
 }
 
@@ -244,7 +245,6 @@ static void osif_free(struct osif *dev) {
 
 static int osif_probe(struct usb_interface *interface, 
                              const struct usb_device_id *id) {
-    struct osif *dev = NULL;
     int retval = -ENOMEM;
     u16 version;
 
@@ -266,7 +266,7 @@ static int osif_probe(struct usb_interface *interface,
     usb_set_intfdata(interface, dev);
 
     version = le16_to_cpu(dev->udev->descriptor.bcdDevice);
-    info("version %x.%02x found at bus %03d address %03d", 
+    dev_info(&dev->i2c_adap.dev, "version %x.%02x found at bus %03d address %03d",
         version>>8, version&0xff, 
         dev->udev->bus->busnum, dev->udev->devnum);
 
@@ -318,7 +318,7 @@ static int __init usb_osif_init(void)
 {
     int result;
 
-    info(DRIVER_DESC " " DRIVER_VERSION " of " __DATE__);
+    dev_info(&dev->i2c_adap.dev, DRIVER_DESC " " DRIVER_VERSION " of " __DATE__);
 
     /* register this driver with the USB subsystem */
     result = usb_register(&osif_driver);
