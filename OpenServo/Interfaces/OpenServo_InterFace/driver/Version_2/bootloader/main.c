@@ -21,6 +21,7 @@
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 #include <avr/boot.h>
+#include <avr/delay.h>
 #include "usb.h"
 
 #define USBTINYBL_FUNC_APP_INIT 1
@@ -183,9 +184,11 @@ int main(void)
 {
     // Initialise hardware
     //Set all ports as inputs apart from the USB
+    DDRB  = 0;
     PORTB = 0;
-    DDRB  = _BV(PB3);
-    PORTC = 0;         // This is where our jumper pin detection will happen
+    PORTB |= _BV(PB4); // Enable the PB4 pullup.
+    DDRB  = _BV(PB3);  // This is where our jumper pin detection will happen. Make output
+    PORTC = 0;         
     DDRC  = 0;
     PORTD = 0;
     DDRD  = 0x02;
@@ -193,13 +196,23 @@ int main(void)
 
     // Load the main application if jumper is not set
     // Change this pin to relocate the jumper elsewhere
-    // Take PB3 high
-    PORTB |= (1 << PB3);
+    // Take PB3 low
+    PORTB &= ~(1 << PB3);
+
+    // If PB3 and PB4 are connected, then pulling PB3 low will pull PB4 low
     if (PINB & (1 << PB4))
     {
        init_application();
     }
 
+    /*
+    // We need to pull USB + - low for at least 200ms to force
+    // a renumeration of init
+    DDRC = (_BV(PC0) | _BV(PC1));
+    PORTC &= ~(_BV(PC0) | _BV(PC1));
+
+    _delay_ms(400);
+*/
     GICR = (1 << IVCE);  // Enable change of interrupt vectors
     GICR = (1 << IVSEL); // Move interrupts to boot flash section
 
