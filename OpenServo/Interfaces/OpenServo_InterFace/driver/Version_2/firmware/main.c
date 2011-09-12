@@ -282,13 +282,15 @@ int i2c_bitrate_set(int twbr_set, int twps_set)
 void i2c_init()
 {
     // Set the port directions and disable I2C pullups
-    I2CPORT|=  SDA_O;                     // Disable pullups on I2C
-    I2CPORT|=  SCL_O;
-    I2CDDR |=  (SDA_O) | (SCL_O);           // Set I2C lines as output
+    DDRB &= ~(1<<PB5);   // Set PB5 (SCK) as input
+    PORTB &= ~(1<<PB5);  // Disable the pullup
+    DDRC &= ~((1<<PC4)|(1<<PC5));  // Set I2C pins PC4 and PC5 as input
+    PORTC &= ~(1<<PC4); // Disable pullups on I2C
+    PORTC &= ~(1<<PC5);
 
-    TWCR = 0;                           // Clear the control register
+    TWCR = 0; // Clear the control register
     i2c_bitrate_set(10, 1);          // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
-    TWCR |= _BV(TWEN);                  // Enable I2C in control register
+    TWCR |= _BV(TWEN); // Enable I2C in control register
 }
 
 // Wait for the interupt flag to clear in the TWI hardware
@@ -589,7 +591,7 @@ extern byte_t usb_setup(byte_t data[8])
     if	( req == USBTINY_POWERUP )
     {
         TWCR = 0;                                         // Disable I2C
-        TWSR = (0 & 0X03);                                         // Clear the status register
+        TWSR = 0;                                         // Clear the status register
         sck_period = data[2];                             // Store the clock period
         mask = DDRMASK;                                   // setup the port mask
         RESET_DDR |= RESET_PIN;                           // Set the port direction for the reset line
@@ -599,8 +601,11 @@ extern byte_t usb_setup(byte_t data[8])
         }
         else
             RESET_PORT &= ~RESET_PIN;                     // Bring the reset low
+        DDRC &= ~(_BV(PC5));
+        PORTC &= ~(_BV(PC5));
         DDR  = DDRMASK;                                   // Reset spi port directions
         PORT = mask;                                      // setup the port mask
+        //PORTB |= _BV(PB2);     // set AVR reset high
         return 0;
     }
     // Disable SPI mode and enable I2C
@@ -1089,15 +1094,19 @@ __attribute__((naked))                                                  // suppr
 extern int main ( void )
 {
     DDRD = (1<<0)|(1<<1);  // Set the port directions
-    PORTB |= _BV(PB2);     // Enable pullup on AVR reset control
-    DDRB   = _BV(PB2);     // Set portb output
-    PORTB |= _BV(PB2);     // set AVR reset high
+    PORTB = _BV(PB2);     // Enable pullup on AVR reset control
+    DDRB   = 0;     // Set portb input
 
-    PORTD |= _BV(PD3);
+
+    PORTB &= ~(_BV(PB3));     // set AVR bootloader pins low, disable pullups
+    PORTB &= ~(_BV(PB4));
+    PORTB &= ~(_BV(PB5));
+    //PORTB |= _BV(PB2);     // set AVR reset high
+
     wdt_enable(WDTO_2S);   // Enable the watchdog timer
     wdt_reset();
 
-    cli();
+    //cli();
     // We need to pull USB + - low for at least 200ms to force
     // a renumeration of init
     /*DDRC = (_BV(PC0) | _BV(PC1));
@@ -1105,11 +1114,13 @@ extern int main ( void )
 
     _delay_ms(200);
     */ // Removed for now as it was causing problems with some hosts 22-04-09
+    
+    
+
     usb_init();
     sei();
     i2c_init();
     io_init();
-
     sei();
 
     for	( ;; )
