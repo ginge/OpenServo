@@ -142,11 +142,11 @@ int main ( int argc, char *argv[] ) {
             // set ports as input excluding i2c
             OSIF_io_set_ddr(0, 0x00, 0x0F);
             inv = OSIF_io_get_in(0);
-	    
-	    printf("Port         543210\n");
-	    printf("Input Values "BYTETOBINARYPATTERN"\n", BYTETOBINARY(inv));
-	    
-	    continue;
+
+            printf("Port         543210\n");
+            printf("Input Values "BYTETOBINARYPATTERN"\n", BYTETOBINARY(inv));
+
+            continue;
         }
 
         if ((a == 4) || (a == 5) && !disabled_i2c)
@@ -182,26 +182,13 @@ int main ( int argc, char *argv[] ) {
         int j, k;
         current_regs = OSIF_io_get_current(0);
         
-	printf("Current pin outputs:\n\n");
+        printf("Current pin outputs:\n\n");
         printf("Port         543210\n");
-	printf("Input Values "BYTETOBINARYPATTERN"\n", BYTETOBINARY(current_regs));
-	    
+        printf("Input Values "BYTETOBINARYPATTERN"\n", BYTETOBINARY(current_regs));
     }
 
     return;
 
-}
-
-void ltostr(long x, char * s, size_t n)
-{
-    memset( s, 0, n );
-    int pos = n - 2;
-
-    while( x && (pos >= 0) )
-    {
-      s[ pos-- ] = (x & 0x1) ? '1' : '0'; // Check LSb of x
-      x >>= 1;
-    }
 }
 
 void closeapp(void)

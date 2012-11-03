@@ -718,7 +718,7 @@ extern byte_t usb_setup(byte_t data[8])
         for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
         {
             if (*port_table[x].p_pin & (1<<port_table[x].bit))
-	        data[0] |= (1<<x);
+                data[0] |= (1<<x);
         }
         return 1;
     }
