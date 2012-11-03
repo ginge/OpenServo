@@ -27,32 +27,44 @@ http://www.gnu.org/licenses/gpl.txt
 void * libhandle; // handle to the shared lib when opened
 #endif
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 void closeapp(void);
+void ltostr(long x, char * s, size_t n);
 
 
-    /* Typedef the OSIF functions */
-    typedef int  (*OSIF_initfunc   )();
-    typedef int  (*OSIF_deinitfunc )();
+/* Typedef the OSIF functions */
+typedef int  (*OSIF_initfunc   )();
+typedef int  (*OSIF_deinitfunc )();
 
-    /* GPIOFunctions */
-    typedef int (*OSIF_io_set_ddrfunc  )(int adapter_no, int ddr, int enabled);
-    typedef int (*OSIF_io_set_outfunc  )(int adapter_no, int io);
-    typedef int (*OSIF_io_set_out1func  )(int adapter_no, int gpio, int state);
-    typedef int (*OSIF_io_get_infunc   )(int adapter_no, int in);
-    typedef int (*OSIF_io_get_currentfunc   )(int adapter_no);
+/* GPIOFunctions */
+typedef int (*OSIF_io_set_ddrfunc  )(int adapter_no, int ddr, int enabled);
+typedef int (*OSIF_io_set_outfunc  )(int adapter_no, int io);
+typedef int (*OSIF_io_set_out1func  )(int adapter_no, int gpio, int state);
+typedef int (*OSIF_io_get_infunc   )(int adapter_no);
+typedef int (*OSIF_io_get_currentfunc   )(int adapter_no);
 
-    /* Pointers to the functions */
-    OSIF_deinitfunc OSIF_deinit;
-    OSIF_initfunc OSIF_init;
+/* Pointers to the functions */
+OSIF_deinitfunc OSIF_deinit;
+OSIF_initfunc OSIF_init;
 
-    OSIF_io_set_ddrfunc OSIF_io_set_ddr;
-    OSIF_io_set_outfunc OSIF_io_set_out;
-    OSIF_io_get_infunc  OSIF_io_get_in;
-    OSIF_io_set_out1func OSIF_io_set_out1;
-    OSIF_io_get_currentfunc OSIF_io_get_current;
-    
+OSIF_io_set_ddrfunc OSIF_io_set_ddr;
+OSIF_io_set_outfunc OSIF_io_set_out;
+OSIF_io_get_infunc  OSIF_io_get_in;
+OSIF_io_set_out1func OSIF_io_set_out1;
+OSIF_io_get_currentfunc OSIF_io_get_current;
+
+#define BYTETOBINARYPATTERN "%d%d%d%d%d%d"
+#define BYTETOBINARY(byte)  \
+  (byte & 0x20 ? 1 : 0), \
+  (byte & 0x10 ? 1 : 0), \
+  (byte & 0x08 ? 1 : 0), \
+  (byte & 0x04 ? 1 : 0), \
+  (byte & 0x02 ? 1 : 0), \
+  (byte & 0x01 ? 1 : 0)
+  
 int main ( int argc, char *argv[] ) {
 
 
@@ -104,7 +116,7 @@ int main ( int argc, char *argv[] ) {
     unsigned char buf[255];
     int ret = 0;
     int len = 1;
-    printf("Welcome to GPIO test app! Press 0 - 5 to change a gpio, or 9 to quit\n\n");
+    printf("Welcome to GPIO test app! Press 0 - 5 to change a gpio, 6 to read gpio inputs or 9 to quit\n\n");
 
     // set ports as output excluding I2C
     OSIF_io_set_ddr(0, 0xCF, 0xCF);
@@ -121,6 +133,20 @@ int main ( int argc, char *argv[] ) {
             quit = true;
             closeapp();
             continue;
+        }
+        
+        // read
+        if (a == 6)
+        {
+            int inv = 0;
+            // set ports as input excluding i2c
+            OSIF_io_set_ddr(0, 0x00, 0x0F);
+            inv = OSIF_io_get_in(0);
+	    
+	    printf("Port         543210\n");
+	    printf("Input Values "BYTETOBINARYPATTERN"\n", BYTETOBINARY(inv));
+	    
+	    continue;
         }
 
         if ((a == 4) || (a == 5) && !disabled_i2c)
@@ -155,20 +181,27 @@ int main ( int argc, char *argv[] ) {
         
         int j, k;
         current_regs = OSIF_io_get_current(0);
-        printf("Current map: ");
-        for (j=0; j < 6; j++)
-        {
-            k = 0;
-            if ((current_regs) & (1<<j))
-                k = 1;
-            printf("%d", k);
-        }
-        printf("\n");
-
+        
+	printf("Current pin outputs:\n\n");
+        printf("Port         543210\n");
+	printf("Input Values "BYTETOBINARYPATTERN"\n", BYTETOBINARY(current_regs));
+	    
     }
 
     return;
 
+}
+
+void ltostr(long x, char * s, size_t n)
+{
+    memset( s, 0, n );
+    int pos = n - 2;
+
+    while( x && (pos >= 0) )
+    {
+      s[ pos-- ] = (x & 0x1) ? '1' : '0'; // Check LSb of x
+      x >>= 1;
+    }
 }
 
 void closeapp(void)

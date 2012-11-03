@@ -67,7 +67,11 @@ enum
     USBSER_READ = 40,
     USBSER_WRITE,
     // PWM Requests
-    USBPWM_RATE = 50
+    USBPWM_RATE = 50,
+    // EEPROM commands
+    EEPROM_READ = 60,
+    EEPROM_WRITE,
+    EEPROM_PLAYBACK
 };
 
 // Status flags for the I2C reading and writing
@@ -79,6 +83,21 @@ enum
     I2C_WRITE               = 0x08,
     I2C_STATUS              = 0x10,
 };
+
+// EEPROM Flags
+enum
+{
+    EEPROM_DIR_W            = 0x01,
+    EEPROM_SEND_STOP        = 0x02,
+};
+
+// Serial mode flags
+enum
+{
+    SER_MODE_READ           = 0x02,
+    SER_MODE_WRITE          = 0x04,
+};
+
 
 #define PORT            PORTB
 #define DDR             DDRB
@@ -92,8 +111,6 @@ enum
 
 #define I2CPORT         PORTC
 #define I2CDDR          DDRC
-#define SDA             (0<<PC4)
-#define SCL             (0<<PC5)
 #define SDA_O           (1<<PC4)
 #define SCL_O           (1<<PC5)
 #define RESET_DDR       DDRC
@@ -142,7 +159,7 @@ static byte_t          i2cstat;         // status of I2C comms
 static byte_t          i2crecvlen;      // I2C buffer recieve length
 static uint8_t         io_enabled;
 static uint8_t         io_ddr;
-static byte_t          modestat;        // USB to serial mode
+static byte_t          modestat;        // Current enabled mode
 static byte_t          pwm_on;          // Enable PWM mode
 
 static unsigned char UART_RxBuf[UART_RX_BUFFER_SIZE];
@@ -157,12 +174,7 @@ int8_t uart_putc(uint8_t c);
 int8_t uart_puts (char *s);
 void pwm_init(void);
 void pwm_deinit(void);
-
-enum
-{
-    SER_MODE_READ           = 0x02,
-    SER_MODE_WRITE          = 0x04,
-};
+void playback_start(void);
 
 typedef struct { 
     volatile uint8_t *p_ddr; 
@@ -265,12 +277,12 @@ int i2c_bitrate_set(int twbr_set, int twps_set)
 {
     if (twps_set == 4) // TWPS 4
     {
-        TWSR &= ~(_BV(TWPS0));
-        TWSR |= _BV(TWPS0); // Set the prescaler for twi in the status reegister
+        TWSR &= ~((1<<TWPS0));
+        TWSR |= 1<<TWPS0; // Set the prescaler for twi in the status reegister
     }
     else //\ TWPS 1
     {
-        TWSR &= ~(_BV(TWPS0) | _BV(TWPS1)); // Set the prescaler for twi in the status reegister
+        TWSR &= ~((1<<TWPS0) | (1<<TWPS1)); // Set the prescaler for twi in the status reegister
     } 
 
     TWBR = twbr_set;        // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
@@ -290,7 +302,7 @@ void i2c_init()
 
     TWCR = 0; // Clear the control register
     i2c_bitrate_set(10, 1);          // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
-    TWCR |= _BV(TWEN); // Enable I2C in control register
+    TWCR |= (1<<TWEN); // Enable I2C in control register
 }
 
 // Wait for the interupt flag to clear in the TWI hardware
@@ -299,7 +311,7 @@ void i2c_init()
 static inline int i2c_wait_int()
 {
     uint32_t i = 0;
-    while((TWCR & _BV(TWINT)) == 0);
+    while((TWCR & (1<<TWINT)) == 0);
     {
         if (i++ > I2C_TIMEOUT)
             return -1;
@@ -312,7 +324,7 @@ static inline int i2c_wait_int()
 static inline int i2c_send (byte_t sendbyte)
 {
     TWDR = sendbyte;                            // Fill Data register
-    TWCR |= _BV(TWINT);                         // Send the byte
+    TWCR |= (1<<TWINT);                         // Send the byte
     if (i2c_wait_int() <0) return -1;           // Wait for the byte to send
     return TWSR & TWSRMASK;                                // Return the status
 }
@@ -327,14 +339,14 @@ static inline int i2c_read(void)
 // Send Stop condition
 static inline void i2c_stop(void)
 {
-    TWCR |= _BV(TWINT) | _BV(TWSTO);            // Send the stop bit
+    TWCR |= (1<<TWINT) | (1<<TWSTO);            // Send the stop bit
 }
 
 // Send the Start condition
 static inline int i2c_start(void)
 {
     
-    TWCR |= _BV(TWINT) | _BV(TWSTA);            // Send the I2C start command
+    TWCR |= (1<<TWINT) | (1<<TWSTA);            // Send the I2C start command
 
     return i2c_wait_int();                      // and wait for it to complete
 }
@@ -366,11 +378,11 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         {
             // Use the TWSRtmp temporary variable to store the return of the i2c_send function
             TWSRtmp = i2c_send ( i2caddr<<1 | 0x01 );      // Start the data send by sending device address + R
-            TWCR &= ~_BV(TWSTA);                           // Disable the start flag in the control register
+            TWCR &= ~(1<<TWSTA);                           // Disable the start flag in the control register
         }
         else
         {
-            TWCR &= ~(_BV(TWSTA) | _BV(TWINT));            // Disable the start flag in the control register
+            TWCR &= ~((1<<TWSTA) | (1<<TWINT));            // Disable the start flag in the control register
             TWSRtmp = i2c_send ( i2caddr<<1 & 0xFE );      // Start the data send by sending device address + W
         }
         i2cstats[0x02] = TWSRtmp;                          // Store the return status in the status array
@@ -378,7 +390,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     }
     else                                                   // The start failed. Error handle
     {
-        TWCR = _BV(TWINT) | _BV(TWEN);                     // disable all commands in the control register
+        TWCR = (1<<TWINT) | (1<<TWEN);                     // disable all commands in the control register
         data[0] = i2cstats[0x00] = (TWSR & TWSRMASK);                   // Store the return status in the status array
         if(direction == USBI2C_READ)
             i2cstat &= ~(I2C_READ | I2C_PACKET | I2C_READ_ON); // Disable the flags for reading
@@ -390,7 +402,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     // variable which was filled with the return of the send command
     if(TWSRtmp == TW_MR_ARB_LOST  || TWSRtmp == TW_MR_SLA_NACK )
     {
-        TWCR = _BV(TWEN);
+        TWCR = (1<<TWEN);
         data[0] = i2cstats[0x00] = TWSRtmp;
         i2cstat &= ~(I2C_READ | I2C_PACKET | I2C_READ_ON);
         return 0;
@@ -399,7 +411,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     // Checks to see if the start command and device selection generated an ACK
     if(TWSRtmp != TW_MR_SLA_ACK && direction == USBI2C_READ)
     {
-        TWCR = _BV(TWEN);                                  // No ACK was generated. Disable pending flags in the Control register
+        TWCR = (1<<TWEN);                                  // No ACK was generated. Disable pending flags in the Control register
         data[0] = i2cstats[0x00] = TWSRtmp;                // Store the status in the status array
         i2cstat &= ~(I2C_READ | I2C_PACKET | I2C_READ_ON); // Disable flags for reading in the status register
         return 0;
@@ -409,7 +421,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     // cleanup and disable writing to I2C
     if(TWSRtmp == TW_MT_SLA_NACK)
     {
-        TWCR = _BV(TWINT) | _BV(TWEN);
+        TWCR = (1<<TWINT) | (1<<TWEN);
         data[0] = i2cstats[0x00] = TWSRtmp;
         i2cstat &= ~(I2C_WRITE | I2C_PACKET);
         return 0;
@@ -417,7 +429,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     // TWI Master Transmitter Slave Ack
     if(TWSRtmp != TW_MT_SLA_ACK && direction == USBI2C_WRITE) // On no ACK cleanup and reset flags
     {
-        TWCR = _BV(TWINT) | _BV(TWEN);                  //
+        TWCR = (1<<TWINT) | (1<<TWEN);                  //
         data[0] = i2cstats[0x00] = TWSRtmp;
         i2cstat &= ~(I2C_WRITE | I2C_PACKET);
         return 0;
@@ -426,9 +438,9 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     if( direction == USBI2C_READ)
     {
         if(data[6] > 1 || data[7] > 0)
-            TWCR |= _BV(TWEA);
+            TWCR |= (1<<TWEA);
 
-        TWCR |= _BV(TWINT);                                // Clear the interrupt pending flag in the status register
+        TWCR |= (1<<TWINT);                                // Clear the interrupt pending flag in the status register
     }
     return 1;
 }
@@ -449,15 +461,15 @@ static inline int i2c_read_bytes(byte_t *data,byte_t len)
             i2crecvlen--;
         if(i2crecvlen == 1)
         {
-            TWCR = (TWCR | _BV(TWINT)) & ~_BV(TWEA);        // Dont Send the ACK to the TWI slave
+            TWCR = (TWCR | (1<<TWINT)) & ~(1<<TWEA);        // Dont Send the ACK to the TWI slave
         }
         else
         {
-            TWCR |= _BV(TWINT);                             //
+            TWCR |= (1<<TWINT);                             //
         }
         if(TWSRtmp == TW_MR_DATA_NACK)                      // If we get a no ACK from the slave, dont read on
             i2cstat &= ~I2C_READ_ON;
-        TWCR |= _BV(TWINT);
+        TWCR |= (1<<TWINT);
     }
     return 0;
 }
@@ -601,11 +613,11 @@ extern byte_t usb_setup(byte_t data[8])
         }
         else
             RESET_PORT &= ~RESET_PIN;                     // Bring the reset low
-        DDRC &= ~(_BV(PC5));
-        PORTC &= ~(_BV(PC5));
+        DDRC &= ~((1<<PC5));
+        PORTC &= ~((1<<PC5));
         DDR  = DDRMASK;                                   // Reset spi port directions
         PORT = mask;                                      // setup the port mask
-        //PORTB |= _BV(PB2);     // set AVR reset high
+        //PORTB |= (1<<PB2);     // set AVR reset high
         return 0;
     }
     // Disable SPI mode and enable I2C
@@ -667,12 +679,12 @@ extern byte_t usb_setup(byte_t data[8])
             // io_tx
             if (io_ddr & (1<<x))             // if set as output
             {
-                *port_table[x].p_ddr |= _BV(port_table[x].bit);
-		*port_table[x].p_port |= _BV((port_table[x].bit)); //low
+                *port_table[x].p_ddr |= (1<<port_table[x].bit);
+                *port_table[x].p_port |= (1<<(port_table[x].bit)); //low
             }
             else                        //input
             {
-                *port_table[x].p_ddr &= ~_BV((port_table[x].bit));
+                *port_table[x].p_ddr &= ~(1<<(port_table[x].bit));
             }
           }
         }
@@ -684,41 +696,42 @@ extern byte_t usb_setup(byte_t data[8])
         // check to make sure it is an output
         for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
         {
-            if ((io_enabled & (1<<x)) && (io_ddr & (1<<x)))              // Check bit 0 for IO dir
+            if (io_enabled & (1<<x))                 // Check bit 0 for IO dir
             {
                 if ( data[4] & (1<<x) )              // is it high?
                 {
-                    *port_table[x].p_port &= ~_BV((port_table[x].bit));
+                    *port_table[x].p_port &= ~(1<<(port_table[x].bit));
                 }
                 else
                 {
-                    *port_table[x].p_port |= _BV((port_table[x].bit));
+                    *port_table[x].p_port |= (1<<(port_table[x].bit));
                 }
             }
         }
         data[0] = 1;
         return 0;
     }
-    if  ( req == USBIO_GET_IN )
+    else if  ( req == USBIO_GET_IN )
     {
+         data[0] = 0x00;
         // read anyways, regardless of ststus
         for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
         {
-            if (bit_is_clear((port_table[x].p_pin), (port_table[x].bit)))
-                data[0] ^= (1<<x);
+            if (*port_table[x].p_pin & (1<<port_table[x].bit))
+	        data[0] |= (1<<x);
         }
-        return 0;
+        return 1;
     }
-    if (req == USBSER_READ)
+    else if (req == USBSER_READ)
     {
         modestat = USBSER_READ;
         return 0xff;
     }
-    if (req == USBSER_WRITE)
+    else if (req == USBSER_WRITE)
     {
         return 0;
     }
-    if (req == USBPWM_RATE)
+    else if (req == USBPWM_RATE)
     {
         if (data[4] == 0)
         {
@@ -738,6 +751,22 @@ extern byte_t usb_setup(byte_t data[8])
         data[0] = 1;
         return 1;
     }
+    else if (req == EEPROM_READ)
+    {
+        modestat = EEPROM_READ;
+        return 0xff;
+    }
+    else if (req == EEPROM_WRITE)
+    {
+        modestat = EEPROM_WRITE;
+        return 0;
+    }
+    else if (req == EEPROM_PLAYBACK)
+    {
+        playback_start();
+        return 1;
+    }
+    
     return 0;
 }
 
@@ -769,6 +798,15 @@ extern  byte_t  usb_in ( byte_t* data, byte_t len )
         data[i] = UART_RxBuf[i]+block;
         block += 8;
     }*/
+    }
+    else if (modestat == EEPROM_READ)
+    {
+        uint8_t ee_data[len];
+        eeprom_read_block((void*)&ee_data, (const void*)0, len);
+        for (i = 0; i < len; i++)
+        {
+            data[i] = ee_data[i];
+        }
     }
     else                                                      // SPI mode read
     {
@@ -809,6 +847,11 @@ extern void usb_out (byte_t* data, byte_t len)
     else if (modestat == USBSER_WRITE)
     {
         uart_puts((char *)data);
+    }
+    else if (modestat == EEPROM_WRITE)
+    {
+        eeprom_busy_wait();
+        eeprom_write_block(data, (void*)0, len);
     }
     else                                                                // SPI write
     {
@@ -983,6 +1026,9 @@ int uart_poll()
     //> S
     //< OK STOP
 
+    if (UART_RxHead == 0)
+        return 0;
+
     rx_timeout++;  // Increment the timeout counter. This will be reset once data comes in.
     if ((rx_timeout > UART_RX_TIMEOUT) && serstat != 0)
     {
@@ -1089,19 +1135,87 @@ int uart_poll()
     return 0;
 }
 
+// init sequence code
+// allows replay of saved EEPROM settings to default some I2C device(s)
+// Flags:
+// DIR_W = 0x01;
+// STOP = 0x02;
+// EEPROM format :   [data length][device address][direction (R|W) and stop bit flags][data]...[data]
+void playback_init(void)
+{
+    ;
+}
+
+void playback_start()
+{
+    // read the entire eeprom byte by byte
+    // first two bytes contain the length of the whole eeprom
+/*    uint16_t ee_len = eeprom_read_word((uint16_t*)0);
+
+    uint8_t data[ee_len];
+    eeprom_read_block((void*)&data, (const void*)0x02, ee_len);
+
+    modestat = EEPROM_PLAYBACK;
+    
+    // break into packets
+    uint16_t offset = 0;
+    while(icnt < ee_len)
+    {
+        //first byte is the number of data elements to send
+        uint8_t data_cnt = data[icnt];
+        uint8_t i2c_addr = data[icnt+1]
+        uint8_t flags = data[icnt+2];
+        uint8_t send_data[data_cnt];
+        for (uint8_t i = 0; i < data_cnt; i++)
+        {
+            send_data[i] = data[icnt+3+i];
+        }
+
+        uint8_t s_data[8];
+        s_data[1] = USBI2C_WRITE;
+        s_data[6] = data_cnt;
+        s_data[4] = i2c_addr;
+        if (usb_setup(s_data) == 0)
+        {
+            ;//good
+            usb_out(send_data, data_cnt);
+
+            if (flags & EEPROM_SEND_STOP)
+            {
+                // Use the existing USB function Setup to process the stop command
+                // as this handles all of the existing I2C logic
+                s_data[1] = USBI2C_STOP;
+                s_data[4] = 0;
+                s_data[6] = 0;
+
+                usb_setup(s_data);
+            }
+        }
+        else
+        {
+            ;//bad
+        }
+        icnt+=data_cnt + 3;
+    }
+
+    modestat = 0;
+    // for each packet, send to I2C
+    */
+}
+
 // Main
 __attribute__((naked))                                                  // suppress redundant SP initialization
-extern int main ( void )
+extern int main (void)
 {
     DDRD = (1<<0)|(1<<1);  // Set the port directions
-    PORTB = _BV(PB2);     // Enable pullup on AVR reset control
+    PORTB = (1<<PB2);     // Enable pullup on AVR reset control
     DDRB   = 0;     // Set portb input
 
 
-    PORTB &= ~(_BV(PB3));     // set AVR bootloader pins low, disable pullups
-    PORTB &= ~(_BV(PB4));
-    PORTB &= ~(_BV(PB5));
-    //PORTB |= _BV(PB2);     // set AVR reset high
+    PORTB &= ~((1<<PB3));     // set AVR bootloader pins low, disable pullups
+    PORTB &= ~((1<<PB4));
+    PORTB &= ~((1<<PB5));
+    //PORTB |= (1<<PB2);     // set AVR reset high
 
     wdt_enable(WDTO_2S);   // Enable the watchdog timer
     wdt_reset();
@@ -1109,12 +1223,14 @@ extern int main ( void )
     //cli();
     // We need to pull USB + - low for at least 200ms to force
     // a renumeration of init
-    /*DDRC = (_BV(PC0) | _BV(PC1));
-    PORTC &= ~(_BV(PC0) | _BV(PC1));
+    /*DDRC = ((1<<PC0) | (1<<PC1));
+    PORTC &= ~((1<<PC0) | (1<<PC1));
 
     _delay_ms(200);
     */ // Removed for now as it was causing problems with some hosts 22-04-09
-    
+    uart_init();
+    //uart_puts("Welcome to OSIF serial port\n\r");
+    //uart_puts("in>");
     
 
     usb_init();
@@ -1126,6 +1242,11 @@ extern int main ( void )
     for	( ;; )
     {
         usb_poll();
+        if (uart_poll() < 0) //uart_poll() only returns negative on UART rx/tx failure.
+        {
+            //Handle UART errors by resetting the UART hardware
+            uart_init();
+        }
         wdt_reset();
 
         // If there is an error on the bus store the status and reinitialise I2C hardware
@@ -1136,4 +1257,25 @@ extern int main ( void )
         }
     }
     return 0;
+}
+
+ISR(USART_RXC_vect)
+{
+    byte_t data;
+
+    rx_timeout = 0;
+    cli();  //Disable global interrupts
+
+    data = UDR;                 /* Read the received data */
+    /* Calculate buffer index */
+
+    if ( UART_RxHead == UART_RxTail )
+    {
+        /* ERROR! Receive buffer overflow */
+        UART_RxHead = 0;
+    }
+
+    UART_RxBuf[UART_RxHead++] = data; // Store received data in buffer
+
+    sei(); //re-enable global interrupts
 }

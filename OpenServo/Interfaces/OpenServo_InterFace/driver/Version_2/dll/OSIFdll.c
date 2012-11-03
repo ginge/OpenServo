@@ -42,7 +42,7 @@ http://www.gnu.org/licenses/gpl.txt
 #include <string.h>
 #include <math.h>
 
-//#define DEBUG_OUT
+#define DEBUG_OUT
 
 /* Perform a setup data transfer without a full usb transfer */
 int OSIF_USB_write(usb_dev_handle *handle, int request, int value, int index)
@@ -183,7 +183,7 @@ EXPORT int OSIF_init(void)
                  }
 #endif
 
-                break;
+//                break;
             }
         }
 
@@ -712,10 +712,10 @@ EXPORT int OSIF_io_get_in(int adapter_no)
     char data[10];
     int retval = usb_control_msg(handle, USB_CTRL_IN,
         USBIO_GET_IN,
-        0, 0, data, 0,
+        0, 0, data, 1,
         1000);
 
-    if (retval > 0)
+    if (retval < 0)
     {
         fprintf(stderr, "r_io_USB error: %s\n", usb_strerror());
         return -1;
