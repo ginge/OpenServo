@@ -78,14 +78,14 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
     int i;
     int ret=0;
 
-    dbg("master xfer %d messages:", num);
+    dev_dbg(&adapter->dev, "master xfer %d messages:", num);
 
     for (i = 0;ret >= 0 && i < num; i++) {
         int cmd = USBI2C_READ;
 
         pmsg = &msgs[i];
 
-        dbg("  %d: %s (flags %d) %d bytes to 0x%02x",
+        dev_dbg(&adapter->dev, "  %d: %s (flags %d) %d bytes to 0x%02x",
             i, pmsg->flags & I2C_M_RD ? "read" : "write", pmsg->flags,
             pmsg->len, pmsg->addr);
 
@@ -97,14 +97,14 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                         pmsg->flags, pmsg->addr, 
                         pmsg->buf, pmsg->len) <1) {
 
-                err("failure reading data");
+                dev_err(&adapter->dev, "failure reading data");
                 return -EREMOTEIO;
             }
             if(usb_read(adapter, USBI2C_STOP, 
                0, 0, 
                0, 0) >0) {
 
-                   err("failure sending STOP");
+                   dev_err(&adapter->dev, "failure sending STOP");
                    return -EREMOTEIO;
             }
 
@@ -115,7 +115,7 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 str[0] = 0;
                 for(j=0;j<pmsg->len;j++)
                 sprintf(str+strlen(str), "%x ", pmsg->buf[i]);
-                printk(KERN_INFO "   < %s", str);
+                pr_info("   < %s", str);
             }
 #endif
         } else {
@@ -126,7 +126,7 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 str[0] = 0;
                 for(j=0;j<pmsg->len;j++)
                 sprintf(str+strlen(str), "%x ", pmsg->buf[i]);
-                printk(KERN_INFO "   > %s", str);
+                pr_info("   > %s", str);
             }
 #endif
             cmd = USBI2C_WRITE;
@@ -134,14 +134,14 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
             if(usb_write(adapter, cmd, 
                         pmsg->flags, pmsg->addr, 
                         pmsg->buf, pmsg->len) != pmsg->len) {
-                err("failure writing data");
+                dev_err(&adapter->dev, "failure writing data");
                 return -EREMOTEIO;
             }
             if(usb_read(adapter, USBI2C_STOP, 
                0, 0, 
                0, 0) >0) {
 
-                   err("failure sending STOP");
+                   dev_err(&adapter->dev, "failure sending STOP");
                    return -EREMOTEIO;
                }
 
@@ -149,11 +149,11 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
 
         /* read status */
         if(usb_read(adapter, USBI2C_STAT, 0, 0, &status, 1) != 1) {
-        err("failure reading status");
+        dev_err(&adapter->dev, "failure reading status");
         return -EREMOTEIO;
         }
 
-        dbg("  status = %d", status);
+        dev_dbg(&adapter->dev, "  status = %d", status);
         if(status != STATUS_ADDRESS_ACK)
         return -EREMOTEIO;
     }
@@ -166,7 +166,7 @@ static u32 usb_func(struct i2c_adapter *adapter)
         /* configure for I2c mode and SMBUS emulation */
     u32 func = I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL;
 
-    printk(KERN_INFO "OSIF: got adapter functionality %x", func);
+    pr_info("got adapter functionality %x", func);
     return func;
 }
 
@@ -248,12 +248,12 @@ static int osif_probe(struct usb_interface *interface,
     int retval = -ENOMEM;
     u16 version;
 
-    dbg("probing usb device");
+    dev_dbg(&interface->dev, "probing usb device");
 
     /* allocate memory for our device state and initialize it */
     dev = kmalloc(sizeof(*dev), GFP_KERNEL);
     if (dev == NULL) {
-        err("Out of memory");
+        dev_err(&interface->dev, "Out of memory");
         goto error;
     }
 
@@ -266,7 +266,7 @@ static int osif_probe(struct usb_interface *interface,
     usb_set_intfdata(interface, dev);
 
     version = le16_to_cpu(dev->udev->descriptor.bcdDevice);
-    dev_info(&dev->i2c_adap.dev, "version %x.%02x found at bus %03d address %03d",
+    pr_info("version %x.%02x found at bus %03d address %03d", 
         version>>8, version&0xff, 
         dev->udev->bus->busnum, dev->udev->devnum);
 
@@ -304,7 +304,7 @@ static void osif_disconnect(struct usb_interface *interface)
 
     osif_free(dev);
 
-    dbg("disconnected");
+    dev_dbg(&interface->dev, "disconnected");
 }
 
 static struct usb_driver osif_driver = {
@@ -314,28 +314,7 @@ static struct usb_driver osif_driver = {
     .id_table   = osif_table,
 };
 
-static int __init usb_osif_init(void)
-{
-    int result;
-
-    printk( KERN_INFO DRIVER_DESC " " DRIVER_VERSION " of " __DATE__);
-
-    /* register this driver with the USB subsystem */
-    result = usb_register(&osif_driver);
-    if (result)
-    err("OSIF: usb_register failed. Error number %d", result);
-
-    return result;
-}
-
-static void __exit usb_osif_exit(void)
-{
-    /* deregister this driver with the USB subsystem */
-    usb_deregister(&osif_driver);
-}
-
-module_init (usb_osif_init);
-module_exit (usb_osif_exit);
+module_usb_driver(osif_driver);
 
 /* ----- end of usb layer ---------------------------------------------- */
 
