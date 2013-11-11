@@ -59,15 +59,23 @@
 #define USBI2C_WRITE                  21 // write to i2c bus
 #define USBI2C_STOP                   22 // send stop condition
 #define USBI2C_STAT                   23 // get stats from i2c action
+#define USBI2C_SET_BITRATE            24 // Set the bitrate
 
 #define STATUS_ADDRESS_ACK            0
 #define STATUS_ADDRESS_NAK            2
+
+/* i2c speed in khz. 333kHz max */
+static int speed = 333;
+module_param(speed, int, 0);
+MODULE_PARM_DESC(speed, "I2C bus speed in KHz "
+                 "(default is 333KHz)");
 
 static int usb_read(struct i2c_adapter *i2c_adap, int cmd, 
 		    int value, int index, void *data, int len);
 
 static int usb_write(struct i2c_adapter *adapter, int cmd, 
 		     int value, int index, void *data, int len);
+
 
 /* ----- begin of i2c layer ---------------------------------------------- */
 
@@ -115,7 +123,7 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 str[0] = 0;
                 for(j=0;j<pmsg->len;j++)
                 sprintf(str+strlen(str), "%x ", pmsg->buf[i]);
-                pr_info("   < %s", str);
+                dev_info(&adapter->dev, "   < %s\n", str);
             }
 #endif
         } else {
@@ -126,7 +134,7 @@ static int usb_xfer(struct i2c_adapter *adapter, struct i2c_msg *msgs, int num)
                 str[0] = 0;
                 for(j=0;j<pmsg->len;j++)
                 sprintf(str+strlen(str), "%x ", pmsg->buf[i]);
-                pr_info("   > %s", str);
+                dev_info(&adapter->dev, "   > %s\n", str);
             }
 #endif
             cmd = USBI2C_WRITE;
@@ -166,7 +174,7 @@ static u32 usb_func(struct i2c_adapter *adapter)
         /* configure for I2c mode and SMBUS emulation */
     u32 func = I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL;
 
-    pr_info("got adapter functionality %x", func);
+    dev_info(&adapter->dev, "got adapter functionality %x\n", func);
     return func;
 }
 
@@ -200,6 +208,10 @@ struct osif {
     /* i2c related things */
     struct i2c_adapter      i2c_adap;
 };
+
+
+static void set_i2c_speed(struct osif *dev, int speed_khz);
+
 
 static int usb_read(struct i2c_adapter *adapter, int cmd, 
 		    int value, int index, void *data, int len) {
@@ -266,7 +278,7 @@ static int osif_probe(struct usb_interface *interface,
     usb_set_intfdata(interface, dev);
 
     version = le16_to_cpu(dev->udev->descriptor.bcdDevice);
-    pr_info("version %x.%02x found at bus %03d address %03d", 
+    dev_info(&interface->dev, "version %x.%02x found at bus %03d address %03d\n", 
         version>>8, version&0xff, 
         dev->udev->bus->busnum, dev->udev->devnum);
 
@@ -278,6 +290,8 @@ static int osif_probe(struct usb_interface *interface,
     sprintf(dev->i2c_adap.name, "OSIF at bus %03d device %03d", 
             dev->udev->bus->busnum, dev->udev->devnum);
 
+    set_i2c_speed(dev, speed);
+       
     /* and finally attach to i2c layer */
     i2c_add_adapter(&(dev->i2c_adap));
 
@@ -318,6 +332,30 @@ module_usb_driver(osif_driver);
 
 /* ----- end of usb layer ---------------------------------------------- */
 
+
+static void set_i2c_speed(struct osif *dev, int speed_khz)
+{
+    int twbr;
+    int twps = 1;
+    int bitrate_hz = speed_khz * 1000;
+ 
+    // Calculate the new bitrate based on the formula
+    // br scl = cpu / (16 + 2(TWBR)) . 4 ^TWPS
+    if (bitrate_hz < 26000)
+    {
+        twps = 4;
+    }
+    //int poww = pow(4, twps);
+    twbr = (((12000000/bitrate_hz)/twps)-16)/2 ;
+
+    if (usb_write(&dev->i2c_adap, USBI2C_SET_BITRATE, twbr, twps, NULL, 0) != 0) {
+        dev_err(&dev->i2c_adap.dev,
+                "failure setting bitrate to %dKHz\n", speed_khz);
+    }
+    else {
+        dev_info(&dev->interface->dev, "Setting speed to %dKHz, twbr %d, twps %d\n", speed_khz, twbr, (twps == 1 ? 0 : twps));
+    }
+}
 
 MODULE_AUTHOR( DRIVER_AUTHOR );
 MODULE_DESCRIPTION( DRIVER_DESC );
