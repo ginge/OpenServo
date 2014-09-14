@@ -13,16 +13,18 @@
 # SRAM		- SRAM size (optional)
 # SCHEM		- Postscript version of the schematic to be generated
 #
-# Copyright 2006-2008 Dick Streefland
+# Copyright 2006-2010 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
 # ======================================================================
 
+check	= $(shell $(CC) $1 -c -xc /dev/null -o/dev/null 2>/dev/null && echo $1)
+
 CC	= avr-gcc
-CFLAGS	= -Os -g -Wall -I. -I$(USBTINY)
-ASFLAGS	= -Os -g -Wall -I.
-LDFLAGS	= -g $(LDEXTRAFLAGS)
+OPTIM	= -Os -ffunction-sections $(call check,-fno-split-wide-types)
+CFLAGS	= -g -Wall -I. -I$(USBTINY) $(OPTIM)
+LDFLAGS	= -g -Wl,--relax,--gc-sections
 MODULES = crc.o int.o usb.o $(OBJECTS)
 UTIL	= $(USBTINY)/../util
 
@@ -42,6 +44,9 @@ main.elf:	$(MODULES)
 main.hex:	main.elf $(UTIL)/check.py
 	@python $(UTIL)/check.py main.elf $(STACK) $(FLASH) $(SRAM)
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
+
+check:		main.elf $(UTIL)/check.py
+	@python $(UTIL)/check.py main.elf $(STACK) $(FLASH) $(SRAM)
 
 disasm:		main.elf
 	avr-objdump -S main.elf

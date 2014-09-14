@@ -17,10 +17,10 @@
 // the callback functions usb_in() and usb_out() will be called for IN
 // and OUT transfers.
 //
-// Maximum stack usage (gcc 3.4.3 & 4.1.0) of usb_poll(): 5 bytes plus
+// Maximum stack usage (gcc 4.1.0 & 4.3.4) of usb_poll(): 5 bytes plus
 // possible additional stack usage in usb_setup(), usb_in() or usb_out().
 //
-// Copyright 2006-2008 Dick Streefland
+// Copyright 2006-2010 Dick Streefland
 //
 // This is free software, licensed under the terms of the GNU General
 // Public License as published by the Free Software Foundation.
@@ -32,6 +32,16 @@
 #include "usb.h"
 
 #define	LE(word)			(word) & 0xff, (word) >> 8
+
+// ----------------------------------------------------------------------
+// typedefs
+// ----------------------------------------------------------------------
+
+#if	USBTINY_CALLBACK_IN == 2
+typedef	uint_t		txlen_t;
+#else
+typedef	byte_t		txlen_t;
+#endif
 
 // ----------------------------------------------------------------------
 // USB constants
@@ -49,6 +59,14 @@ enum
 // ----------------------------------------------------------------------
 // Interrupt handler interface
 // ----------------------------------------------------------------------
+
+#if	USBTINY_NO_DATA
+byte_t	tx_ack;				// ACK packet
+byte_t	tx_nak;				// NAK packet
+#else
+byte_t	tx_ack = USB_PID_ACK;		// ACK packet
+byte_t	tx_nak = USB_PID_NAK;		// NAK packet
+#endif
 
 byte_t	usb_rx_buf[2*USB_BUFSIZE];	// two input buffers
 byte_t	usb_rx_off;			// buffer offset: 0 or USB_BUFSIZE
@@ -74,7 +92,7 @@ enum
 };
 
 static	byte_t	usb_tx_state;		// TX_STATE_*, see enum above
-static	byte_t	usb_tx_total;		// total transmit size
+static	txlen_t	usb_tx_total;		// total transmit size
 static	byte_t*	usb_tx_data;		// pointer to data to transmit
 
 #if	defined USBTINY_VENDOR_NAME
@@ -83,7 +101,7 @@ struct
 	byte_t	length;
 	byte_t	type;
 	int	string[sizeof(USBTINY_VENDOR_NAME)-1];
-}	string_vendor PROGMEM =
+}	const	string_vendor PROGMEM =
 {
 	2 * sizeof(USBTINY_VENDOR_NAME),
 	DESCRIPTOR_TYPE_STRING,
@@ -100,7 +118,7 @@ struct
 	byte_t	length;
 	byte_t	type;
 	int	string[sizeof(USBTINY_DEVICE_NAME)-1];
-}	string_device PROGMEM =
+}	const	string_device PROGMEM =
 {
 	2 * sizeof(USBTINY_DEVICE_NAME),
 	DESCRIPTOR_TYPE_STRING,
@@ -117,7 +135,7 @@ struct
 	byte_t	length;
 	byte_t	type;
 	int	string[sizeof(USBTINY_SERIAL)-1];
-}	string_serial PROGMEM =
+}	const	string_serial PROGMEM =
 {
 	2 * sizeof(USBTINY_SERIAL),
 	DESCRIPTOR_TYPE_STRING,
@@ -129,7 +147,7 @@ struct
 #endif
 
 #if	VENDOR_NAME_ID || DEVICE_NAME_ID || SERIAL_ID
-static	byte_t	string_langid [] PROGMEM =
+static	byte_t	const	string_langid [] PROGMEM =
 {
 	4,				// bLength
 	DESCRIPTOR_TYPE_STRING,		// bDescriptorType (string)
@@ -138,7 +156,7 @@ static	byte_t	string_langid [] PROGMEM =
 #endif
 
 // Device Descriptor
-static	byte_t	descr_device [18] PROGMEM =
+static	byte_t	const	descr_device [18] PROGMEM =
 {
 	18,				// bLength
 	DESCRIPTOR_TYPE_DEVICE,		// bDescriptorType
@@ -157,7 +175,7 @@ static	byte_t	descr_device [18] PROGMEM =
 };
 
 // Configuration Descriptor
-static	byte_t	descr_config [] PROGMEM =
+static	byte_t	const	descr_config [] PROGMEM =
 {
 	9,				// bLength
 	DESCRIPTOR_TYPE_CONFIGURATION,	// bDescriptorType
@@ -197,17 +215,22 @@ static	void	usb_receive ( byte_t* data, byte_t rx_len )
 {
 	byte_t	len;
 	byte_t	type;
-	byte_t	limit;
+	txlen_t	limit;
 
 	usb_tx_state = TX_STATE_RAM;
 	len = 0;
+	limit = 0;
 	if	( usb_rx_token == USB_PID_SETUP )
 	{
+#if	USBTINY_CALLBACK_IN == 2
+		limit = * (uint_t*) & data[6];
+#else
 		limit = data[6];
 		if	( data[7] )
 		{
 			limit = 255;
 		}
+#endif
 		type = data[0] & 0x60;
 		if	( type == 0x00 )
 		{	// Standard request
@@ -224,6 +247,9 @@ static	void	usb_receive ( byte_t* data, byte_t rx_len )
 			else if	( data[1] == 5 )	// SET_ADDRESS
 			{
 				usb_new_address = data[2];
+#ifdef	USBTINY_USB_OK_LED
+				SET(USBTINY_USB_OK_LED);// LED on
+#endif
 			}
 			else if	( data[1] == 6 )	// GET_DESCRIPTOR
 			{
@@ -291,9 +317,13 @@ static	void	usb_receive ( byte_t* data, byte_t rx_len )
 			}
 #endif
 		}
-		if	( len > limit )
+		if	(  len < limit
+#if	USBTINY_CALLBACK_IN == 2
+			&& len != 0xff
+#endif
+			)
 		{
-			len = limit;
+			limit = len;
 		}
 		usb_tx_data = data;
 	}
@@ -303,7 +333,7 @@ static	void	usb_receive ( byte_t* data, byte_t rx_len )
 		usb_out( data, rx_len );
 	}
 #endif
-	usb_tx_total  = len;
+	usb_tx_total  = limit;
 	usb_tx_buf[0] = USB_PID_DATA0;	// next data packet will be DATA1
 }
 
@@ -319,10 +349,13 @@ static	void	usb_transmit ( void )
 	byte_t	b;
 
 	usb_tx_buf[0] ^= (USB_PID_DATA0 ^ USB_PID_DATA1);
-	len = usb_tx_total;
-	if	( len > 8 )
+	if	( usb_tx_total > 8 )
 	{
 		len = 8;
+	}
+	else
+	{
+		len = (byte_t) usb_tx_total;
 	}
 	dst = usb_tx_buf + 1;
 	if	( len > 0 )
@@ -371,6 +404,17 @@ extern	void	usb_init ( void )
 {
 	USB_INT_CONFIG |= USB_INT_CONFIG_SET;
 	USB_INT_ENABLE |= (1 << USB_INT_ENABLE_BIT);
+#ifdef	USBTINY_USB_OK_LED
+	OUTPUT(USBTINY_USB_OK_LED);
+#endif
+#ifdef	USBTINY_DMINUS_PULLUP
+	SET(USBTINY_DMINUS_PULLUP);
+	OUTPUT(USBTINY_DMINUS_PULLUP);	// enable pullup on D-
+#endif
+#if	USBTINY_NO_DATA
+	tx_ack = USB_PID_ACK;
+	tx_nak = USB_PID_NAK;
+#endif
 	sei();
 }
 
@@ -404,5 +448,8 @@ extern	void	usb_poll ( void )
 	{	// SE0 for more than 2.5uS is a reset
 		usb_new_address = 0;
 		usb_address = 0;
+#ifdef	USBTINY_USB_OK_LED
+		CLR(USBTINY_USB_OK_LED);	// LED off
+#endif
 	}
 }

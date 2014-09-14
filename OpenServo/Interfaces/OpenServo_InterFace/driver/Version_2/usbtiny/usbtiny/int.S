@@ -9,20 +9,26 @@
 ; When a DATA0/DATA1 packet directly follows a SETUP or OUT packet, while
 ; this interrupt handler is not yet finished, there would be no time to
 ; return and take another interrupt. In that case, the second packet is
-; decoded directly in the same invocation.
+; decoded directly in the same invocation. A packet immediately following
+; an ignored packet is also decoded directly.
 ;
 ; This code is *extremely* time critical. For instance, there is not a
 ; single spare cycle in the receiver loop, and only two in the transmitter
 ; loop. In addition, the various code paths are laid out in such a way that
 ; the various USB timeouts are not violated, in particular the maximum time
 ; between the reception of a packet and the reply, which is 7.5 bit times
-; (TRSPIPD2) for the captive cable that is mandatory for a low-speed USB
-; device. The worst-case delay here is 55 cycles, which is well below the
-; 60 cycles limit.
+; (TRSPIPD2) for a low-speed USB captive cable. The worst-case delay here
+; is 51 cycles, which is well below the 60 cycles limit, and even below the
+; 6.5 bit times limit for a detachable cable (TRSPIPD1).
 ;
 ; The interrupt handler must be reached within 34 cycles after D+ goes high
-; for the first time, so the interrupts should not be disabled for longer
-; than 34-4-2=28 cycles.
+; for the first time. The interrupt response time is 4 cycles, and the RJMP
+; in the vector table takes 2 cycles. Therefore, the interrupts should not
+; be disabled for longer than: 34 - 4 - 2 = 28 cycles. When the I-bit is
+; reenabled, a single instruction is always executed before a pending
+; interrupt is served, so this instruction should be included in the
+; calculation. For RETI, the next instruction can be anything, so we
+; should assume the worst-case of 4 cycles.
 ;
 ; The end-of-packet (EOP) is sampled in the second bit, because the USB
 ; standard allows the EOP to be delayed by up to one bit. As the EOP
@@ -30,7 +36,7 @@
 ;
 ; Stack usage including the return address: 11 bytes.
 ;
-; Copyright 2006-2008 Dick Streefland
+; Copyright 2006-2010 Dick Streefland
 ;
 ; This is free software, licensed under the terms of the GNU General
 ; Public License as published by the Free Software Foundation.
@@ -42,8 +48,8 @@
 ; local data
 ; ----------------------------------------------------------------------
 	.data
-tx_ack:	.byte	USB_PID_ACK		; ACK packet
-tx_nak:	.byte	USB_PID_NAK		; NAK packet
+	.extern	tx_ack			; ACK packet
+	.extern	tx_nak			; NAK packet
 	.lcomm	token_pid, 1		; PID of most recent token packet
 
 ; ----------------------------------------------------------------------
@@ -291,46 +297,51 @@ eop2:
 	; clear pending interrupt (SE0+3)
 	ldi	byte, 1<<USB_INT_PENDING_BIT
 	out	USB_INT_PENDING, byte	; clear pending bit at end of packet
-	; ignore packets shorter than 3 bytes
+	; calculate packet length
 	subi	count, USB_BUFSIZE
 	neg	count			; count = packet length
-	cpi	count, 3
-	brlo	ignore
 	; get PID
 	sub	YL, count
+	sbci	YH, 0
 	ld	pid, Y
-	; check for DATA0/DATA1 first, as this is the critical path (SE0+12)
-	cpi	pid, USB_PID_DATA0
-	breq	is_data			; handle DATA0 packet
-	cpi	pid, USB_PID_DATA1
-	breq	is_data			; handle DATA1 packet
-	; check ADDR (SE0+16)
+	; separate out the non-Token packets (SE0+11)
+	sbrc	pid, 1
+	rjmp	is_data_handshake	; jump for Data or Handshake packet
+	; check ADDR of Token packet (SE0+13)
 	ldd	addr, Y+1
 	andi	addr, 0x7f
 	lds	tmp, usb_address
 	cp	addr, tmp		; is this packet for me?
 	brne	ignore			; no, ignore
-	; check for other PIDs (SE0+23)
+	; dispatch Token packets (SE0+20)
 	cpi	pid, USB_PID_IN
-	breq	is_in			; handle IN packet
-	cpi	pid, USB_PID_SETUP
-	breq	is_setup_out		; handle SETUP packet
-	cpi	pid, USB_PID_OUT
-	breq	is_setup_out		; handle OUT packet
+	brne	is_setup_out		; handle SETUP and OUT packets
 
 ; ----------------------------------------------------------------------
-; exit point for ignored packets
+; Handle IN (SE0+22)
+; ----------------------------------------------------------------------
+	lds	count, usb_tx_len
+	tst	count			; data ready?
+	breq	nak			; no, reply with NAK
+	lds	tmp, usb_rx_len
+	tst	tmp			; unprocessed input packet?
+	brne	nak			; yes, don't send old data for new packet
+	sts	usb_tx_len, tmp		; buffer is available again (after reti)
+	lds	tmp, usb_new_address
+	sts	usb_address, tmp	; assign new address at end of transfer
+	ldi	YL, lo8(usb_tx_buf)
+	ldi	YH, hi8(usb_tx_buf)
+	rjmp	send_packet		; SE0+40, SE0 --> SOP <= 51
+
+; ----------------------------------------------------------------------
+; exit point for ignored packets (SE0+21)
 ; ----------------------------------------------------------------------
 ignore:
-	clr	tmp
-	sts	token_pid, tmp
-	pop	even
-	pop	fixup
-	pop	byte
-	rjmp	return
+	clr	pid
+ignore0:
 
 ; ----------------------------------------------------------------------
-; Handle SETUP/OUT (SE0+30)
+; Handle SETUP/OUT (SE0+23)
 ; ----------------------------------------------------------------------
 is_setup_out:
 	sts	token_pid, pid		; save PID of token packet
@@ -339,10 +350,10 @@ is_setup_out:
 	pop	byte
 	in	count, USB_INT_PENDING	; next packet already started?
 	sbrc	count, USB_INT_PENDING_BIT
-	rjmp	sync			; yes, get it right away (SE0+42)
+	rjmp	sync			; yes, get it right away (SE0+35)
 
 ; ----------------------------------------------------------------------
-; restore registers and return from interrupt
+; restore registers and return from interrupt (SE0+34)
 ; ----------------------------------------------------------------------
 return:
 	pop	count
@@ -355,29 +366,26 @@ return:
 	reti
 
 ; ----------------------------------------------------------------------
-; Handle IN (SE0+26)
+; send NAK packet (SE0+31)
 ; ----------------------------------------------------------------------
-is_in:
-	lds	count, usb_tx_len
-	tst	count			; data ready?
-	breq	nak			; no, reply with NAK
-	lds	tmp, usb_rx_len
-	tst	tmp			; unprocessed input packet?
-	brne	nak			; yes, don't send old data for new packet
-	sts	usb_tx_len, tmp		; buffer is available again (after reti)
-	lds	tmp, usb_new_address
-	sts	usb_address, tmp	; assign new address at end of transfer
-	ldi	YL, lo8(usb_tx_buf)
-	ldi	YH, hi8(usb_tx_buf)
-	rjmp	send_packet		; SE0+44, SE0 --> SOP <= 55
+nak:
+	ldi	YL, lo8(tx_nak)
+	ldi	YH, hi8(tx_nak)
+	rjmp	send_token
 
 ; ----------------------------------------------------------------------
-; Handle DATA0/DATA1 (SE0+17)
+; Handle Data and Handshake packets (SE0+14)
 ; ----------------------------------------------------------------------
-is_data:
+is_data_handshake:
+	andi	pid, 0x01
+	breq	ignore0			; ignore ACK/NAK/STALL
+
+; ----------------------------------------------------------------------
+; Handle DATA0/DATA1 (SE0+16)
+; ----------------------------------------------------------------------
 	lds	pid, token_pid
 	tst	pid			; data following our SETUP/OUT
-	breq	ignore			; no, ignore
+	breq	ignore0			; no, ignore
 	lds	tmp, usb_rx_len
 	tst	tmp			; buffer free?
 	brne	nak			; no, reply with NAK
@@ -389,21 +397,12 @@ is_data:
 	sts	usb_rx_off, tmp
 
 ; ----------------------------------------------------------------------
-; send ACK packet (SE0+35)
+; send ACK packet (SE0+34)
 ; ----------------------------------------------------------------------
-ack:
 	ldi	YL, lo8(tx_ack)
 	ldi	YH, hi8(tx_ack)
-	rjmp	send_token
-
-; ----------------------------------------------------------------------
-; send NAK packet (SE0+36)
-; ----------------------------------------------------------------------
-nak:
-	ldi	YL, lo8(tx_nak)
-	ldi	YH, hi8(tx_nak)
 send_token:
-	ldi	count, 1		; SE0+40, SE0 --> SOP <= 51
+	ldi	count, 1		; SE0+37, SE0 --> SOP <= 48
 
 ; ----------------------------------------------------------------------
 ; acquire the bus and send a packet (11 cycles to SOP)

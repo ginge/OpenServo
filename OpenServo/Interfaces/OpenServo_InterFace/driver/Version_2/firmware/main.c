@@ -275,17 +275,17 @@ static void spi_rw (void)
 // Calculate the new bitrate from an input khz
 int i2c_bitrate_set(int twbr_set, int twps_set)
 {
-    if (twps_set == 4) // TWPS 4
+    if (twps_set == 4)          // Prescaler set to 4
     {
         TWSR &= ~((1<<TWPS0));
-        TWSR |= 1<<TWPS0; // Set the prescaler for twi in the status reegister
+        TWSR |= 1<<TWPS0;       // Set the prescaler for twi in the status register
     }
     else //\ TWPS 1
     {
         TWSR &= ~((1<<TWPS0) | (1<<TWPS1)); // Set the prescaler for twi in the status reegister
     } 
 
-    TWBR = twbr_set;        // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
+    TWBR = twbr_set;            // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
 
     return 1;
 }
@@ -297,12 +297,12 @@ void i2c_init()
     DDRB &= ~(1<<PB5);   // Set PB5 (SCK) as input
     PORTB &= ~(1<<PB5);  // Disable the pullup
     DDRC &= ~((1<<PC4)|(1<<PC5));  // Set I2C pins PC4 and PC5 as input
-    PORTC &= ~(1<<PC4); // Disable pullups on I2C
+    PORTC &= ~(1<<PC4);  // Disable pullups on I2C
     PORTC &= ~(1<<PC5);
 
-    TWCR = 0; // Clear the control register
+    TWCR = 0;            // Clear the control register
     i2c_bitrate_set(10, 1);          // 10;//max bitrate for twi, ca 333khz by 12Mhz Crystal
-    TWCR |= (1<<TWEN); // Enable I2C in control register
+    TWCR |= (1<<TWEN);   // Enable I2C in control register
 }
 
 // Wait for the interupt flag to clear in the TWI hardware
@@ -325,14 +325,14 @@ static inline int i2c_send (byte_t sendbyte)
 {
     TWDR = sendbyte;                            // Fill Data register
     TWCR |= (1<<TWINT);                         // Send the byte
-    if (i2c_wait_int() <0) return -1;           // Wait for the byte to send
+    if (i2c_wait_int() < 0) return -1;           // Wait for the byte to send
     return TWSR & TWSRMASK;                                // Return the status
 }
 
 // Read one byte over I2C
 static inline int i2c_read(void)
 {
-    if (i2c_wait_int() <0) return -1;           // Check to see if the interrupt is clear
+    if (i2c_wait_int() < 0) return -1;           // Check to see if the interrupt is clear
     return TWDR;                                // Store the byte in the status register
 }
 
@@ -366,33 +366,33 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         data[0] = TW_BUS_ERROR;                            // return an error
         return 0;
     }
-    i2cstats[0x01] = TWSR & TWSRMASK;                                 // update the status array with the returned status
+    i2cstats[0x01] = TWSR & TWSRMASK;                      // update the status array with the returned status
     int TWSRtmp = 0;
 
     // Start sending the I2C packet by following the normal I2C protocol sequence of Start data Stop
     // This USB control packet will contain the I2C address only so this function generates a start 
     // followed by the device address
-    if((TWSR & TWSRMASK) == TW_START || (TWSR & TWSRMASK) == TW_REP_START)           // If the start completed
+    if ((TWSR & TWSRMASK) == TW_START || (TWSR & TWSRMASK) == TW_REP_START)           // If the start completed
     {
-        if(direction == USBI2C_READ)
+        if (direction == USBI2C_READ)
         {
             // Use the TWSRtmp temporary variable to store the return of the i2c_send function
-            TWSRtmp = i2c_send ( i2caddr<<1 | 0x01 );      // Start the data send by sending device address + R
+            TWSRtmp = i2c_send(i2caddr<<1 | 0x01);         // Start the data send by sending device address + R
             TWCR &= ~(1<<TWSTA);                           // Disable the start flag in the control register
         }
         else
         {
             TWCR &= ~((1<<TWSTA) | (1<<TWINT));            // Disable the start flag in the control register
-            TWSRtmp = i2c_send ( i2caddr<<1 & 0xFE );      // Start the data send by sending device address + W
+            TWSRtmp = i2c_send (i2caddr<<1 & 0xFE);        // Start the data send by sending device address + W
         }
         i2cstats[0x02] = TWSRtmp;                          // Store the return status in the status array
-        if ( TWSRtmp < 0 ) i2c_error();
+        if (TWSRtmp < 0) i2c_error();
     }
     else                                                   // The start failed. Error handle
     {
         TWCR = (1<<TWINT) | (1<<TWEN);                     // disable all commands in the control register
-        data[0] = i2cstats[0x00] = (TWSR & TWSRMASK);                   // Store the return status in the status array
-        if(direction == USBI2C_READ)
+        data[0] = i2cstats[0x00] = (TWSR & TWSRMASK);      // Store the return status in the status array
+        if (direction == USBI2C_READ)
             i2cstat &= ~(I2C_READ | I2C_PACKET | I2C_READ_ON); // Disable the flags for reading
         else
             i2cstat &= ~(I2C_WRITE | I2C_PACKET);          // Disable the flags for reading
@@ -400,7 +400,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     }
     // Arbitration was lost, clean up and close. We are reading from the TWSRtmp temporary
     // variable which was filled with the return of the send command
-    if(TWSRtmp == TW_MR_ARB_LOST  || TWSRtmp == TW_MR_SLA_NACK )
+    if (TWSRtmp == TW_MR_ARB_LOST  || TWSRtmp == TW_MR_SLA_NACK )
     {
         TWCR = (1<<TWEN);
         data[0] = i2cstats[0x00] = TWSRtmp;
@@ -409,7 +409,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     }
     // TWI Master Receiver Slave acknowledge. Working on the TWSRtmp variable
     // Checks to see if the start command and device selection generated an ACK
-    if(TWSRtmp != TW_MR_SLA_ACK && direction == USBI2C_READ)
+    if (TWSRtmp != TW_MR_SLA_ACK && direction == USBI2C_READ)
     {
         TWCR = (1<<TWEN);                                  // No ACK was generated. Disable pending flags in the Control register
         data[0] = i2cstats[0x00] = TWSRtmp;                // Store the status in the status array
@@ -419,7 +419,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
 
     // TWI Master Transmitter Slave Not Ack
     // cleanup and disable writing to I2C
-    if(TWSRtmp == TW_MT_SLA_NACK)
+    if (TWSRtmp == TW_MT_SLA_NACK)
     {
         TWCR = (1<<TWINT) | (1<<TWEN);
         data[0] = i2cstats[0x00] = TWSRtmp;
@@ -427,7 +427,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         return 0;
     }
     // TWI Master Transmitter Slave Ack
-    if(TWSRtmp != TW_MT_SLA_ACK && direction == USBI2C_WRITE) // On no ACK cleanup and reset flags
+    if (TWSRtmp != TW_MT_SLA_ACK && direction == USBI2C_WRITE) // On no ACK cleanup and reset flags
     {
         TWCR = (1<<TWINT) | (1<<TWEN);                  //
         data[0] = i2cstats[0x00] = TWSRtmp;
@@ -435,9 +435,9 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         return 0;
     }
 
-    if( direction == USBI2C_READ)
+    if (direction == USBI2C_READ)
     {
-        if(data[6] > 1 || data[7] > 0)
+        if (data[6] > 1 || data[7] > 0)
             TWCR |= (1<<TWEA);
 
         TWCR |= (1<<TWINT);                                // Clear the interrupt pending flag in the status register
@@ -450,28 +450,38 @@ static inline int i2c_read_bytes(byte_t *data,byte_t len)
     byte_t i;
     int read;
 
-    for ( i = 0; i < len; i++ )
+    for (i = 0; i < len; i++)
     {
         read = i2c_read();
-        if (read < 0) return -1;
+        if (read < 0)
+        {
+            return -1;                                     // Really bad!
+        }
+        if (TWSRtmp == TW_MR_DATA_NACK)                    // If we get a no ACK (NACK) from the slave, dont read on
+        {
+            i2cstat &= ~I2C_READ_ON;                       // Bail out of the loop now. Slave says no more data
+            //i2c_stop();                                  // commected out -- API should do this, although that behaviour is questionable at best.
+            return i;                                      // Return the real length
+        }
         data[i] = (byte_t)read;                            // Store the byte in the status register
-        int TWSRtmp = (TWSR & TWSRMASK);                                // Store the return status
+        int TWSRtmp = (TWSR & TWSRMASK);                   // Store the return status
         i2cstats[0x08+i] = TWSRtmp;                        // Store the return status in the status array
-        if(i2crecvlen > 0)
+        if (i2crecvlen > 0)
+        {
             i2crecvlen--;
-        if(i2crecvlen == 1)
-        {
-            TWCR = (TWCR | (1<<TWINT)) & ~(1<<TWEA);        // Dont Send the ACK to the TWI slave
         }
-        else
+        if (i2crecvlen == 1)                               // On the last byte, we NACK the slave so we don't lock the bus
         {
-            TWCR |= (1<<TWINT);                             //
+            TWCR = (TWCR | (1<<TWINT)) & ~(1<<TWEA);       // Start SCL clocking without the ACK to the TWI slave
         }
-        if(TWSRtmp == TW_MR_DATA_NACK)                      // If we get a no ACK from the slave, dont read on
-            i2cstat &= ~I2C_READ_ON;
-        TWCR |= (1<<TWINT);
+        if (i2crecvlen == 0)                               // Now check if we are done
+        {
+            return i;                                      // Return the real length
+        }
+        
+        TWCR |= (1<<TWINT);                                // ACK and Start SCL clocking
     }
-    return 0;
+    return len;
 }
 
 #if defined( OBDEV )
@@ -514,7 +524,7 @@ extern byte_t usb_setup(byte_t data[8])
     // Send the stop command over the I2C bus
     if (req == USBI2C_STOP)
     {
-        if((i2cstat & (I2C_READ | I2C_WRITE)) != 0)  // Send the stop signal if we are reading or writing
+        if ((i2cstat & (I2C_READ | I2C_WRITE)) != 0)  // Send the stop signal if we are reading or writing
         {
             i2c_stop();
             i2cstat = 0;                             // Clear the status flags variable
@@ -531,12 +541,12 @@ extern byte_t usb_setup(byte_t data[8])
         return 0xff;                                  // Will be handled by usb_in
     }
     // Handle an I2C read request
-    else if ( req == USBI2C_READ)
+    else if (req == USBI2C_READ)
     {
         i2cstats[0x00] = 0;                          // Clear the status register
         i2cstats[0x04] = data[6];                    // Set the status
         i2cstats[0x05] = data[7];
-        if(data[7] == 0)
+        if (data[7] == 0)
         {
             i2crecvlen = data[6];
         }
@@ -545,7 +555,7 @@ extern byte_t usb_setup(byte_t data[8])
             i2crecvlen = 0;
         }
         i2cstat = (i2cstat | I2C_READ | I2C_PACKET) & ~I2C_STATUS ;  // Add the read flag to the status variable
-        if(i2caddr != data[4] || (i2cstat & I2C_READ_ON) == 0)       // If I2C address has not changed or we are not reading more data
+        if (i2caddr != data[4] || (i2cstat & I2C_READ_ON) == 0)       // If I2C address has not changed or we are not reading more data
         {
             i2caddr = data[4];                                     // set the I2C address to send to
             i2cstat |= I2C_READ_ON;                                // Update the status flags variable to continue read
@@ -559,7 +569,7 @@ extern byte_t usb_setup(byte_t data[8])
     {
         i2cstats[0x00] = 0;
         i2cstat = I2C_PACKET;
-        if(i2caddr != data[4] || (i2cstat & I2C_WRITE) == 0)    // Check to see is write is enabled in the flags
+        if (i2caddr != data[4] || (i2cstat & I2C_WRITE) == 0)    // Check to see is write is enabled in the flags
         {
             i2caddr = data[4];
             i2cstat |= I2C_WRITE;                               // Disable write in the status flags
@@ -575,24 +585,24 @@ extern byte_t usb_setup(byte_t data[8])
 
     // SPI begin
     addr = (byte_t*) (int) data[4];
-    if	( req == USBTINY_READ )                          // SPI read command
+    if	(req == USBTINY_READ)                          // SPI read command
     {
         data[0] = *addr;
         return 1;
     }
-    else if	( req == USBTINY_WRITE )                         // SPI write
+    else if (req == USBTINY_WRITE)                         // SPI write
     {
         *addr = data[2];
         return 0;
     }
     bit = data[2] & 7;                                   // mask the SPI
     mask = 1 << bit;
-    if	( req == USBTINY_CLR )                           // Clear command
+    if	(req == USBTINY_CLR)                           // Clear command
     {
         *addr &= ~ mask;
         return 0;
     }
-    if	( req == USBTINY_SET )                           // SPI set
+    if	(req == USBTINY_SET)                           // SPI set
     {
         *addr |= mask;
         return 0;
@@ -600,14 +610,14 @@ extern byte_t usb_setup(byte_t data[8])
 
     // Programming requests
     // Requred to enable the SPI hardware in the OSIF and disable I2C
-    if	( req == USBTINY_POWERUP )
+    if	(req == USBTINY_POWERUP)
     {
         TWCR = 0;                                         // Disable I2C
         TWSR = 0;                                         // Clear the status register
         sck_period = data[2];                             // Store the clock period
         mask = DDRMASK;                                   // setup the port mask
         RESET_DDR |= RESET_PIN;                           // Set the port direction for the reset line
-        if ( data[4] )                                    // Read the high low status of the reset
+        if (data[4])                                    // Read the high low status of the reset
         {
             RESET_PORT |= RESET_PIN;                      // Bring the reset line high
         }
@@ -621,7 +631,7 @@ extern byte_t usb_setup(byte_t data[8])
         return 0;
     }
     // Disable SPI mode and enable I2C
-    if	( req == USBTINY_POWERDOWN )
+    if	(req == USBTINY_POWERDOWN)
     {
         RESET_PORT |= RESET_PIN;                          // Bring the reset low
         i2c_init();                                       // Initialise the I2C module
@@ -629,50 +639,50 @@ extern byte_t usb_setup(byte_t data[8])
         DDR  &= ~DDRMASK;                                 // Reset the spi port to defaults
         return 0;
     }
-    if	( ! PORT )
+    if	(!PORT)
     {
         return 0;
     }
-    if	( req == USBTINY_SPI )                            // SPI
+    if	(req == USBTINY_SPI)                            // SPI
     {
-        spi( data + 2, data + 0 );
+        spi(data + 2, data + 0);
         return 4;
     }
-    if	( req == USBTINY_POLL_BYTES )
+    if	(req == USBTINY_POLL_BYTES)
     {
         poll1 = data[2];
         poll2 = data[3];
         return 0;
     }
     address = * (uint_t*) & data[4];
-    if	( req == USBTINY_FLASH_READ )
+    if	(req == USBTINY_FLASH_READ)
     {
         cmd0 = 0x20;
         return 0xff;	                                   // usb_in() will be called to get the data
     }
-    if	( req == USBTINY_EEPROM_READ )
+    if	(req == USBTINY_EEPROM_READ)
     {
         cmd0 = 0xa0;
         return 0xff;	                                   // usb_in() will be called to get the data
     }
     timeout = * (uint_t*) & data[2];
-    if	( req == USBTINY_FLASH_WRITE )
+    if	(req == USBTINY_FLASH_WRITE)
     {
         cmd0 = 0x40;
         return 0;	                                   // data will be received by usb_out()
     }
-    if	( req == USBTINY_EEPROM_WRITE )
+    if	(req == USBTINY_EEPROM_WRITE)
     {
         cmd0 = 0xc0;
         return 0;	                                   // data will be received by usb_out()
     }
     // Set an IO line high or low
-    if  ( req == USBIO_SET_DDR )
+    if  (req == USBIO_SET_DDR)
     {
         io_ddr = data[4];                                  // This holds the direction bits
         io_enabled = data[2];                              // This holds the IO enabled status
         // Set the port directions
-        for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
+        for (x=0; x < PORT_TABLE_IO_COUNT; x++)
         {
           if (io_enabled & (1<<x))              // Check bit 0 for IO dir
           {
@@ -691,14 +701,14 @@ extern byte_t usb_setup(byte_t data[8])
         data[0] = 1;                                       // flag all ok
         return 0;
     }
-    if  ( req == USBIO_SET_OUT )
+    if  (req == USBIO_SET_OUT)
     {
         // check to make sure it is an output
-        for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
+        for (x=0; x<PORT_TABLE_IO_COUNT; x++)
         {
             if (io_enabled & (1<<x))                 // Check bit 0 for IO dir
             {
-                if ( data[4] & (1<<x) )              // is it high?
+                if (data[4] & (1<<x))                // is it high?
                 {
                     *port_table[x].p_port &= ~(1<<(port_table[x].bit));
                 }
@@ -711,11 +721,11 @@ extern byte_t usb_setup(byte_t data[8])
         data[0] = 1;
         return 0;
     }
-    else if  ( req == USBIO_GET_IN )
+    else if  (req == USBIO_GET_IN)
     {
          data[0] = 0x00;
         // read anyways, regardless of ststus
-        for ( x=0; x<PORT_TABLE_IO_COUNT; x++)
+        for (x=0; x < PORT_TABLE_IO_COUNT; x++)
         {
             if (*port_table[x].p_pin & (1<<port_table[x].bit))
                 data[0] |= (1<<x);
@@ -773,27 +783,31 @@ extern byte_t usb_setup(byte_t data[8])
 
 // Handle an IN packet over USB
 #if defined (OBDEV)
-uchar usbFunctionRead( uchar *data, uchar len )
+uchar usbFunctionRead(uchar *data, uchar len)
 #else
-extern  byte_t  usb_in ( byte_t* data, byte_t len )
+extern byte_t usb_in(byte_t* data, byte_t len)
 #endif
 {
     byte_t	i;
-    if((i2cstat & I2C_PACKET) != 0)                           // Make sure we are in packet reading mode in the status register
+    if ((i2cstat & I2C_PACKET) != 0)                           // Make sure we are in packet reading mode in the status register
     {
-        if((i2cstat & I2C_STATUS) != 0){                      // See if we are sending back the status array
-            for	( i = 0; i < len; i++ )
+        if ((i2cstat & I2C_STATUS) != 0)                       // See if we are sending back the status array
+        {                      
+            for	(i = 0; i < len; i++ )
             {
-                data[i]=i2cstats[i2cstatspos++];              // Send back the byte of the status array, and increment pointer
+                data[i] = i2cstats[i2cstatspos++];            // Send back the byte of the status array, and increment pointer
             }
         }
-        else if ((i2cstat & I2C_READ) != 0){                  // I2C Read in status flag
-            if (i2c_read_bytes(data, len) < 0) return 0;
+        else if ((i2cstat & I2C_READ) != 0)                   // I2C Read Data
+        {                  
+            len = i2c_read_bytes(data, len);
+            if (len < 0)
+                return 0;
         }
     }
     else if (modestat == USBSER_READ)
     {
-/*        for (i = 0; i < len; i++)
+    /*  for (i = 0; i < len; i++)
         {
         data[i] = UART_RxBuf[i]+block;
         block += 8;
@@ -829,18 +843,18 @@ extern void usb_out (byte_t* data, byte_t len)
     byte_t	i;
     uint_t	usec;
     byte_t	r;
-    if((i2cstat & I2C_PACKET) != 0x0)                                   // Check to see if we are in packet mode
+    if ((i2cstat & I2C_PACKET) != 0x0)                         // Check to see if we are in packet mode
     {
-        for	( i = 0; i < len; i++ )
+        for (i = 0; i < len; i++)
         {
-            int TWSRtmp = i2c_send(data[i]);                      // Send the data over I2C
-            if(TWSRtmp != TW_MT_DATA_ACK
+            int TWSRtmp = i2c_send(data[i]);                  // Send the data over I2C
+            if (TWSRtmp != TW_MT_DATA_ACK
                        && TWSRtmp != TW_MT_DATA_NACK
-                       && TWSRtmp != -1)                                // Check for an NACK in TWSR
+                       && TWSRtmp != -1)                      // Check for an NACK in TWSR
             {
-                i2cstats[0x03] = i2cstats[0x00] = TWSRtmp;              // Store the return status in the status array
-                i2c_stop();                                             // Send stop. Close I2C
-                i2cstat = 0;                                            // Clear all status flags
+                i2cstats[0x03] = i2cstats[0x00] = TWSRtmp;    // Store the return status in the status array
+                i2c_stop();                                   // Send stop. Close I2C
+                i2cstat = 0;                                  // Clear all status flags
             }
         }
     }
@@ -862,7 +876,7 @@ extern void usb_out (byte_t* data, byte_t len)
             cmd[0] ^= 0x60;	                                        // turn write into read
             for (usec = 0; usec < timeout; usec += 32 * sck_period)
             {	                                                        // when timeout > 0, poll until byte is written
-                spi(cmd, res);                                        // Send the SPI packet
+                spi(cmd, res);                                          // Send the SPI packet
                 r = res[3];
                 if (r == cmd[3] && r != poll1 && r != poll2)
                 {
@@ -906,7 +920,7 @@ void uart_init()
     UBRRL = (uint8_t)(BAUD_PRESCALE);
 
     /* Enable UART receiver and transmitter, and receive interrupt */
-    UCSRB = ( (1<<RXCIE) | (1<<RXEN) | (1<<TXEN) );
+    UCSRB = ((1<<RXCIE) | (1<<RXEN) | (1<<TXEN));
 
     //asynchronous 8N1
     UCSRC = (1 << URSEL) | (3 << UCSZ0);
@@ -950,7 +964,8 @@ int8_t uart_putc(uint8_t c)
 int8_t uart_puts (char *s) 
 {
     //  loop until *s != NULL
-    while (*s) {
+    while (*s)
+    {
         if ((uart_putc(*s)) < 0) return -1;
         s++;
     }
@@ -1250,7 +1265,7 @@ extern int main (void)
         wdt_reset();
 
         // If there is an error on the bus store the status and reinitialise I2C hardware
-        if((TWSR & TWSRMASK) == TW_BUS_ERROR)
+        if ((TWSR & TWSRMASK) == TW_BUS_ERROR)
         {
             i2cstats[0x06]++;
             i2c_init();
@@ -1269,7 +1284,7 @@ ISR(USART_RXC_vect)
     data = UDR;                 /* Read the received data */
     /* Calculate buffer index */
 
-    if ( UART_RxHead == UART_RxTail )
+    if (UART_RxHead == UART_RxTail)
     {
         /* ERROR! Receive buffer overflow */
         UART_RxHead = 0;
