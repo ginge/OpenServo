@@ -5,6 +5,12 @@ Copyright 2008 Barry Carter RobotFuzz www.robotfuzz.com
 This is the core firmware for the OpenServo InterFace (OSIF) It allows for USB to I2C and USB GPIO control
 
 Changelog:
+1.07
+Fixed issue with clocking too long.
+Added slave nacking support
+Fixed formatting
+usbtiny 1.7 integrated
+
 1.06
 Changed the default I2C speed to 100khz and added support functions to change this value.
 Added support for GPIOs using spare pin.

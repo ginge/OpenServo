@@ -453,6 +453,7 @@ static inline int i2c_read_bytes(byte_t *data,byte_t len)
     for (i = 0; i < len; i++)
     {
         read = i2c_read();
+        int TWSRtmp = (TWSR & TWSRMASK);                   // Store the return status
         if (read < 0)
         {
             return -1;                                     // Really bad!
@@ -464,7 +465,6 @@ static inline int i2c_read_bytes(byte_t *data,byte_t len)
             return i;                                      // Return the real length
         }
         data[i] = (byte_t)read;                            // Store the byte in the status register
-        int TWSRtmp = (TWSR & TWSRMASK);                   // Store the return status
         i2cstats[0x08+i] = TWSRtmp;                        // Store the return status in the status array
         if (i2crecvlen > 0)
         {
@@ -1222,17 +1222,17 @@ void playback_start()
 __attribute__((naked))                                                  // suppress redundant SP initialization
 extern int main (void)
 {
-    DDRD = (1<<0)|(1<<1);  // Set the port directions
-    PORTB = (1<<PB2);     // Enable pullup on AVR reset control
-    DDRB   = 0;     // Set portb input
+    DDRD  = (1<<0) | (1<<1);  // Set the port directions
+    PORTB = (1<<PB2);         // Enable pullup on AVR reset control
+    DDRB  = 0;                // Set portb input
 
 
     PORTB &= ~((1<<PB3));     // set AVR bootloader pins low, disable pullups
     PORTB &= ~((1<<PB4));
     PORTB &= ~((1<<PB5));
-    //PORTB |= (1<<PB2);     // set AVR reset high
+    //PORTB |= (1<<PB2);      // set AVR reset high
 
-    wdt_enable(WDTO_2S);   // Enable the watchdog timer
+    wdt_enable(WDTO_2S);      // Enable the watchdog timer
     wdt_reset();
 
     //cli();
@@ -1257,9 +1257,9 @@ extern int main (void)
     for	( ;; )
     {
         usb_poll();
-        if (uart_poll() < 0) //uart_poll() only returns negative on UART rx/tx failure.
+        if (uart_poll() < 0)    // uart_poll() only returns negative on UART rx/tx failure.
         {
-            //Handle UART errors by resetting the UART hardware
+            // Handle UART errors by resetting the UART hardware
             uart_init();
         }
         wdt_reset();
@@ -1279,18 +1279,18 @@ ISR(USART_RXC_vect)
     byte_t data;
 
     rx_timeout = 0;
-    cli();  //Disable global interrupts
+    cli();                  // Disable global interrupts
 
-    data = UDR;                 /* Read the received data */
-    /* Calculate buffer index */
+    data = UDR;             // Read the received data
+    // Calculate buffer index
 
     if (UART_RxHead == UART_RxTail)
     {
-        /* ERROR! Receive buffer overflow */
+        // ERROR! Receive buffer overflow
         UART_RxHead = 0;
     }
 
     UART_RxBuf[UART_RxHead++] = data; // Store received data in buffer
 
-    sei(); //re-enable global interrupts
+    sei(); // re-enable global interrupts
 }
