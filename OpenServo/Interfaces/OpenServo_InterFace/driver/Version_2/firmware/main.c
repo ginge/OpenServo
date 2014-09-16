@@ -73,7 +73,7 @@ extern byte_t usb_setup(byte_t data[8])
     // Send the stop command over the I2C bus
     if (req == USBI2C_STOP)
     {
-        if ((i2cstat & (I2C_READ | I2C_WRITE)) != 0)  // Send the stop signal if we are reading or writing
+        //if ((i2cstat & (I2C_READ | I2C_WRITE)) != 0)  // Send the stop signal if we are reading or writing
         {
             i2c_stop();
             i2cstat = 0;                             // Clear the status flags variable
