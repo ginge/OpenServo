@@ -16,11 +16,11 @@ enum
     I2C_STATUS              = 0x10,
 };
 
-byte_t                 i2caddr;         // i2c address
-byte_t                 i2cstatspos;     // status register incremental pointer
-byte_t          i2cstats[32];    // status array buffer
-byte_t          i2cstat;         // status of I2C comms
-byte_t          i2crecvlen;      // I2C buffer recieve length
+byte_t  i2caddr;         // i2c address
+byte_t  i2cstatspos;     // status register incremental pointer
+byte_t  i2cstats[32];    // status array buffer
+byte_t  i2cstat;         // status of I2C comms
+byte_t  i2crecvlen;      // I2C buffer recieve length
 
 int i2c_bitrate_set(int twbr_set, int twps_set);
 void i2c_init();

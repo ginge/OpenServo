@@ -174,7 +174,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
     return 1;
 }
 
-int i2c_read_bytes(byte_t *data,byte_t len)
+int i2c_read_bytes(byte_t *data, byte_t len)
 {
     byte_t i;
     int read;
@@ -183,18 +183,24 @@ int i2c_read_bytes(byte_t *data,byte_t len)
     {
         read = i2c_read();
         int TWSRtmp = (TWSR & TWSRMASK);                   // Store the return status
-        if (read < 0)
+        /*if (read < 0)
         {
             return -1;                                     // Really bad!
-        }
-        if (TWSRtmp == TW_MR_DATA_NACK)                    // If we get a no ACK (NACK) from the slave, dont read on
-        {
-            i2cstat &= ~I2C_READ_ON;                       // Bail out of the loop now. Slave says no more data
-            //i2c_stop();                                  // commected out -- API should do this, although that behaviour is questionable at best.
-            return i;                                      // Return the real length
-        }
+        }*/
         data[i] = (byte_t)read;                            // Store the byte in the status register
         i2cstats[0x08+i] = TWSRtmp;                        // Store the return status in the status array
+        
+        if (TWSRtmp == TW_MR_DATA_NACK)                    // If we get a no ACK (NACK) from the slave, dont read on
+        {
+            // 16-09-14: This logic actually serves little purpose. According to the I2C spec, the slave
+            // when xmitting will not be able to NACK as the receiver controls the ACK/NACK bit.
+            // This function actually is called when the master reader is ready to terminate
+            // the read.
+            i2cstat &= ~I2C_READ_ON;                       // Bail out of the loop now. Slave says no more data
+//            i2c_stop();                                  // commented out -- API should do this, although that behaviour is questionable at best.
+            return i + 1;                                  // Return the real length
+        }
+        
         if (i2crecvlen > 0)
         {
             i2crecvlen--;
@@ -205,7 +211,7 @@ int i2c_read_bytes(byte_t *data,byte_t len)
         }
         if (i2crecvlen == 0)                               // Now check if we are done
         {
-            return i;                                      // Return the real length
+            return i + 1;                                  // Return the real length
         }
         
         TWCR |= (1<<TWINT);                                // ACK and Start SCL clocking
