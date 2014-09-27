@@ -153,6 +153,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         TWCR = (1<<TWINT) | (1<<TWEN);
         data[0] = i2cstats[0x00] = TWSRtmp;
         i2cstat &= ~(I2C_WRITE | I2C_PACKET);
+        i2c_stop();
         return 0;
     }
     // TWI Master Transmitter Slave Ack
