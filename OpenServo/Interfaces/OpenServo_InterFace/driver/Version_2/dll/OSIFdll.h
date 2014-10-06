@@ -57,8 +57,8 @@ for linux and Mac BUILD_STATIC_LINKER to generate shared .so library run ldconfi
 #include "OSIFlib.h"
 
 /* The current firmware version */
-#define LIB_VERSION_MAJOR 0
-#define LIB_VERSION_MINOR 9
+#define LIB_VERSION_MAJOR 1
+#define LIB_VERSION_MINOR 0
 
 /**
   All function return <0 for error and >0 for success
@@ -68,7 +68,7 @@ for linux and Mac BUILD_STATIC_LINKER to generate shared .so library run ldconfi
     addr:     start address of data read/write
     data:     pointer to unsigned char containing read bytes/bytes to write
     buflen:   length of data to read/write
-	stop_off: STOP_ON will send a stop bit after the transaction, STOP_OFF will now.
+    stop_off: STOP_ON will send a stop bit after the transaction, STOP_OFF will now.
 
 **/
 

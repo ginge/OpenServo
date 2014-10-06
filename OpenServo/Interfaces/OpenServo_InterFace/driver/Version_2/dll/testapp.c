@@ -88,19 +88,22 @@ int main ( int argc, char *argv[] ) {
             {
                 case '1':
                     len = parse_option( argv[4]);
-                    ret = OSIF_read_data(0,parse_option( argv[2]),parse_option( argv[3]),buf,len, parse_option( argv[5]));
+                    // r1 is read data (write and read)  r1 i2c_addr reg_addr len stop
+                    // OSIF_read_data(int adapter, int i2c_addr, unsigned char addr, unsigned char * data, int buflen, int issue_stop)
+                    ret = OSIF_read_data(0, parse_option(argv[2]), parse_option(argv[3]), buf, len, parse_option(argv[5]));
                     
                     break;
                 case '2':
                     len = parse_option( argv[3]);
-                    ret = OSIF_readonly(0,parse_option( argv[2]),buf,len, parse_option( argv[4]));
+                    ret = OSIF_readonly(0, parse_option(argv[2]), buf, len, parse_option(argv[4]));
                     
                     break;
                 default:
-                    len = parse_option( argv[4]);
+                    len = parse_option(argv[4]);
                     if (len > 64)
-                        len=64;
-                    ret = OSIF_read(0,parse_option( argv[2]),parse_option( argv[3]),buf,len);
+                        len = 64;
+                    printf("asd\n");
+                    ret = OSIF_read(0, parse_option(argv[2]), parse_option(argv[3]), buf, len);
                     break;
             }
             //if (ret>=0)
@@ -163,13 +166,13 @@ int main ( int argc, char *argv[] ) {
                     OSIF_write_data(0,parse_option( argv[2]),parse_option( argv[3]),outdata,parse_option( argv[argc-2]), parse_option( argv[argc-1]));
                     break;
                 case '2':
-                                //get the command line data and compile into a character array 
+                    //get the command line data and compile into a character array 
                     parse_data( argv, 3, argc - 5,&outdata );
 
                     OSIF_writeonly(0,parse_option( argv[2]),outdata,parse_option( argv[argc-2]), parse_option( argv[argc-1]));
                     break;
                 default:
-                                //get the command line data and compile into a character array 
+                    //get the command line data and compile into a character array 
                     parse_data( argv, 4, argc - 5,&outdata );
 
                     OSIF_write(0,parse_option( argv[2]),parse_option( argv[3]),outdata,parse_option( argv[argc-1]));

@@ -73,14 +73,14 @@ extern byte_t usb_setup(byte_t data[8])
     // Send the stop command over the I2C bus
     if (req == USBI2C_STOP)
     {
-        //if ((i2cstat & (I2C_READ | I2C_WRITE)) != 0)  // Send the stop signal if we are reading or writing
+        if ((i2cstat & (I2C_READ | I2C_WRITE)) != 0)  // Send the stop signal if we are reading or writing
         {
             i2c_stop();
             i2cstat = 0;                             // Clear the status flags variable
             return 0;
         }
         data[0] = i2cstat;                           // Return the status flags in the data buffer
-        return 1;
+        return 0;
     }
     // Handle a status read request
     else if (req == USBI2C_STATUS)
@@ -104,11 +104,11 @@ extern byte_t usb_setup(byte_t data[8])
             i2crecvlen = 0;
         }
         i2cstat = (i2cstat | I2C_READ | I2C_PACKET) & ~I2C_STATUS ;  // Add the read flag to the status variable
-        if (i2caddr != data[4] || (i2cstat & I2C_READ_ON) == 0)       // If I2C address has not changed or we are not reading more data
+        if (i2caddr != data[4] || (i2cstat & I2C_READ_ON) == 0)      // If I2C address has not changed or we are not reading more data
         {
-            i2caddr = data[4];                                     // set the I2C address to send to
-            i2cstat |= I2C_READ_ON;                                // Update the status flags variable to continue read
-            if (i2c_begin(i2caddr, data, USBI2C_READ) == 0)        // Begin the I2C transfer the rest to be handled by usb_in
+            i2caddr = data[4];                                       // set the I2C address to send to
+            i2cstat |= I2C_READ_ON;                                  // Update the status flags variable to continue read
+            if (i2c_begin(i2caddr, data, USBI2C_READ) == 0)          // Begin the I2C transfer the rest to be handled by usb_in
                 return 0;
         }
         return 0xff;
@@ -118,11 +118,11 @@ extern byte_t usb_setup(byte_t data[8])
     {
         i2cstats[0x00] = 0;
         i2cstat = I2C_PACKET;
-        if (i2caddr != data[4] || (i2cstat & I2C_WRITE) == 0)    // Check to see is write is enabled in the flags
+        if (i2caddr != data[4] || (i2cstat & I2C_WRITE) == 0)        // Check to see is write is enabled in the flags
         {
             i2caddr = data[4];
-            i2cstat |= I2C_WRITE;                               // Disable write in the status flags
-            i2c_begin(i2caddr, data, USBI2C_WRITE);             // Begin the I2C transfer. The rest handled by usb_out
+            i2cstat |= I2C_WRITE;                                    // Disable write in the status flags
+            i2c_begin(i2caddr, data, USBI2C_WRITE);                  // Begin the I2C transfer. The rest handled by usb_out
         }
         return 0;
     }
@@ -134,24 +134,24 @@ extern byte_t usb_setup(byte_t data[8])
 
     // SPI begin
     addr = (byte_t*) (int) data[4];
-    if	(req == USBTINY_READ)                          // SPI read command
+    if    (req == USBTINY_READ)                                        // SPI read command
     {
         data[0] = *addr;
         return 1;
     }
-    else if (req == USBTINY_WRITE)                         // SPI write
+    else if (req == USBTINY_WRITE)                                   // SPI write
     {
         *addr = data[2];
         return 0;
     }
-    bit = data[2] & 7;                                   // mask the SPI
+    bit = data[2] & 7;                                               // mask the SPI
     mask = 1 << bit;
-    if	(req == USBTINY_CLR)                           // Clear command
+    if    (req == USBTINY_CLR)                                         // Clear command
     {
         *addr &= ~ mask;
         return 0;
     }
-    if	(req == USBTINY_SET)                           // SPI set
+    if    (req == USBTINY_SET)                                         // SPI set
     {
         *addr |= mask;
         return 0;
@@ -159,7 +159,7 @@ extern byte_t usb_setup(byte_t data[8])
 
     // Programming requests
     // Requred to enable the SPI hardware in the OSIF and disable I2C
-    if	(req == USBTINY_POWERUP)
+    if    (req == USBTINY_POWERUP)
     {
         TWCR = 0;                                         // Disable I2C
         TWSR = 0;                                         // Clear the status register
@@ -182,7 +182,7 @@ extern byte_t usb_setup(byte_t data[8])
         return 0;
     }
     // Disable SPI mode and enable I2C
-    if	(req == USBTINY_POWERDOWN)
+    if    (req == USBTINY_POWERDOWN)
     {
         RESET_PORT |= RESET_PIN;                          // Bring the reset low
         i2c_init();                                       // Initialise the I2C module
@@ -190,42 +190,42 @@ extern byte_t usb_setup(byte_t data[8])
         DDR  &= ~DDRMASK;                                 // Reset the spi port to defaults
         return 0;
     }
-    if	(!PORT)
+    if    (!PORT)
     {
         return 0;
     }
-    if	(req == USBTINY_SPI)                            // SPI
+    if    (req == USBTINY_SPI)                            // SPI
     {
         spi(data + 2, data + 0);
         return 4;
     }
-    if	(req == USBTINY_POLL_BYTES)
+    if    (req == USBTINY_POLL_BYTES)
     {
         poll1 = data[2];
         poll2 = data[3];
         return 0;
     }
     address = * (uint_t*) & data[4];
-    if	(req == USBTINY_FLASH_READ)
+    if    (req == USBTINY_FLASH_READ)
     {
         cmd0 = 0x20;
-        return 0xff;	                                   // usb_in() will be called to get the data
+        return 0xff;                                       // usb_in() will be called to get the data
     }
-    if	(req == USBTINY_EEPROM_READ)
+    if    (req == USBTINY_EEPROM_READ)
     {
         cmd0 = 0xa0;
-        return 0xff;	                                   // usb_in() will be called to get the data
+        return 0xff;                                       // usb_in() will be called to get the data
     }
     timeout = * (uint_t*) & data[2];
-    if	(req == USBTINY_FLASH_WRITE)
+    if    (req == USBTINY_FLASH_WRITE)
     {
         cmd0 = 0x40;
-        return 0;	                                   // data will be received by usb_out()
+        return 0;                                       // data will be received by usb_out()
     }
-    if	(req == USBTINY_EEPROM_WRITE)
+    if    (req == USBTINY_EEPROM_WRITE)
     {
         cmd0 = 0xc0;
-        return 0;	                                   // data will be received by usb_out()
+        return 0;                                       // data will be received by usb_out()
     }
     // Set an IO line high or low
     if  (req == USBIO_SET_DDR)
@@ -288,17 +288,17 @@ uchar usbFunctionRead(uchar *data, uchar len)
 extern byte_t usb_in(byte_t* data, byte_t len)
 #endif
 {
-    byte_t	i;
+    byte_t i;
     if ((i2cstat & I2C_PACKET) != 0)                           // Make sure we are in packet reading mode in the status register
     {
         if ((i2cstat & I2C_STATUS) != 0)                       // See if we are sending back the status array
         {                      
-            for	(i = 0; i < len; i++ )
+            for (i = 0; i < len; i++)
             {
-                data[i] = i2cstats[i2cstatspos++];            // Send back the byte of the status array, and increment pointer
+                data[i] = i2cstats[i2cstatspos++];             // Send back the byte of the status array, and increment pointer
             }
         }
-        else if ((i2cstat & I2C_READ) != 0)                   // I2C Read Data
+        else if ((i2cstat & I2C_READ) != 0)                    // I2C Read Data
         {                  
             len = i2c_read_bytes(data, len);
             if (len < 0)
@@ -340,9 +340,9 @@ uchar usbFunctionWrite(uchar *data, uchar len)
 extern void usb_out (byte_t* data, byte_t len)
 #endif
 {
-    byte_t	i;
-    uint_t	usec;
-    byte_t	r;
+    byte_t i;
+    uint_t    usec;
+    byte_t r;
     if ((i2cstat & I2C_PACKET) != 0x0)                         // Check to see if we are in packet mode
     {
         for (i = 0; i < len; i++)
@@ -373,9 +373,9 @@ extern void usb_out (byte_t* data, byte_t len)
         {
             cmd[3] = data[i];
             spi_rw();
-            cmd[0] ^= 0x60;	                                        // turn write into read
+            cmd[0] ^= 0x60;                                             // turn write into read
             for (usec = 0; usec < timeout; usec += 32 * sck_period)
-            {	                                                        // when timeout > 0, poll until byte is written
+            {                                                           // when timeout > 0, poll until byte is written
                 spi(cmd, res);                                          // Send the SPI packet
                 r = res[3];
                 if (r == cmd[3] && r != poll1 && r != poll2)
@@ -497,7 +497,7 @@ extern int main (void)
     io_init();
     sei();
 
-    for	( ;; )
+    for ( ;; )
     {
         usb_poll();
         if (uart_poll() < 0)    // uart_poll() only returns negative on UART rx/tx failure.

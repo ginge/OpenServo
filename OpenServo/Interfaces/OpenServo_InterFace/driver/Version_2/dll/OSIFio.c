@@ -46,15 +46,18 @@ int write_data( usb_dev_handle *thandle, int i2c_addr, unsigned char * data, int
 
 int read_data(usb_dev_handle *thandle, int i2c_addr, unsigned char * data, int buflen, int stop)
 {
-    if(usb_control_msg(thandle, 
+    int ret = -1;
+    ret = usb_control_msg(thandle, 
        USB_CTRL_IN, 
        USBI2C_READ,
        0, i2c_addr, data, buflen,
-       1000) <1) 
+       1000);
+    
+    if(ret < 1) 
     {
         char status[100];
         OSIF_USB_get_status(thandle, status);
-        fprintf(stderr, "rUSB error: %s i2caddr 0x%02x buflen %d\n", usb_strerror(), i2c_addr, buflen);
+        fprintf(stderr, "rUSB error: %s i2caddr 0x%02x buflen %d %d\n", usb_strerror(), i2c_addr, buflen, ret);
         return -1;
     }
 

@@ -54,21 +54,21 @@ int i2c_send(byte_t sendbyte)
 {
     TWDR = sendbyte;                            // Fill Data register
     TWCR |= (1<<TWINT);                         // Send the byte
-    if (i2c_wait_int() < 0) return -1;           // Wait for the byte to send
-    return TWSR & TWSRMASK;                                // Return the status
+    if (i2c_wait_int() < 0) return -1;          // Wait for the byte to send
+    return TWSR & TWSRMASK;                     // Return the status
 }
 
 // Read one byte over I2C
 int i2c_read(void)
 {
-    if (i2c_wait_int() < 0) return -1;           // Check to see if the interrupt is clear
+    if (i2c_wait_int() < 0) return -1;          // Check to see if the interrupt is clear
     return TWDR;                                // Store the byte in the status register
 }
 
 // Send Stop condition
 inline void i2c_stop(void)
 {
-    TWCR |= (1<<TWINT) | (1<<TWSTO);            // Send the stop bit
+    TWCR |= (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);            // Send the stop bit
 }
 
 // Send the Start condition
@@ -127,6 +127,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
             i2cstat &= ~(I2C_WRITE | I2C_PACKET);          // Disable the flags for reading
         return 0;
     }
+    
     // Arbitration was lost, clean up and close. We are reading from the TWSRtmp temporary
     // variable which was filled with the return of the send command
     if (TWSRtmp == TW_MR_ARB_LOST  || TWSRtmp == TW_MR_SLA_NACK )
@@ -134,8 +135,10 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         TWCR = (1<<TWEN);
         data[0] = i2cstats[0x00] = TWSRtmp;
         i2cstat &= ~(I2C_READ | I2C_PACKET | I2C_READ_ON);
+        i2c_stop();
         return 0;
     }
+    
     // TWI Master Receiver Slave acknowledge. Working on the TWSRtmp variable
     // Checks to see if the start command and device selection generated an ACK
     if (TWSRtmp != TW_MR_SLA_ACK && direction == USBI2C_READ)
@@ -143,6 +146,7 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         TWCR = (1<<TWEN);                                  // No ACK was generated. Disable pending flags in the Control register
         data[0] = i2cstats[0x00] = TWSRtmp;                // Store the status in the status array
         i2cstat &= ~(I2C_READ | I2C_PACKET | I2C_READ_ON); // Disable flags for reading in the status register
+        i2c_stop();
         return 0;
     }
 
@@ -156,12 +160,14 @@ int i2c_begin(byte_t i2caddr, byte_t *data, byte_t direction)
         i2c_stop();
         return 0;
     }
+    
     // TWI Master Transmitter Slave Ack
     if (TWSRtmp != TW_MT_SLA_ACK && direction == USBI2C_WRITE) // On no ACK cleanup and reset flags
     {
         TWCR = (1<<TWINT) | (1<<TWEN);                  //
         data[0] = i2cstats[0x00] = TWSRtmp;
         i2cstat &= ~(I2C_WRITE | I2C_PACKET);
+        i2c_stop();
         return 0;
     }
 
@@ -197,8 +203,6 @@ int i2c_read_bytes(byte_t *data, byte_t len)
             // when xmitting will not be able to NACK as the receiver controls the ACK/NACK bit.
             // This function actually is called when the master reader is ready to terminate
             // the read.
-            i2cstat &= ~I2C_READ_ON;                       // Bail out of the loop now. Slave says no more data
-//            i2c_stop();                                  // commented out -- API should do this, although that behaviour is questionable at best.
             return i + 1;                                  // Return the real length
         }
         
