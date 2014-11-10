@@ -246,7 +246,6 @@ ISR(USART_RXC_vect)
     byte_t data;
 
     rx_timeout = 0;
-    cli();                  // Disable global interrupts
 
     data = UDR;             // Read the received data
     // Calculate buffer index
@@ -258,6 +257,4 @@ ISR(USART_RXC_vect)
     }
 
     UART_RxBuf[UART_RxHead++] = data; // Store received data in buffer
-
-    sei(); // re-enable global interrupts
 }
